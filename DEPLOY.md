@@ -21,4 +21,4 @@ Ship the **repository root**: public HTML at the root, plus **`admin/`** and **`
 - Source: branch **`main`**, folder **`/`** (root).
 - Homepage: **`/index.html`** (or `/` with default document).
 - Admin: **`/admin/login.html`**.
-- Public HTML uses **`assets/...`** (relative). Shared loaders in JS use **`/assets/...`** (works with a **custom domain at site root**).
+- Public HTML uses **`assets/...`** (relative). Loader markup in JS uses **`assets/logo/logonew.png`** (relative to each root-level page so it works on **local `file://` opens** and on the live host).
