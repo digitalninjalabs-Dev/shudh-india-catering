@@ -4,12 +4,12 @@ Separate project focused on high-quality inquiries (not direct menu ordering).
 
 ## Folder layout (deploy bundle)
 
-Everything under **`shudh_india_leadgen/`** is meant to ship together: `website/` (public), `admin/`, and `assets/` (JS/CSS/media + Firebase config). Root **`index.html`** redirects to `website/index.html` when this folder is the web root.
+Ship the **repo root** together: public pages as **`index.html`** and **`*.html`** at the root, plus **`admin/`** and **`assets/`** (JS/CSS/media + Firebase config).
 
 Deployment checklist and hosting notes: **`DEPLOY.md`**.
 
 ## Included
-- Public pages: `website/index.html`, `about.html`, `packages.html`, `inquiry.html`, `gallery.html`, `videos.html`, `careers.html`
+- Public pages (root): `index.html`, `about.html`, `packages.html`, `inquiry.html`, `gallery.html`, `videos.html`, `blog.html`, `blog-post.html`, `careers.html`, `contact.html`
 - Admin pages: `admin/login.html`, `dashboard.html`, `packages.html`, `leads.html`, `gallery.html`, `content.html`, `settings.html`
 - Shared theme: `assets/css/global.css` (admin), `assets/css/styles.css` (public site)
 - Shared JS: `assets/js/public-site.js`, `assets/js/public-content.js`, `assets/js/shudh-first-paint.js`, `assets/js/content-admin.js`, `assets/js/admin-app.js`, `assets/js/admin-shell.js`, `assets/js/admin-auth-guard.js`

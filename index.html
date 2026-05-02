@@ -1,16 +1,415 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta http-equiv="refresh" content="0;url=website/index.html"/>
-  <link rel="canonical" href="website/index.html"/>
-  <title>Shudh India</title>
   <link rel="icon" href="assets/logo/logonew.png" type="image/png" sizes="any"/>
   <link rel="apple-touch-icon" href="assets/logo/logonew.png"/>
-  <script>location.replace("website/index.html");</script>
+  <title>Shudh India | Artisanal Culinary Excellence</title>
+  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: { extend: {
+        colors: {
+          "primary":"#af101a","primary-container":"#8c0d15","on-primary":"#ffffff",
+          "primary-fixed":"#ffdad6","primary-fixed-dim":"#ffb3ac",
+          "secondary":"#2E7D32","on-secondary":"#ffffff","secondary-container":"#e8f5e9",
+          "on-secondary-container":"#1b5e20","secondary-fixed":"#9df898",
+          "tertiary":"#735c00","on-tertiary":"#ffffff","tertiary-container":"#cca730",
+          "on-tertiary-container":"#4f3e00","tertiary-fixed":"#ffe088","tertiary-fixed-dim":"#e9c349",
+          "surface":"#FCF8F1","on-surface":"#1b1c15","surface-variant":"#e4e3d7",
+          "on-surface-variant":"#5b403d","surface-dim":"#dbdbcf","surface-bright":"#fbfaee",
+          "surface-container-lowest":"#ffffff","surface-container-low":"#FDF2EE",
+          "surface-container":"#efeee3","surface-container-high":"#F0F4ED",
+          "surface-container-highest":"#e4e3d7","inverse-surface":"#303129",
+          "inverse-on-surface":"#f2f1e5","outline":"#8f6f6c","outline-variant":"#e4beba",
+          "on-primary-container":"#fff2f0","error":"#ba1a1a","on-error":"#ffffff",
+          "background":"#FCF8F1","on-background":"#1b1c15"
+        }
+      }}
+    }
+  </script>
+  <style>
+    .hero-gradient { background: linear-gradient(to right, rgba(252,248,241,0.92) 0%, rgba(252,248,241,0.65) 55%, transparent 100%); }
+    @keyframes bounceSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+    .animate-bounce-slow { animation: bounceSlow 4s ease-in-out infinite; }
+  </style>
 </head>
-<body>
-  <p><a href="website/index.html">Continue to the website</a></p>
+<body class="bg-surface text-on-surface" style="font-family:var(--font-body)">
+<script src="assets/js/shudh-first-paint.js"></script>
+<!-- ===== SHARED HEADER ===== -->
+<header class="site-header">
+  <div class="site-header__inner">
+    <a href="index.html" class="site-logo" aria-label="Shudh India Home">
+      <img src="assets/logo/logonew.png" alt="Shudh India" class="site-logo__image" />
+    </a>
+    <nav class="site-nav">
+      <a href="index.html" class="active home-nav-home">Home</a>
+      <a href="gallery.html" class="home-nav-gallery">Gallery</a>
+      <a href="packages.html" class="home-nav-packages">Packages</a>
+      <a href="videos.html" class="home-nav-videos">Videos</a>
+      <a href="blog.html" class="home-nav-blog">Blog</a>
+      <a href="about.html" class="home-nav-about">About</a>
+      <a href="careers.html" class="home-nav-careers">Careers</a>
+      <a href="contact.html" class="home-nav-contact">Contact</a>
+    </nav>
+    <a href="inquiry.html" class="site-header__cta">
+      <span class="home-nav-cta">Get Quote</span> <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span>
+    </a>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<!-- Mobile Nav -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="index.html" class="active home-mnav-home">Home</a>
+  <a href="gallery.html" class="home-mnav-gallery">Gallery</a>
+  <a href="packages.html" class="home-mnav-packages">Packages</a>
+  <a href="videos.html" class="home-mnav-videos">Videos</a>
+  <a href="blog.html" class="home-mnav-blog">Blog</a>
+  <a href="about.html" class="home-mnav-about">About</a>
+  <a href="careers.html" class="home-mnav-careers">Careers</a>
+  <a href="contact.html" class="home-mnav-contact">Contact</a>
+  <a href="inquiry.html" class="btn btn-primary home-mnav-cta" style="margin-top:.5rem;justify-content:center">Get Quote</a>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="home-hero">
+  <div style="position:absolute;inset:0;z-index:0">
+    <img class="home-hero-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpDx9uyIMELKzoxjZlM_5ubKOaeuLItQ_jc_telsflSGWbE0oIj79sNCNHFW5WRn3R4G15oU7nVep7uLmKGtaNUajMIQ8Sn-e0ZDWXwJMM8t2qpAfSHSjvsxzCvNuQx_Jx24_0M4Bq_bJ55nSd9y_ysoRCQ8TkHPhAEfSMmPPoysN0Xdpwz7HfvzsPPF5A-mMlGhrQ99fQ2ilApSSWi2Hagjp0jkki08hMEN5wWDcgMCfZu1elP3Ijlo_-jAkYrjjylNTw3QpLvdz2" alt="Luxurious banquet hall" style="width:100%;height:100%;object-fit:cover"/>
+    <div class="hero-gradient" style="position:absolute;inset:0"></div>
+  </div>
+  <div class="container home-hero__container">
+    <div class="home-hero__content">
+      <div class="home-hero__pill">
+        <span class="home-hero-eyebrow" style="color:var(--color-secondary);font-weight:700;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase">shudh india catering</span>
+      </div>
+      <h1 class="animate-fade-up home-hero__title">
+        Elevating Culinary Tradition into an <span class="italic font-normal">Art Form</span>
+      </h1>
+      <p class="animate-fade-up animate-delay-2 home-hero__desc">
+        Crafting bespoke gastronomic experiences for those who settle for nothing less than absolute luxury and heritage.
+      </p>
+      <div class="animate-fade-up animate-delay-3 home-hero__actions">
+        <a href="inquiry.html" class="btn btn-primary">
+          <span class="home-hero-primary-cta">Get Quote</span> <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_forward</span>
+        </a>
+        <a href="packages.html" class="btn btn-secondary home-hero-secondary-cta">View Packages</a>
+      </div>
+    </div>
+    <!-- Floating Stats -->
+    <div class="animate-bounce-slow home-hero__stats" id="statsFloat">
+      <div style="display:flex;flex-direction:column;gap:1.1rem">
+        <div class="home-hero-stat" style="border-bottom:1px solid var(--color-surface-variant);padding-bottom:.9rem">
+          <div class="home-hero-stat__icon" style="background:rgba(175,16,26,0.1);color:var(--color-primary)">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">calendar_month</span>
+          </div>
+          <div>
+            <p class="home-hero-stat__number home-hero-stat1-number">20+</p>
+            <p class="home-hero-stat__label home-hero-stat1-label">Years of Heritage</p>
+          </div>
+        </div>
+        <div class="home-hero-stat" style="border-bottom:1px solid var(--color-surface-variant);padding-bottom:.9rem">
+          <div class="home-hero-stat__icon" style="background:rgba(46,125,50,0.1);color:var(--color-secondary)">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">celebration</span>
+          </div>
+          <div>
+            <p class="home-hero-stat__number home-hero-stat2-number">1000+</p>
+            <p class="home-hero-stat__label home-hero-stat2-label">Grand Events</p>
+          </div>
+        </div>
+        <div class="home-hero-stat">
+          <div class="home-hero-stat__icon" style="background:rgba(115,92,0,0.1);color:var(--color-tertiary)">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">skillet</span>
+          </div>
+          <div>
+            <p class="home-hero-stat__number home-hero-stat3-number">50+</p>
+            <p class="home-hero-stat__label home-hero-stat3-label">Master Chefs</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS STRIP ===== -->
+<div class="stats-strip">
+  <div class="stats-strip__grid">
+    <div class="stat-card"><div class="stat-number home-strip-stat1-number">98%</div><div class="stat-label home-strip-stat1-label">Client Satisfaction</div></div>
+    <div class="stat-card"><div class="stat-number home-strip-stat2-number" style="color:var(--color-secondary)">5★</div><div class="stat-label home-strip-stat2-label">Google Rating</div></div>
+    <div class="stat-card"><div class="stat-number home-strip-stat3-number" style="color:var(--color-tertiary)">10M+</div><div class="stat-label home-strip-stat3-label">Meals Served</div></div>
+    <div class="stat-card"><div class="stat-number home-strip-stat4-number">150+</div><div class="stat-label home-strip-stat4-label">Signature Dishes</div></div>
+  </div>
+</div>
+
+<!-- ===== EXPERIENCES ===== -->
+<section class="section home-experiences-section" style="background:var(--color-surface-container-high)">
+  <div class="section-inner">
+    <div class="shudh-flex-wrap" style="margin-bottom:3.5rem">
+      <div class="section-header">
+        <div class="section-eyebrow home-exp-eyebrow">Tailored Excellence</div>
+        <h2 class="section-title home-exp-title">Culinary <span class="accent">Experiences</span> for Every Occasion</h2>
+      </div>
+      <p class="section-desc home-exp-desc" style="max-width:380px">Whether it's a dream wedding or a corporate gala, we curate menus that tell your unique story through flavor.</p>
+    </div>
+    <div class="shudh-grid-auto" style="align-items:start">
+      <!-- Wedding -->
+      <div class="exp-card shudh-exp-card">
+        <img class="shudh-exp-image home-exp-card1-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmQdcwPnEgti_eNwXygB1GjOgVsCuuXvctPNu2oMq889mOsVb7qYZDI13kaykiGLrjs59q6GQNvBI6ylHZl3oKTLY6hEala7q1pqUAM-fdZ2Pw3QBGXMP79tyhBjHioQh7uDoABj3ZfklOmRo8oJ2quC2mKrors2Zh818N_lYoZy0vBuUW59UTSEqnguwE7xOPh7oqILw-NvJUcqvWUHMaQR1-RwBn7Zy2jUqbIrXs2SzTNCUdSyNUZW6NId7wLFEQP3HIm6C-Wt_y" alt="Wedding catering"/>
+        <div class="shudh-exp-overlay">
+          <h3 class="home-exp-card1-title" style="font-family:var(--font-headline);font-weight:700;font-size:1.75rem;color:#fff;margin-bottom:1rem">Wedding Catering</h3>
+          <p class="home-exp-card1-desc" style="color:rgba(255,255,255,.75);margin-bottom:1rem;font-size:.9375rem;line-height:1.6">Grand celebratory menus featuring royal Indian delicacies and contemporary global fusions.</p>
+          <a class="home-exp-card1-cta" href="packages.html" style="color:var(--color-primary-fixed);font-weight:700;display:inline-flex;align-items:center;gap:.4rem">Learn More <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_right_alt</span></a>
+        </div>
+      </div>
+      <!-- Private -->
+      <div class="exp-card shudh-exp-card shudh-exp-card--offset">
+        <img class="shudh-exp-image home-exp-card2-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBX0iNUneTNT20W_3huiLf96Azu0X9_6zHRGXvwDnqMwUc0VdJhi6DGF-vdUCZYoXLxH9FodA5g8Rhyd3wZlPXnh_4Ev_1XjvZgSy3M18H0kAlKQ49OWd0sng5YskuifSVOSfb_0M5ZmekMqG1anfaxd0kyj4p8Ku56x799DbPjLoPwGwqfDW8SMCxBdsgY6VGz_izKfdDcXsKXfXqiTbPlxsDkr6HMj_F_OR5wf81cXaNVZHHi3wZBcBSFPD3aA2Z6NDpEgINh_Wiz" alt="Private events"/>
+        <div class="shudh-exp-overlay">
+          <h3 class="home-exp-card2-title" style="font-family:var(--font-headline);font-weight:700;font-size:1.75rem;color:#fff;margin-bottom:1rem">Private Events</h3>
+          <p class="home-exp-card2-desc" style="color:rgba(255,255,255,.75);margin-bottom:1rem;font-size:.9375rem;line-height:1.6">Bespoke dining experiences for anniversaries, birthdays, and high-profile house parties.</p>
+          <a class="home-exp-card2-cta" href="inquiry.html" style="color:var(--color-primary-fixed);font-weight:700;display:inline-flex;align-items:center;gap:.4rem">Learn More <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_right_alt</span></a>
+        </div>
+      </div>
+      <!-- Corporate -->
+      <div class="exp-card shudh-exp-card">
+        <img class="shudh-exp-image home-exp-card3-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBTSqM7uWE28Y94ifoUw762hSgp8ZZvkea0kV5KipOkeWnsAzo6KbVq-2IJGvhdx2sqEN383i9tkM6OamInp0aWtYQ2NiI7dkxGGm8x1CQKt9xK6doe43VV7ybGf2MmsgwrjPLl7ylDvMlg2jNVsTWyP23vbwrM5T7WTgpnp8yyHd90ZGjY6GQhiQXNnkYcXt1xaF1VwwqFAZd6-Gy_TciZBev22U7w5D-oUTSVjfPoQQiwVLYZ76lulgZANVBiHP1lSx_YiefNjhbd" alt="Corporate catering"/>
+        <div class="shudh-exp-overlay">
+          <h3 class="home-exp-card3-title" style="font-family:var(--font-headline);font-weight:700;font-size:1.75rem;color:#fff;margin-bottom:1rem">Corporate Catering</h3>
+          <p class="home-exp-card3-desc" style="color:rgba(255,255,255,.75);margin-bottom:1rem;font-size:.9375rem;line-height:1.6">Efficient and impressive dining solutions for boardroom lunches and corporate galas.</p>
+          <a class="home-exp-card3-cta" href="inquiry.html" style="color:var(--color-primary-fixed);font-weight:700;display:inline-flex;align-items:center;gap:.4rem">Learn More <span class="material-symbols-outlined" style="font-size:1.1rem">arrow_right_alt</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SIGNATURE SERVICE FLOW ===== -->
+<section class="section home-signature-flow">
+  <div class="section-inner">
+    <div class="home-signature-flow__head">
+      <div class="section-eyebrow home-signature-eyebrow">Our Signature Approach</div>
+      <h2 class="section-title home-signature-title">How We Shape <span class="accent">Unforgettable</span> Events</h2>
+      <p class="section-desc home-signature-desc">A process-led experience designed to feel effortless for hosts and exceptional for every guest.</p>
+    </div>
+
+    <div class="home-signature-flow__layout">
+      <article class="home-signature-flow__feature">
+        <img class="home-signature-feature-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmQdcwPnEgti_eNwXygB1GjOgVsCuuXvctPNu2oMq889mOsVb7qYZDI13kaykiGLrjs59q6GQNvBI6ylHZl3oKTLY6hEala7q1pqUAM-fdZ2Pw3QBGXMP79tyhBjHioQh7uDoABj3ZfklOmRo8oJ2quC2mKrors2Zh818N_lYoZy0vBuUW59UTSEqnguwE7xOPh7oqILw-NvJUcqvWUHMaQR1-RwBn7Zy2jUqbIrXs2SzTNCUdSyNUZW6NId7wLFEQP3HIm6C-Wt_y" alt="Shudh India premium event execution">
+        <div class="home-signature-flow__feature-overlay">
+          <span class="home-signature-feature-kicker">Flagship Events</span>
+          <h3 class="home-signature-feature-title">Destination & Grand Celebration Services</h3>
+        </div>
+      </article>
+
+      <div class="home-signature-flow__steps">
+        <article class="home-signature-step">
+          <div class="home-signature-step__num">01</div>
+          <div>
+            <h3 class="home-signature-step1-title">Concept & Menu Story</h3>
+            <p class="home-signature-step1-desc">We align cuisine, guest profile, and event mood into a clear culinary direction.</p>
+            <a class="home-signature-step1-cta" href="inquiry.html">Start Planning <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+
+        <article class="home-signature-step">
+          <div class="home-signature-step__num">02</div>
+          <div>
+            <h3 class="home-signature-step2-title">Buffet Architecture</h3>
+            <p class="home-signature-step2-desc">Flow-first layout planning with premium counters, thematic styling, and service rhythm.</p>
+            <a class="home-signature-step2-cta" href="packages.html">View Packages <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+
+        <article class="home-signature-step">
+          <div class="home-signature-step__num">03</div>
+          <div>
+            <h3 class="home-signature-step3-title">Final Styling & Service</h3>
+            <p class="home-signature-step3-desc">From plating aesthetics to on-ground execution, every touchpoint is refined and consistent.</p>
+            <a class="home-signature-step3-cta" href="gallery.html">See Gallery <span class="material-symbols-outlined">arrow_forward</span></a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== VISUAL STORY ===== -->
+<section class="shudh-visual-story">
+  <img class="home-visual-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoRtVTZiICt-sjIzLQgzg-fv3rTmAldI-OuAW1rWNSzEQi3xgGE2YE3nl6NVJBwlO6t7f3d7FDT-FK91D9ujV-ng80uKpZiP3doutBV3wLE7CkbQwsbMsUuAwDAOZM_xR7tD11dJqiAmm1oM53jHn1ti6qc0fZsJxIDKjKtm4vsvF-1fXbOtm7he1ThKbqVNganOxMqk3738esO01nPqnHQyyciUPZoXmthpPRgiAhrsPQQo6l3JoAPvJ79IsgDUjLk-64WjBJVDwS" alt="Outdoor wedding" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
+  <div style="position:absolute;inset:0;background:rgba(27,28,21,.45);backdrop-filter:blur(2px)"></div>
+  <div style="position:relative;z-index:1;max-width:720px;padding:0 1.5rem">
+    <h2 class="home-visual-title" style="font-family:var(--font-headline);font-weight:800;font-size:clamp(2rem,5vw,4rem);color:#fff;margin-bottom:1rem">Where Tradition Meets Fine Art</h2>
+    <p class="home-visual-desc" style="color:rgba(255,255,255,.9);font-size:1.125rem;line-height:1.75;max-width:520px;margin:0 auto">Every dish is a canvas, every event a masterpiece. We don't just serve food; we create memories.</p>
+  </div>
+</section>
+
+<!-- ===== GALLERY PREVIEW ===== -->
+<section class="section" style="background:var(--color-surface-container-low)">
+  <div class="section-inner">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:3rem;flex-wrap:wrap;gap:1rem">
+      <h2 class="section-title home-gallery-title">The Artisanal Gallery</h2>
+      <a href="gallery.html" class="home-gallery-cta" style="color:var(--color-primary);font-weight:700;font-size:.9375rem">View All →</a>
+    </div>
+    <div class="masonry-grid home-gallery-grid"></div>
+  </div>
+</section>
+
+<!-- ===== HOMEPAGE QUOTE SECTION ===== -->
+<section class="section home-quote-section" style="background:var(--color-surface-container-high)">
+  <div class="section-inner">
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <div class="section-eyebrow home-quote-eyebrow">Let's Connect</div>
+      <h2 class="section-title home-quote-title" style="text-align:center">Let's Plan Your <span class="accent">Celebration</span></h2>
+    </div>
+    <div class="quote-split-card">
+      <div class="contact-panel">
+        <div>
+          <h3 class="home-quote-panel-title">Let's Plan Your Celebration</h3>
+          <p class="home-quote-panel-desc">Our culinary architects are ready to design your perfect menu. Contact us for a personalized consultation.</p>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <div class="contact-item">
+            <div class="contact-icon"><span class="material-symbols-outlined">call</span></div>
+            <div><p class="home-quote-call-label">Call Us</p><p class="home-quote-call-value">+91 98765 43210</p></div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><span class="material-symbols-outlined">mail</span></div>
+            <div><p class="home-quote-email-label">Email Us</p><p class="home-quote-email-value">concierge@shudhindia.com</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-form-pane">
+        <h3 class="quote-form-title home-quote-form-title">Tell us about your event</h3>
+        <form class="shudh-inquiry-form quote-form-grid" data-source="website-homepage-quote">
+          <div class="quote-form-field"><label class="form-label home-quote-label-name">Full Name</label><input class="form-input home-quote-input-name" name="name" type="text" placeholder="Your Name"/></div>
+          <div class="quote-form-field"><label class="form-label home-quote-label-phone">Phone Number</label><input class="form-input home-quote-input-phone" name="phone" type="tel" placeholder="+91 00000 00000"/></div>
+          <div class="quote-form-field"><label class="form-label home-quote-label-event">Event Type</label><select class="form-select home-quote-select-event" name="eventType"><option class="home-quote-option1">Wedding</option><option class="home-quote-option2">Corporate</option><option class="home-quote-option3">Private Party</option><option class="home-quote-option4">Other</option></select></div>
+          <div class="quote-form-field"><label class="form-label home-quote-label-guests">Expected Guests</label><input class="form-input home-quote-input-guests" name="guestCount" type="number" placeholder="e.g. 200"/></div>
+          <div class="quote-form-field"><label class="form-label home-quote-label-date">Event Date</label><input class="form-input home-quote-input-date" name="date" type="date"/></div>
+          <div class="quote-form-field"><label class="form-label home-quote-label-location">Location</label><input class="form-input home-quote-input-location" name="location" type="text" placeholder="City / Venue"/></div>
+          <div class="quote-form-field quote-form-field--full"><label class="form-label home-quote-label-requests">Special Requests</label><textarea class="form-textarea home-quote-input-requests" name="requirements" placeholder="Any dietary requirements, theme, or special wishes..."></textarea></div>
+          <p data-form-msg class="quote-form-field--full" style="color:var(--color-primary);font-size:.9rem;font-weight:600;min-height:1.2rem"></p>
+          <div class="quote-submit-wrap">
+            <button type="submit" class="btn btn-primary quote-submit-btn home-quote-submit-text">Get My Quote</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOMEPAGE CLOSING SECTION ===== -->
+<section class="section home-closing-signature">
+  <div class="section-inner home-closing-signature__title-wrap">
+    <p class="home-closing-signature__title-kicker home-closing-title-kicker">WHY SHUDH INDIA</p>
+    <h2 class="home-closing-signature__title home-closing-title-main">Your Trusted Partner for <span class="home-closing-title-accent">Premium Events</span></h2>
+  </div>
+  <div class="section-inner home-closing-signature__inner">
+    <div class="home-closing-signature__content">
+      <div class="home-closing-signature__text">
+        <span class="home-closing-signature__eyebrow home-closing-content-eyebrow">Hospitality Promise</span>
+        <h2 class="home-closing-content-title">Designed to Impress, Delivered with <span class="home-closing-content-accent">Shudh India Precision</span></h2>
+        <p class="home-closing-content-desc">From first tasting to final service, we combine culinary artistry, disciplined execution, and warm guest care for events that feel effortless and unforgettable.</p>
+        <div class="home-closing-signature__actions">
+          <a href="inquiry.html" class="btn btn-primary home-closing-cta1">Book Consultation</a>
+          <a href="gallery.html" class="btn btn-secondary home-closing-cta2">See Real Events</a>
+        </div>
+      </div>
+      <div class="home-closing-signature__media" aria-hidden="true"></div>
+    </div>
+    <div class="home-closing-signature__points">
+      <article>
+        <span class="material-symbols-outlined">verified</span>
+        <h3 class="home-closing-point1-title">Quality Assured</h3>
+        <p class="home-closing-point1-desc">Hygiene-first operations and consistently high food standards.</p>
+      </article>
+      <article>
+        <span class="material-symbols-outlined">groups</span>
+        <h3 class="home-closing-point2-title">Guest-Centric Service</h3>
+        <p class="home-closing-point2-desc">Attentive on-ground teams that keep service smooth and graceful.</p>
+      </article>
+      <article>
+        <span class="material-symbols-outlined">trophy</span>
+        <h3 class="home-closing-point3-title">Signature Presentation</h3>
+        <p class="home-closing-point3-desc">Elegant styling that elevates every buffet, plate, and counter.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SHARED FOOTER ===== -->
+<footer class="site-footer">
+  <div class="site-footer__main">
+    <div>
+      <div class="footer-brand__logo">
+        <img src="assets/logo/logonew.png" alt="Shudh India" class="footer-brand__image" />
+      </div>
+      <p class="footer-brand__desc home-footer-desc">Pioneering the art of Indian catering for over two decades. We combine ancestral recipes with avant-garde presentation.</p>
+      <div class="footer-socials">
+        <a href="#"><span class="material-symbols-outlined" style="font-size:1.1rem">share</span></a>
+        <a href="#"><span class="material-symbols-outlined" style="font-size:1.1rem">thumb_up</span></a>
+        <a href="#"><span class="material-symbols-outlined" style="font-size:1.1rem">camera</span></a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4 class="home-footer-links-title">Quick Links</h4>
+      <ul>
+        <li><a href="index.html" class="home-footer-link-home">Home</a></li>
+        <li><a href="gallery.html" class="home-footer-link-gallery">Gallery</a></li>
+        <li><a href="packages.html" class="home-footer-link-packages">Packages</a></li>
+        <li><a href="videos.html" class="home-footer-link-videos">Videos</a></li>
+        <li><a href="blog.html" class="home-footer-link-blog">Blog</a></li>
+        <li><a href="about.html" class="home-footer-link-about">About Us</a></li>
+        <li><a href="careers.html" class="home-footer-link-careers">Careers</a></li>
+        <li><a href="contact.html" class="home-footer-link-contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 class="home-footer-signature-title">Our Signature</h4>
+      <div class="footer-tags">
+        <span class="footer-tag home-footer-tag1">Aromatic Spices</span>
+        <span class="footer-tag home-footer-tag2">Farm Fresh</span>
+        <span class="footer-tag home-footer-tag3">Artisanal Plating</span>
+        <span class="footer-tag home-footer-tag4">Vegan Friendly</span>
+      </div>
+      <p class="footer-cert home-footer-cert">View Hygiene Certification</p>
+      <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:.5rem">
+        <p style="font-size:.875rem;color:#71717a"><strong class="home-footer-call-label" style="color:var(--color-on-surface)">Call Us:</strong> <span class="home-footer-call-value">+91 98765 43210</span></p>
+        <p style="font-size:.875rem;color:#71717a"><strong class="home-footer-email-label" style="color:var(--color-on-surface)">Email:</strong> <span class="home-footer-email-value">concierge@shudhindia.com</span></p>
+      </div>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <p class="home-footer-bottom-text">© 2024 Shudh India Catering. Artisanal Culinary Excellence.</p>
+    <div style="display:flex;gap:1.5rem">
+      <a href="#" class="home-footer-privacy" style="color:#71717a;font-size:.8125rem">Privacy Policy</a>
+      <a href="#" class="home-footer-terms" style="color:#71717a;font-size:.8125rem">Terms</a>
+      <a href="#" class="home-footer-faq" style="color:#71717a;font-size:.8125rem">FAQ</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="assets/js/firebase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="assets/js/public-content.js"></script>
+<script src="assets/js/public-site.js"></script>
+<script>
+  const ham = document.getElementById('hamburger');
+  const mNav = document.getElementById('mobileNav');
+  ham.addEventListener('click', () => mNav.classList.toggle('open'));
+  // Hover effect for exp cards
+  document.querySelectorAll('.exp-card').forEach(c => {
+    c.addEventListener('mouseenter', () => c.querySelector('img').style.transform = 'scale(1.07)');
+    c.addEventListener('mouseleave', () => c.querySelector('img').style.transform = 'scale(1)');
+  });
+</script>
 </body>
 </html>

@@ -5,4 +5,4 @@ The live site uses **`assets/logo/logonew.png`** for header, footer, and loaders
 - `assets/js/public-site.js`
 - `assets/js/public-content.js`
 - `assets/js/shudh-first-paint.js`
-- `website/*.html` logo `src` attributes
+- Root public `*.html` logo `src` attributes (`assets/logo/logonew.png`)

@@ -1,28 +1,24 @@
-# Deploying `shudh_india_leadgen`
+# Deploying this project
 
-Treat **`shudh_india_leadgen/`** as the deployable unit (public site + admin + shared assets).
+Ship the **repository root**: public HTML at the root, plus **`admin/`** and **`assets/`**.
 
 ## Folder layout
 
 | Path | Purpose |
 |------|---------|
-| `website/` | Public HTML, entry `index.html` (styles in `../assets/css/styles.css`) |
-| `admin/` | Admin HTML (login, dashboard, content, settings, …) |
-| `assets/` | Shared JS/CSS, Firebase config, branding media |
-| `index.html` (root of this folder) | Sends visitors to `website/index.html` when the host serves this folder as site root |
+| `index.html` | Homepage |
+| `*.html` (root) | Other public pages (`about.html`, `gallery.html`, …) |
+| `admin/` | Admin UI |
+| `assets/` | CSS, JS, Firebase config, media |
 
 ## Before you upload
 
-1. **`assets/js/firebase-config.js`** — must contain your Firebase web app keys (see `README.md`). For new clones, copy from `assets/js/firebase-config.example.js` and rename.
-2. **`assets/logo/logonew.png`** — required by headers, footer, and loaders. Add the file under `assets/logo/` (see `assets/logo/PLACE_LOGO_HERE.txt`).
+1. **`assets/js/firebase-config.js`** — Firebase web keys (see `README.md`).
+2. **`assets/logo/logonew.png`** — logo for header, footer, favicon, loaders.
 
-## Static hosting
+## Static hosting / GitHub Pages
 
-- Upload **the contents of** `shudh_india_leadgen/` (or the whole folder) so URLs resolve:
-  - `…/website/index.html` for the homepage
-  - `…/admin/login.html` for admin
-- Paths in HTML use **relative** `../assets/…` from `website/` and `admin/`; do not flatten only `website/` without `assets/` or links will break.
-
-## GitHub Pages
-
-The repository workflow uploads **`shudh_india_leadgen`** as the site artifact so Pages serves this app at the root URL, with `index.html` redirecting into `website/`.
+- Source: branch **`main`**, folder **`/`** (root).
+- Homepage: **`/index.html`** (or `/` with default document).
+- Admin: **`/admin/login.html`**.
+- Public HTML uses **`assets/...`** (relative). Shared loaders in JS use **`/assets/...`** (works with a **custom domain at site root**).
