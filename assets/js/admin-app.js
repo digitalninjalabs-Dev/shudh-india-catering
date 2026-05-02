@@ -1127,7 +1127,9 @@
     var draggingType = "";
 
     function driveFileId(url) {
-      var v = String(url || "");
+      var v = String(url || "")
+        .replace(/&amp;/gi, "&")
+        .trim();
       var a = v.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (a && a[1]) return a[1];
       var b = v.match(/[?&]id=([a-zA-Z0-9_-]+)/);
@@ -1141,7 +1143,7 @@
       var driveId = driveFileId(url);
       if ((m.type || "photo") === "video" && poster) return poster;
       if ((m.type || "photo") === "photo" && driveId) {
-        return "https://drive.google.com/uc?export=view&id=" + driveId;
+        return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w2000";
       }
       if ((m.type || "photo") === "photo") return url;
       if (driveId) return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1000";

@@ -304,7 +304,9 @@
     if (!root) return;
 
     function getDriveFileId(url) {
-      var val = String(url || "");
+      var val = String(url || "")
+        .replace(/&amp;/gi, "&")
+        .trim();
       var m1 = val.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
       if (m1 && m1[1]) return m1[1];
       var m2 = val.match(/[?&]id=([a-zA-Z0-9_-]+)/);

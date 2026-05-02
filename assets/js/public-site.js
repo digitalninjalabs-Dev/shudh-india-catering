@@ -737,7 +737,9 @@
   }
 
   function getDriveFileId(url) {
-    var val = String(url || "");
+    var val = String(url || "")
+      .replace(/&amp;/gi, "&")
+      .trim();
     var m1 = val.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (m1 && m1[1]) return m1[1];
     var m2 = val.match(/[?&]id=([a-zA-Z0-9_-]+)/);
@@ -772,7 +774,8 @@
     item.driveId = getDriveFileId(item.url);
 
     if (item.driveId && item.type === "photo") {
-      item.displayUrl = "https://drive.google.com/uc?export=view&id=" + item.driveId;
+      // uc?export=view often returns HTML or blocks <img> hotlinking; thumbnail API works for public files.
+      item.displayUrl = "https://drive.google.com/thumbnail?id=" + item.driveId + "&sz=w2000";
     } else {
       item.displayUrl = item.url;
     }
