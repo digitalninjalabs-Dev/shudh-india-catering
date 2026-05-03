@@ -261,20 +261,28 @@
       if (!(window.gsap && window.ScrollTrigger)) return false;
       window.gsap.registerPlugin(window.ScrollTrigger);
 
-      // Staggered reveal with slightly stronger movement for visible smoothness.
-      window.gsap.set(targets, { opacity: 0, y: 42, willChange: "transform, opacity" });
+      // Staggered reveal: more travel + scale for a richer scroll-in feel.
+      window.gsap.set(targets, {
+        opacity: 0,
+        y: 56,
+        scale: 0.96,
+        filter: "blur(6px)",
+        willChange: "transform, opacity, filter"
+      });
       window.ScrollTrigger.batch(targets, {
-        start: "top 90%",
-        end: "bottom 18%",
+        start: "top 88%",
+        end: "bottom 16%",
         once: true,
         onEnter: function (batch) {
           window.gsap.to(batch, {
             opacity: 1,
             y: 0,
-            duration: 1.05,
-            ease: "power3.out",
-            stagger: 0.14,
-            clearProps: "willChange"
+            scale: 1,
+            filter: "blur(0px)",
+            duration: 1.22,
+            ease: "power4.out",
+            stagger: { each: 0.1, from: "start" },
+            clearProps: "willChange,filter"
           });
         }
       });
@@ -747,6 +755,29 @@
     return "";
   }
 
+  function normalizeImageUrl(url) {
+    var val = String(url || "").trim();
+    if (!val) return "";
+    // Dropbox share links need raw=1 to be embeddable in <img>.
+    if (/dropbox\.com/i.test(val) && /[?&]dl=0/.test(val)) {
+      val = val.replace(/[?&]dl=0/, function (m) {
+        return m.charAt(0) + "raw=1";
+      });
+    }
+    // Encode spaces and unsafe chars while keeping URL delimiters intact.
+    try {
+      val = encodeURI(val);
+    } catch (_) {}
+    return val;
+  }
+
+  function proxyImageUrl(url) {
+    var val = normalizeImageUrl(url);
+    if (!val) return "";
+    var bare = val.replace(/^https?:\/\//i, "");
+    return "https://images.weserv.nl/?url=" + encodeURIComponent(bare) + "&w=1800&output=webp";
+  }
+
   function isLikelyDirectVideo(url) {
     return /\.(mp4|webm|ogg)(\?|$)/i.test(String(url || ""));
   }
@@ -767,16 +798,28 @@
     var item = Object.assign({}, raw || {});
     item.type = item.type === "video" ? "video" : "photo";
     item.title = String(item.title || "");
-    item.url = String(item.url || "");
+    item.url = normalizeImageUrl(item.url || "");
+    item.thumbnail = normalizeImageUrl(item.thumbnail || item.thumb || item.coverImage || "");
     item.layout = String(item.layout || "standard");
     item.sortOrder = Number(item.sortOrder || 0);
     item.createdAtTs = new Date(item.createdAt || "").getTime() || 0;
     item.driveId = getDriveFileId(item.url);
 
     if (item.driveId && item.type === "photo") {
-      // uc?export=view often returns HTML or blocks <img> hotlinking; thumbnail API works for public files.
-      item.displayUrl = "https://drive.google.com/thumbnail?id=" + item.driveId + "&sz=w2000";
+      // Try multiple public URL patterns because Drive hotlink behavior can vary by file.
+      item.displayCandidates = [
+        "https://drive.google.com/thumbnail?id=" + item.driveId + "&sz=w2000",
+        "https://drive.google.com/uc?export=view&id=" + item.driveId,
+        "https://drive.google.com/uc?export=download&id=" + item.driveId,
+        "https://lh3.googleusercontent.com/d/" + item.driveId + "=w2000"
+      ];
+      if (item.thumbnail) item.displayCandidates.unshift(item.thumbnail);
+      item.displayCandidates.push(proxyImageUrl(item.displayCandidates[0]));
+      item.displayUrl = item.displayCandidates[0];
     } else {
+      item.displayCandidates = [item.url];
+      if (item.thumbnail && item.thumbnail !== item.url) item.displayCandidates.unshift(item.thumbnail);
+      item.displayCandidates.push(proxyImageUrl(item.displayCandidates[0]));
       item.displayUrl = item.url;
     }
 
@@ -788,6 +831,62 @@
     var sb = Number(b.sortOrder || 0);
     if (sa !== sb) return sa - sb;
     return (b.createdAtTs || 0) - (a.createdAtTs || 0);
+  }
+
+  function ensureGalleryImageFallbackHandler() {
+    if (window.SHUDH_handleGalleryImageError) return;
+    window.SHUDH_handleGalleryImageError = function (img) {
+      if (!img) return;
+      var raw = img.getAttribute("data-fallback-srcs") || "";
+      var list = raw ? raw.split("||").filter(Boolean) : [];
+      var idx = Number(img.getAttribute("data-fallback-index") || 0);
+      var next = idx + 1;
+      if (next < list.length) {
+        img.setAttribute("data-fallback-index", String(next));
+        img.src = list[next];
+        return;
+      }
+      var figure = img.closest("figure");
+      if (figure) {
+        figure.remove();
+      } else {
+        img.remove();
+      }
+    };
+  }
+
+  function initLazyGalleryImages(root) {
+    if (!root) return;
+    var imgs = Array.prototype.slice.call(root.querySelectorAll("img[data-lazy-gallery='1']"));
+    if (!imgs.length) return;
+
+    function loadNow(img) {
+      if (!img || img.getAttribute("data-lazy-loaded") === "1") return;
+      var src = img.getAttribute("data-src") || "";
+      if (!src) return;
+      img.setAttribute("data-lazy-loaded", "1");
+      img.src = src;
+    }
+
+    if (!("IntersectionObserver" in window)) {
+      imgs.forEach(loadNow);
+      return;
+    }
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          loadNow(entry.target);
+          io.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "220px 0px", threshold: 0.01 }
+    );
+
+    imgs.forEach(function (img) {
+      io.observe(img);
+    });
   }
 
   function photoLayoutClass(layout) {
@@ -899,6 +998,7 @@
   function loadGalleryPhotos(db) {
     var el = document.getElementById("shudh-gallery-live");
     if (!el) return Promise.resolve();
+    ensureGalleryImageFallbackHandler();
     if (!db) {
       el.innerHTML =
         '<section class="section"><div class="section-inner"><div class="rounded-xl border border-outline-variant/20 bg-surface-container-low p-8 text-center text-on-surface-variant">Gallery is unavailable right now. Please check Firebase configuration.</div></div></section>';
@@ -916,6 +1016,21 @@
           .filter(function (m) {
             return m.visible !== false && (m.type || "photo") === "photo" && m.url;
           });
+        photos = photos.map(function (m) {
+          if (!m.displayCandidates || !m.displayCandidates.length) {
+            m.displayCandidates = [m.url].filter(Boolean);
+          }
+          // Deduplicate candidates while preserving order.
+          var seen = {};
+          m.displayCandidates = m.displayCandidates.filter(function (u) {
+            var key = String(u || "");
+            if (!key || seen[key]) return false;
+            seen[key] = true;
+            return true;
+          });
+          m.displayUrl = m.displayCandidates[0] || m.url;
+          return m;
+        });
         photos.sort(sortMedia);
         if (!photos.length) {
           el.innerHTML =
@@ -944,10 +1059,86 @@
           { key: "corporate", label: "Corporate" },
           { key: "private", label: "Private Events" }
         ];
+        var currentViewItems = photos.slice();
+        var galleryModalIndex = 0;
+
+        function ensurePhotoModal() {
+          var modal = document.getElementById("shudh-gallery-photo-modal");
+          if (modal) return modal;
+          modal = document.createElement("div");
+          modal.id = "shudh-gallery-photo-modal";
+          modal.className = "hidden fixed inset-0 z-[145] bg-black/86 backdrop-blur-md p-3 sm:p-4 md:p-6 items-center justify-center";
+          modal.innerHTML =
+            '<div class="relative w-full max-w-6xl max-h-[92vh] flex flex-col items-center justify-center">' +
+            '<button type="button" data-gallery-close class="absolute top-2 right-2 sm:top-3 sm:right-3 z-20 w-10 h-10 rounded-full bg-black/55 border border-white/25 text-white hover:bg-black/72">' +
+            '<span class="material-symbols-outlined">close</span></button>' +
+            '<button type="button" data-gallery-prev class="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/55 border border-white/25 text-white hover:bg-black/72">' +
+            '<span class="material-symbols-outlined">chevron_left</span></button>' +
+            '<button type="button" data-gallery-next class="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/55 border border-white/25 text-white hover:bg-black/72">' +
+            '<span class="material-symbols-outlined">chevron_right</span></button>' +
+            '<img data-gallery-modal-image src="" alt="Gallery photo" class="max-w-full max-h-[80vh] rounded-xl object-contain shadow-[0_20px_60px_rgba(0,0,0,0.55)]" />' +
+            '<div class="mt-3 px-2 text-center text-white/90 text-sm sm:text-base" data-gallery-modal-title></div>' +
+            "</div>";
+          document.body.appendChild(modal);
+          return modal;
+        }
+
+        function openGalleryModalAt(index) {
+          if (!currentViewItems.length) return;
+          var modal = ensurePhotoModal();
+          var img = modal.querySelector("[data-gallery-modal-image]");
+          var title = modal.querySelector("[data-gallery-modal-title]");
+          galleryModalIndex = Math.max(0, Math.min(index, currentViewItems.length - 1));
+          var item = currentViewItems[galleryModalIndex];
+          if (img) img.src = String(item.displayUrl || "");
+          if (title) title.textContent = String(item.title || "Shudh India Event");
+          modal.classList.remove("hidden");
+          modal.classList.add("flex");
+          document.body.style.overflow = "hidden";
+        }
+
+        function moveGalleryModal(step) {
+          if (!currentViewItems.length) return;
+          var nextIdx = galleryModalIndex + step;
+          if (nextIdx < 0) nextIdx = currentViewItems.length - 1;
+          if (nextIdx >= currentViewItems.length) nextIdx = 0;
+          openGalleryModalAt(nextIdx);
+        }
+
+        function closeGalleryModal() {
+          var modal = document.getElementById("shudh-gallery-photo-modal");
+          if (!modal) return;
+          modal.classList.add("hidden");
+          modal.classList.remove("flex");
+          document.body.style.overflow = "";
+        }
+
+        function bindGalleryModalControls() {
+          var modal = ensurePhotoModal();
+          if (!modal || modal.getAttribute("data-bound") === "1") return;
+          modal.setAttribute("data-bound", "1");
+          var closeBtn = modal.querySelector("[data-gallery-close]");
+          var prevBtn = modal.querySelector("[data-gallery-prev]");
+          var nextBtn = modal.querySelector("[data-gallery-next]");
+          if (closeBtn) closeBtn.addEventListener("click", closeGalleryModal);
+          if (prevBtn) prevBtn.addEventListener("click", function () { moveGalleryModal(-1); });
+          if (nextBtn) nextBtn.addEventListener("click", function () { moveGalleryModal(1); });
+          modal.addEventListener("click", function (e) {
+            if (e.target === modal) closeGalleryModal();
+          });
+          document.addEventListener("keydown", function (e) {
+            if (modal.classList.contains("hidden")) return;
+            if (e.key === "Escape") closeGalleryModal();
+            if (e.key === "ArrowLeft") moveGalleryModal(-1);
+            if (e.key === "ArrowRight") moveGalleryModal(1);
+          });
+        }
+
         function renderCards(active) {
           var items = active === "all"
             ? photos
             : photos.filter(function (x) { return x.category === active; });
+          currentViewItems = items.slice();
           if (!items.length) {
             return '<div class="rounded-xl border border-outline-variant/20 bg-surface-container-low p-8 text-center text-on-surface-variant">No photos in this category yet.</div>';
           }
@@ -955,13 +1146,22 @@
             '<div class="shudh-masonry-grid">' +
             items
               .map(function (m) {
+                var openIdx = currentViewItems.findIndex(function (x) {
+                  return x.id === m.id;
+                });
+                var fallbackSrcs = (m.displayCandidates && m.displayCandidates.length ? m.displayCandidates : [m.displayUrl])
+                  .map(function (x) { return String(x || "").replace(/\|/g, ""); })
+                  .filter(Boolean);
+                var primarySrc = fallbackSrcs[0] || "";
                 return (
-                  '<figure class="shudh-masonry-item">' +
-                  '<img src="' +
-                  String(m.displayUrl).replace(/"/g, "") +
+                  '<figure class="shudh-masonry-item" data-gallery-open="' + String(openIdx) + '" style="cursor:zoom-in">' +
+                  '<img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" data-src="' +
+                  primarySrc.replace(/"/g, "") +
                   '" alt="' +
                   escapeHtml(m.title || "Gallery photo") +
-                  '" loading="lazy" decoding="async" onerror="this.closest(\'figure\').style.display=\'none\'"/>' +
+                  '" loading="lazy" decoding="async" data-fallback-srcs="' +
+                  fallbackSrcs.join("||").replace(/"/g, "&quot;") +
+                  '" data-fallback-index="0" data-lazy-gallery="1" onerror="window.SHUDH_handleGalleryImageError(this)"/>' +
                   '<figcaption class="shudh-masonry-caption">' +
                   '<span class="shudh-masonry-cat">' +
                   categoryLabel(m.category) +
@@ -997,6 +1197,16 @@
           renderCards("all") +
           "</div></section>";
         var gridHost = el.querySelector("[data-gallery-grid]");
+        bindGalleryModalControls();
+        function bindGalleryImageOpeners() {
+          if (!gridHost) return;
+          gridHost.querySelectorAll("[data-gallery-open]").forEach(function (node) {
+            node.addEventListener("click", function () {
+              var idx = Number(node.getAttribute("data-gallery-open") || 0);
+              openGalleryModalAt(idx);
+            });
+          });
+        }
         el.querySelectorAll("[data-gallery-cat]").forEach(function (btn) {
           btn.addEventListener("click", function () {
             var cat = btn.getAttribute("data-gallery-cat") || "all";
@@ -1006,9 +1216,15 @@
             btn.classList.add("active");
             if (gridHost) {
               gridHost.innerHTML = renderCards(cat);
+              initLazyGalleryImages(gridHost);
+              bindGalleryImageOpeners();
             }
           });
         });
+        if (gridHost) {
+          initLazyGalleryImages(gridHost);
+          bindGalleryImageOpeners();
+        }
         el.classList.remove("hidden");
       })
       .catch(function () {
@@ -1345,6 +1561,9 @@
       if (kind === "instagram") {
         return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.8A3.95 3.95 0 0 0 3.8 7.75v8.5a3.95 3.95 0 0 0 3.95 3.95h8.5a3.95 3.95 0 0 0 3.95-3.95v-8.5a3.95 3.95 0 0 0-3.95-3.95h-8.5Zm8.9 1.35a1.2 1.2 0 1 1 0 2.4 1.2 1.2 0 0 1 0-2.4ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.8A3.2 3.2 0 1 0 12 15.2 3.2 3.2 0 0 0 12 8.8Z"/></svg>';
       }
+      if (kind === "facebook") {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8h3V4h-3c-3.31 0-6 2.69-6 6v2H5v4h3v8h4v-8h4l1-4h-5v-2c0-1.1.9-2 2-2z"/></svg>';
+      }
       if (kind === "call") {
         return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.62 10.79a15.1 15.1 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.56 0 1 .44 1 1V20c0 .56-.44 1-1 1C10.3 21 3 13.7 3 4c0-.56.44-1 1-1h3.5c.56 0 1 .44 1 1 0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z"/></svg>';
       }
@@ -1365,6 +1584,7 @@
     var defaults = {
       callNumber: "+91 98765 43210",
       whatsappNumber: "+91 98765 43210",
+      facebookUrl: "https://facebook.com/",
       instagramUrl: "https://instagram.com/",
       youtubeUrl: "videos.html"
     };
@@ -1374,10 +1594,11 @@
       var waRaw = cleanPhone(cfg.whatsappNumber, defaults.whatsappNumber).replace(/^\+/, "");
       return [
       {
-        href: "inquiry.html",
-        label: "Get Quote",
-        icon: "quote",
-        cls: "shudh-contact-dock__item--brand"
+        href: ensureUrl(cfg.facebookUrl, defaults.facebookUrl),
+        label: "Facebook",
+        icon: "facebook",
+        cls: "shudh-contact-dock__item--facebook",
+        external: true
       },
       {
         href: "https://wa.me/" + waRaw,

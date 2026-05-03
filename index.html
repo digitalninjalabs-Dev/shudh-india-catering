@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="assets/logo/logonew.png" type="image/png" sizes="any"/>
-  <link rel="apple-touch-icon" href="assets/logo/logonew.png"/>
+  <link rel="icon" href="assets/logo/favicon.png" type="image/png" sizes="any"/>
+  <link rel="apple-touch-icon" href="assets/logo/favicon.png"/>
   <title>Shudh India | Artisanal Culinary Excellence</title>
   <link rel="stylesheet" href="assets/css/styles.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -32,7 +32,69 @@
     }
   </script>
   <style>
-    .hero-gradient { background: linear-gradient(to right, rgba(252,248,241,0.92) 0%, rgba(252,248,241,0.65) 55%, transparent 100%); }
+    .home-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(
+          to right,
+          rgba(18, 12, 10, 0.46) 0%,
+          rgba(18, 12, 10, 0.26) 38%,
+          rgba(18, 12, 10, 0.12) 68%,
+          rgba(18, 12, 10, 0.02) 100%
+        ),
+        rgba(0, 0, 0, 0.14);
+      backdrop-filter: blur(7px) saturate(1.08);
+      -webkit-backdrop-filter: blur(7px) saturate(1.08);
+    }
+    .hero-gradient {
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 45%,
+        transparent 100%
+      );
+    }
+    .home-hero__container { z-index: 2; }
+    .home-hero-video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      object-position: center center;
+      transform: scale(1.14);
+      transform-origin: center center;
+      filter: saturate(1.16) contrast(1.06) brightness(0.82);
+    }
+    .home-hero__content {
+      position: relative;
+      z-index: 2;
+      padding: 0;
+      border: none;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      box-shadow: none;
+    }
+    .home-hero__title {
+      color: #fff !important;
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.48);
+    }
+    .home-hero__desc {
+      color: rgba(255, 255, 255, 0.9) !important;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.36);
+    }
+    @media (max-width: 1024px) {
+      .home-hero-video { transform: scale(1.2); }
+    }
+    @media (max-width: 640px) {
+      .home-hero-video { transform: scale(1.28); }
+      .home-hero__content { padding: 0.9rem 1rem; }
+    }
+    @media (min-width: 1536px) {
+      .home-hero-video { transform: scale(1.08); }
+    }
     @keyframes bounceSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
     .animate-bounce-slow { animation: bounceSlow 4s ease-in-out infinite; }
   </style>
@@ -47,12 +109,10 @@
     </a>
     <nav class="site-nav">
       <a href="index.html" class="active home-nav-home">Home</a>
-      <a href="gallery.html" class="home-nav-gallery">Gallery</a>
       <a href="packages.html" class="home-nav-packages">Packages</a>
+      <a href="gallery.html" class="home-nav-gallery">Gallery</a>
       <a href="videos.html" class="home-nav-videos">Videos</a>
-      <a href="blog.html" class="home-nav-blog">Blog</a>
       <a href="about.html" class="home-nav-about">About</a>
-      <a href="careers.html" class="home-nav-careers">Careers</a>
       <a href="contact.html" class="home-nav-contact">Contact</a>
     </nav>
     <a href="inquiry.html" class="site-header__cta">
@@ -67,12 +127,10 @@
 <!-- Mobile Nav -->
 <nav class="mobile-nav" id="mobileNav">
   <a href="index.html" class="active home-mnav-home">Home</a>
-  <a href="gallery.html" class="home-mnav-gallery">Gallery</a>
   <a href="packages.html" class="home-mnav-packages">Packages</a>
+  <a href="gallery.html" class="home-mnav-gallery">Gallery</a>
   <a href="videos.html" class="home-mnav-videos">Videos</a>
-  <a href="blog.html" class="home-mnav-blog">Blog</a>
   <a href="about.html" class="home-mnav-about">About</a>
-  <a href="careers.html" class="home-mnav-careers">Careers</a>
   <a href="contact.html" class="home-mnav-contact">Contact</a>
   <a href="inquiry.html" class="btn btn-primary home-mnav-cta" style="margin-top:.5rem;justify-content:center">Get Quote</a>
 </nav>
@@ -80,7 +138,9 @@
 <!-- ===== HERO ===== -->
 <section class="home-hero">
   <div style="position:absolute;inset:0;z-index:0">
-    <img class="home-hero-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpDx9uyIMELKzoxjZlM_5ubKOaeuLItQ_jc_telsflSGWbE0oIj79sNCNHFW5WRn3R4G15oU7nVep7uLmKGtaNUajMIQ8Sn-e0ZDWXwJMM8t2qpAfSHSjvsxzCvNuQx_Jx24_0M4Bq_bJ55nSd9y_ysoRCQ8TkHPhAEfSMmPPoysN0Xdpwz7HfvzsPPF5A-mMlGhrQ99fQ2ilApSSWi2Hagjp0jkki08hMEN5wWDcgMCfZu1elP3Ijlo_-jAkYrjjylNTw3QpLvdz2" alt="Luxurious banquet hall" style="width:100%;height:100%;object-fit:cover"/>
+    <video class="home-hero-image home-hero-video" autoplay muted loop playsinline preload="metadata" poster="https://lh3.googleusercontent.com/aida-public/AB6AXuCpDx9uyIMELKzoxjZlM_5ubKOaeuLItQ_jc_telsflSGWbE0oIj79sNCNHFW5WRn3R4G15oU7nVep7uLmKGtaNUajMIQ8Sn-e0ZDWXwJMM8t2qpAfSHSjvsxzCvNuQx_Jx24_0M4Bq_bJ55nSd9y_ysoRCQ8TkHPhAEfSMmPPoysN0Xdpwz7HfvzsPPF5A-mMlGhrQ99fQ2ilApSSWi2Hagjp0jkki08hMEN5wWDcgMCfZu1elP3Ijlo_-jAkYrjjylNTw3QpLvdz2" style="width:100%;height:100%;object-fit:cover">
+      <source class="home-hero-video-source" src="assets/media/herovideo.mp4" type="video/mp4"/>
+    </video>
     <div class="hero-gradient" style="position:absolute;inset:0"></div>
   </div>
   <div class="container home-hero__container">

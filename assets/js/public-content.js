@@ -6,6 +6,8 @@
       "Crafting bespoke gastronomic experiences for those who settle for nothing less than absolute luxury and heritage.",
     heroImage:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuACzG4JOe8DbsPwXuYgRtDTZdpJUKnEn-OVLfmpdDb8v734nOVCRNCV_E2atwE9aTlW8k8qLs3qDTaEN0KEcw_nTeS0mMdWpXvyfJuTsCJxrubbixlUfUs4ZmVLsywoDATiX42iPBxpL16kSuOsm0b0tDdaYswvxCgcO6wsfjUaEqGTHJxmKjaOA5h6RGmJHtV4_n_fPjwrkym3jf_NUJcresSHKyyDIBpJ6UfsEPGlt1VXoA0CZmyfjaMKRpfKBcHtM4VilXUcWqPG",
+    heroVideoUrl:
+      "https://drive.google.com/uc?export=download&id=1mazf64NRVe7D8BuZsSZjwhc3MUKnvX9L",
     heroPrimaryCta: "Get Quote",
     heroSecondaryCta: "View Packages",
     legacyEyebrow: "Our Legacy",
@@ -243,6 +245,64 @@
     });
   }
 
+  function extractDriveId(url) {
+    var raw = String(url || "").replace(/&amp;/gi, "&");
+    var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m1 && m1[1]) return m1[1];
+    var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m2 && m2[1]) return m2[1];
+    return "";
+  }
+
+  function normalizeHeroVideoUrl(url) {
+    var raw = String(url || "").trim();
+    if (!raw) return "";
+    var driveId = extractDriveId(raw);
+    if (driveId) return "https://drive.usercontent.google.com/download?id=" + driveId + "&export=download";
+    return raw;
+  }
+
+  function safeSetHeroVideo(videoUrl, posterUrl) {
+    var media = document.querySelector(".home-hero-video");
+    if (!media) return;
+    var raw = String(videoUrl || "").trim();
+    if (!raw) return;
+    var driveId = extractDriveId(raw);
+
+    if (driveId) {
+      // Drive download links are often blocked in <video> on external domains.
+      // Use preview iframe for Drive URLs so hero video remains visible.
+      if (media.tagName === "IFRAME") {
+        media.src = "https://drive.google.com/file/d/" + driveId + "/preview?autoplay=1";
+        return;
+      }
+      var iframe = document.createElement("iframe");
+      iframe.className = media.className;
+      iframe.style.cssText = media.style.cssText;
+      iframe.src = "https://drive.google.com/file/d/" + driveId + "/preview?autoplay=1";
+      iframe.setAttribute("allow", "autoplay; fullscreen");
+      iframe.setAttribute("allowfullscreen", "true");
+      iframe.setAttribute("title", "Hero video");
+      iframe.setAttribute("loading", "eager");
+      iframe.setAttribute("referrerpolicy", "no-referrer-when-downgrade");
+      media.replaceWith(iframe);
+      return;
+    }
+
+    var video = media;
+    if (video.tagName !== "VIDEO") return;
+    if (posterUrl) video.setAttribute("poster", String(posterUrl).replace(/"/g, ""));
+    var source = video.querySelector(".home-hero-video-source");
+    var normalized = normalizeHeroVideoUrl(raw);
+    if (!normalized || !source) return;
+    source.src = normalized;
+    video.load();
+    var playPromise = video.play();
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(function () {});
+    }
+  }
+
   function safeSetBackgroundImage(selector, value) {
     if (value == null || value === "") return;
     document.querySelectorAll(selector).forEach(function (node) {
@@ -470,7 +530,7 @@
       safeSetHtml(htmlMap[key], content[key]);
     });
     renderGalleryPreviewGrid(content.galleryPreviewImages);
-    safeSetImage(".home-hero-image", content.heroImage);
+    safeSetHeroVideo("assets/media/herovideo.mp4", content.heroImage);
     safeSetImage(".home-exp-card1-image", content.expCard1Image);
     safeSetImage(".home-exp-card2-image", content.expCard2Image);
     safeSetImage(".home-exp-card3-image", content.expCard3Image);

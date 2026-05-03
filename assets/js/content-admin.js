@@ -17,8 +17,7 @@
       heroEyebrow: "homeHeroEyebrow",
       heroTitle: "homeHeroTitle",
       heroSubtitle: "homeHeroSubtitle",
-      heroImage: "homeHeroImage",
-      heroPrimaryCta: "homeHeroPrimaryCta",
+      heroImage: "homeHeroImage",      heroPrimaryCta: "homeHeroPrimaryCta",
       heroSecondaryCta: "homeHeroSecondaryCta",
       heroStat1Number: "homeHeroStat1Number",
       heroStat1Label: "homeHeroStat1Label",
@@ -174,8 +173,7 @@
       navCta: "Get Quote",
       mobileNavCta: "Get Quote",
       heroEyebrow: "shudh india catering",
-      heroImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuCpDx9uyIMELKzoxjZlM_5ubKOaeuLItQ_jc_telsflSGWbE0oIj79sNCNHFW5WRn3R4G15oU7nVep7uLmKGtaNUajMIQ8Sn-e0ZDWXwJMM8t2qpAfSHSjvsxzCvNuQx_Jx24_0M4Bq_bJ55nSd9y_ysoRCQ8TkHPhAEfSMmPPoysN0Xdpwz7HfvzsPPF5A-mMlGhrQ99fQ2ilApSSWi2Hagjp0jkki08hMEN5wWDcgMCfZu1elP3Ijlo_-jAkYrjjylNTw3QpLvdz2",
-      heroTitle: "Elevating Culinary Tradition into an <span class=\"italic font-normal\">Art Form</span>",
+      heroImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuCpDx9uyIMELKzoxjZlM_5ubKOaeuLItQ_jc_telsflSGWbE0oIj79sNCNHFW5WRn3R4G15oU7nVep7uLmKGtaNUajMIQ8Sn-e0ZDWXwJMM8t2qpAfSHSjvsxzCvNuQx_Jx24_0M4Bq_bJ55nSd9y_ysoRCQ8TkHPhAEfSMmPPoysN0Xdpwz7HfvzsPPF5A-mMlGhrQ99fQ2ilApSSWi2Hagjp0jkki08hMEN5wWDcgMCfZu1elP3Ijlo_-jAkYrjjylNTw3QpLvdz2",      heroTitle: "Elevating Culinary Tradition into an <span class=\"italic font-normal\">Art Form</span>",
       heroSubtitle: "Crafting bespoke gastronomic experiences for those who settle for nothing less than absolute luxury and heritage.",
       heroPrimaryCta: "Get Quote",
       heroSecondaryCta: "View Packages",
@@ -327,6 +325,7 @@
       ])
     }
   };
+
 
   function getEl(id) {
     return document.getElementById(id);
@@ -676,6 +675,7 @@
     payload.updatedAt = new Date().toISOString();
     return payload;
   }
+
 
   async function init() {
     if (!window.SHUDH_CONFIG || !window.SHUDH_CONFIG.firebase) return;

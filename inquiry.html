@@ -2,8 +2,8 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8"/>  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="assets/logo/logonew.png" type="image/png" sizes="any"/>
-  <link rel="apple-touch-icon" href="assets/logo/logonew.png"/>
+  <link rel="icon" href="assets/logo/favicon.png" type="image/png" sizes="any"/>
+  <link rel="apple-touch-icon" href="assets/logo/favicon.png"/>
   <title>Get Quote | Shudh India</title>
   <link rel="stylesheet" href="assets/css/styles.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -16,16 +16,16 @@
   <div class="site-header__inner">
     <a href="index.html" class="site-logo" aria-label="Shudh India Home"><img src="assets/logo/logonew.png" alt="Shudh India" class="site-logo__image" /></a>
     <nav class="site-nav">
-      <a href="index.html">Home</a><a href="gallery.html">Gallery</a><a href="packages.html">Packages</a>
-      <a href="videos.html">Videos</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a>
+      <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
+      <a href="videos.html">Videos</a><a href="about.html">About</a><a href="contact.html">Contact</a>
     </nav>
     <a href="inquiry.html" class="site-header__cta active">Get Quote <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </div>
 </header>
 <nav class="mobile-nav" id="mobileNav">
-  <a href="index.html">Home</a><a href="gallery.html">Gallery</a><a href="packages.html">Packages</a>
-  <a href="videos.html">Videos</a><a href="blog.html">Blog</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a>
+  <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
+  <a href="videos.html">Videos</a><a href="about.html">About</a><a href="contact.html">Contact</a>
   <a href="inquiry.html" class="btn btn-primary" style="margin-top:.5rem;justify-content:center">Get Quote</a>
 </nav>
 
@@ -101,12 +101,25 @@
         </section>
 
         <section>
-          <label class="block text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-4">Expected Guest Count</label>
-          <div class="flex flex-wrap gap-3">
-            <button class="guest-btn px-6 py-2.5 rounded-full border border-outline-variant bg-surface hover:bg-surface-container transition-all font-semibold text-sm" type="button" data-guests="80">50-100</button>
-            <button class="guest-btn active px-6 py-2.5 rounded-full bg-secondary-container text-on-secondary-container font-bold shadow-md scale-105 text-sm" type="button" data-guests="150">100-200</button>
-            <button class="guest-btn px-6 py-2.5 rounded-full border border-outline-variant bg-surface hover:bg-surface-container transition-all font-semibold text-sm" type="button" data-guests="350">200-500</button>
-            <button class="guest-btn px-6 py-2.5 rounded-full border border-outline-variant bg-surface hover:bg-surface-container transition-all font-semibold text-sm" type="button" data-guests="700">500+</button>
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <label class="block text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">Expected Guest Count</label>
+            <div id="guestCountValue" class="px-4 py-1.5 rounded-full bg-gradient-to-r from-secondary-container to-surface-container-high text-on-secondary-container text-sm font-extrabold shadow-[0_10px_24px_rgba(46,125,50,0.22)] transition-all duration-300">150</div>
+          </div>
+          <div class="rounded-2xl border border-outline-variant/30 bg-gradient-to-br from-surface to-surface-container-low p-5 sm:p-6 shadow-[0_16px_34px_rgba(91,64,61,0.10)]">
+            <input
+              id="guestCountSlider"
+              type="range"
+              min="1"
+              max="1500"
+              step="1"
+              value="150"
+              class="guest-slider w-full cursor-pointer"
+            />
+            <div class="mt-3 flex items-center justify-between text-[11px] uppercase tracking-[0.18em] text-on-surface-variant font-bold">
+              <span>1</span>
+              <span>750</span>
+              <span>1500+</span>
+            </div>
           </div>
         </section>
 
@@ -256,6 +269,28 @@
   document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('mobileNav').classList.toggle('open'));
 
   (function () {
+    var s = document.createElement('style');
+    s.textContent = [
+      '.guest-slider{',
+      '  -webkit-appearance:none;appearance:none;height:12px;border-radius:999px;',
+      '  background:linear-gradient(90deg,var(--color-secondary) 10%,var(--color-secondary) 10%,rgba(143,111,108,.22) 10%,rgba(143,111,108,.22) 100%);',
+      '  outline:none;transition:background .25s ease,transform .2s ease;',
+      '}',
+      '.guest-slider:hover{transform:translateY(-1px)}',
+      '.guest-slider::-webkit-slider-runnable-track{height:12px;border-radius:999px;background:transparent}',
+      '.guest-slider::-webkit-slider-thumb{',
+      '  -webkit-appearance:none;appearance:none;width:28px;height:28px;border-radius:50%;',
+      '  background:radial-gradient(circle at 35% 35%,#fff 0 18%,var(--color-secondary) 20% 100%);',
+      '  border:3px solid #fff;box-shadow:0 10px 22px rgba(46,125,50,.34);margin-top:-8px;transition:transform .2s ease;',
+      '}',
+      '.guest-slider:active::-webkit-slider-thumb{transform:scale(1.12)}',
+      '.guest-slider::-moz-range-track{height:12px;border-radius:999px;background:rgba(143,111,108,.22)}',
+      '.guest-slider::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--color-secondary);border:3px solid #fff;box-shadow:0 10px 22px rgba(46,125,50,.34)}'
+    ].join('');
+    document.head.appendChild(s);
+  })();
+
+  (function () {
     var form = document.querySelector('form.shudh-inquiry-form[data-source="website-inquiry-page"]');
     if (!form) return;
 
@@ -284,17 +319,38 @@
       });
     });
 
-    form.querySelectorAll('.guest-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        form.querySelectorAll('.guest-btn').forEach(function (b) {
-          b.classList.remove('active', 'bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'shadow-md', 'scale-105');
-          b.classList.add('border', 'border-outline-variant', 'bg-surface', 'font-semibold');
-        });
-        btn.classList.add('active', 'bg-secondary-container', 'text-on-secondary-container', 'font-bold', 'shadow-md', 'scale-105');
-        btn.classList.remove('border', 'border-outline-variant', 'bg-surface');
-        if (guestInput) guestInput.value = btn.getAttribute('data-guests') || '';
+    var guestSlider = document.getElementById('guestCountSlider');
+    var guestValue = document.getElementById('guestCountValue');
+    var guestMax = 1500;
+
+    function setGuestCountValue(raw) {
+      var n = Number(raw || 0);
+      if (!n || n < 1) n = 1;
+      if (n > guestMax) n = guestMax;
+      var display = n >= guestMax ? '1500+' : String(Math.round(n));
+      if (guestValue) guestValue.textContent = display;
+      if (guestInput) guestInput.value = String(Math.round(n));
+      if (guestSlider) {
+        var pct = ((n - 1) / (guestMax - 1)) * 100;
+        guestSlider.style.background =
+          'linear-gradient(90deg,var(--color-secondary) 0%,' +
+          'var(--color-secondary) ' + pct + '%,' +
+          'rgba(143,111,108,.22) ' + pct + '%,' +
+          'rgba(143,111,108,.22) 100%)';
+      }
+      if (guestValue) {
+        guestValue.classList.add('scale-110');
+        setTimeout(function () { guestValue.classList.remove('scale-110'); }, 170);
+      }
+    }
+
+    if (guestSlider) {
+      guestSlider.addEventListener('input', function () {
+        setGuestCountValue(guestSlider.value);
       });
-    });
+    }
+
+    setGuestCountValue(guestInput ? guestInput.value : 150);
 
     form.querySelectorAll('.dining-btn').forEach(function (btn) {
       btn.addEventListener('click', function () {
