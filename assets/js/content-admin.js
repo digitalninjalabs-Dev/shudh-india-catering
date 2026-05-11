@@ -159,8 +159,8 @@
 
   var DEFAULTS = {
     global: {
-      brandName: "Shudh India",
-      contactPhone: "+91 99999 88888",
+      brandName: "Shudh India Catering",
+      contactPhone: "+91-9621051619",
       contactCity: "New Delhi, India"
     },
     index: {
@@ -232,7 +232,7 @@
       quotePanelTitle: "Let's Plan Your Celebration",
       quotePanelDescription: "Our culinary architects are ready to design your perfect menu. Contact us for a personalized consultation.",
       quoteCallLabel: "Call Us",
-      quoteCallValue: "+91 98765 43210",
+      quoteCallValue: "+91-9621051619",
       quoteEmailLabel: "Email Us",
       quoteEmailValue: "concierge@shudhindia.com",
       quoteFormTitle: "Tell us about your event",
@@ -282,15 +282,11 @@
       footerTag2: "Farm Fresh",
       footerTag3: "Artisanal Plating",
       footerTag4: "Vegan Friendly",
-      footerCert: "View Hygiene Certification",
       footerCallLabel: "Call Us:",
-      footerCallValue: "+91 98765 43210",
+      footerCallValue: "+91-9621051619",
       footerEmailLabel: "Email:",
       footerEmailValue: "concierge@shudhindia.com",
-      footerBottomText: "© 2024 Shudh India Catering. Artisanal Culinary Excellence.",
-      footerPrivacy: "Privacy Policy",
-      footerTerms: "Terms",
-      footerFaq: "FAQ"
+      footerBottomText: "© 2024 Shudh India Catering | Premium Catering Experiences"
     },
     about: {
       heroEyebrow: "Our Story",
@@ -405,6 +401,26 @@
   }
 
   function initImagePreviews() {
+    function extractDriveId(url) {
+      var raw = String(url || "").replace(/&amp;/gi, "&").trim();
+      if (!raw) return "";
+      var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (m1 && m1[1]) return m1[1];
+      var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (m2 && m2[1]) return m2[1];
+      var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+      if (m3 && m3[1]) return m3[1];
+      return "";
+    }
+
+    function normalizePreviewUrl(url) {
+      var raw = String(url || "").trim();
+      if (!raw) return "";
+      var driveId = extractDriveId(raw);
+      if (driveId) return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1200";
+      return raw;
+    }
+
     var pairs = [
       ["homeHeroImage", "homeHeroImagePreview"],
       ["homeExpCard1Image", "homeExpCard1ImagePreview"],
@@ -420,7 +436,7 @@
       var preview = getEl(pair[1]);
       if (!input || !preview) return;
       function sync() {
-        preview.src = String(input.value || "").trim();
+        preview.src = normalizePreviewUrl(input.value);
       }
       input.addEventListener("input", sync);
       sync();

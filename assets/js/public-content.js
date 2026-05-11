@@ -1,4 +1,9 @@
 (function () {
+  var GLOBAL_CORE_STATE = {
+    brandName: "",
+    contactPhone: ""
+  };
+
   var INDEX_DEFAULTS = {
     heroEyebrow: "shudh india catering",
     heroTitle: "Elevating Culinary Tradition into an <span class=\"italic font-normal\">Art Form</span>",
@@ -140,7 +145,7 @@
     galleryPreviewCta: "View All →",
     galleryPreviewImages: "",
     quoteCallLabel: "Call Us",
-    quoteCallValue: "+91 98765 43210",
+    quoteCallValue: "+91-9621051619",
     quoteEmailLabel: "Email Us",
     quoteEmailValue: "concierge@shudhindia.com",
     quoteLabelName: "Full Name",
@@ -172,15 +177,11 @@
     footerTag2: "Farm Fresh",
     footerTag3: "Artisanal Plating",
     footerTag4: "Vegan Friendly",
-    footerCert: "View Hygiene Certification",
     footerCallLabel: "Call Us:",
-    footerCallValue: "+91 98765 43210",
+    footerCallValue: "+91-9621051619",
     footerEmailLabel: "Email:",
     footerEmailValue: "concierge@shudhindia.com",
-    footerBottomText: "© 2024 Shudh India Catering. Artisanal Culinary Excellence.",
-    footerPrivacy: "Privacy Policy",
-    footerTerms: "Terms",
-    footerFaq: "FAQ"
+    footerBottomText: "© 2024 Shudh India Catering | Premium Catering Experiences"
   };
 
   var ABOUT_DEFAULTS = {
@@ -241,7 +242,7 @@
   function safeSetImage(selector, value) {
     if (value == null || value === "") return;
     document.querySelectorAll(selector).forEach(function (node) {
-      if (node && node.tagName === "IMG") node.src = value;
+      if (node && node.tagName === "IMG") node.src = normalizeImageUrl(value);
     });
   }
 
@@ -251,7 +252,20 @@
     if (m1 && m1[1]) return m1[1];
     var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
     if (m2 && m2[1]) return m2[1];
+    var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+    if (m3 && m3[1]) return m3[1];
     return "";
+  }
+
+  function normalizeImageUrl(url) {
+    var raw = String(url || "").trim();
+    if (!raw) return "";
+    var driveId = extractDriveId(raw);
+    if (driveId) {
+      // Most reliable public image endpoint for Drive-hosted assets.
+      return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1600";
+    }
+    return raw;
   }
 
   function normalizeHeroVideoUrl(url) {
@@ -306,7 +320,8 @@
   function safeSetBackgroundImage(selector, value) {
     if (value == null || value === "") return;
     document.querySelectorAll(selector).forEach(function (node) {
-      if (node) node.style.backgroundImage = 'url("' + String(value).replace(/"/g, "") + '")';
+      var src = normalizeImageUrl(value);
+      if (node && src) node.style.backgroundImage = 'url("' + String(src).replace(/"/g, "") + '")';
     });
   }
 
@@ -503,15 +518,11 @@
       footerTag2: ".home-footer-tag2",
       footerTag3: ".home-footer-tag3",
       footerTag4: ".home-footer-tag4",
-      footerCert: ".home-footer-cert",
       footerCallLabel: ".home-footer-call-label",
       footerCallValue: ".home-footer-call-value",
       footerEmailLabel: ".home-footer-email-label",
       footerEmailValue: ".home-footer-email-value",
-      footerBottomText: ".home-footer-bottom-text",
-      footerPrivacy: ".home-footer-privacy",
-      footerTerms: ".home-footer-terms",
-      footerFaq: ".home-footer-faq"
+      footerBottomText: ".home-footer-bottom-text"
     };
 
     var htmlMap = {
@@ -615,9 +626,9 @@
       loader.innerHTML =
         '<div class="shudh-loader-card">' +
         '<div class="shudh-loader-logo-wrap">' +
-        '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India" />' +
+        '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India Catering" />' +
         "</div>" +
-        '<p class="shudh-loader-brand">Shudh India</p>' +
+        '<p class="shudh-loader-brand">Shudh India Catering</p>' +
         '<p class="shudh-loader-text"><span data-loader-text>Preparing your experience</span><span class="shudh-loader-dots" aria-hidden="true"><span></span><span></span><span></span></span></p>' +
         "</div>";
       document.body.appendChild(loader);
@@ -661,13 +672,172 @@
   }
 
   function applyGlobal(globalContent) {
-    safeSetText(".brand-text, .text-2xl.font-serif, .text-2xl.font-headline", globalContent.brandName);
-    if (globalContent.contactPhone) {
-      safeSetText("[data-shudh='footer-phone']", globalContent.contactPhone);
+    GLOBAL_CORE_STATE.brandName = String((globalContent && globalContent.brandName) || "").trim();
+    GLOBAL_CORE_STATE.contactPhone = String((globalContent && globalContent.contactPhone) || "").trim();
+
+    safeSetText(".brand-text, .text-2xl.font-serif, .text-2xl.font-headline", GLOBAL_CORE_STATE.brandName);
+    if (GLOBAL_CORE_STATE.brandName) {
+      document.querySelectorAll("img[alt='Shudh India'], img[alt='Shudh India Catering']").forEach(function (img) {
+        img.alt = GLOBAL_CORE_STATE.brandName;
+      });
+      document.title = String(document.title || "").replace(/^Shudh India(?: Catering)?/i, GLOBAL_CORE_STATE.brandName);
+    }
+
+    if (GLOBAL_CORE_STATE.contactPhone) {
+      safeSetText("[data-shudh='footer-phone']", GLOBAL_CORE_STATE.contactPhone);
+      document.querySelectorAll("a[href^='tel:']").forEach(function (a) {
+        a.setAttribute("href", "tel:" + GLOBAL_CORE_STATE.contactPhone.replace(/[^\d+]/g, ""));
+      });
+      var waNumber = GLOBAL_CORE_STATE.contactPhone.replace(/[^\d]/g, "").replace(/^0+/, "");
+      document.querySelectorAll("a[href^='https://wa.me/']").forEach(function (a) {
+        if (waNumber) a.setAttribute("href", "https://wa.me/" + waNumber);
+      });
+      document.querySelectorAll("p, span, a, strong").forEach(function (node) {
+        if (node.children && node.children.length) return;
+        var txt = String(node.textContent || "");
+        if (!txt) return;
+        node.textContent = txt.replace(/\+91[\s-]?98765[\s-]?43210|\+91[\s-]?99999[\s-]?88888/g, GLOBAL_CORE_STATE.contactPhone);
+      });
     }
     if (globalContent.contactCity) {
       safeSetText("[data-shudh='footer-city']", globalContent.contactCity);
     }
+    // Keep backward compatibility if social links were ever stored in siteContent/global.
+    applyFooterSocialLinks(globalContent || {});
+  }
+
+  function normalizeLink(url, fallback) {
+    var raw = String(url || "").trim();
+    if (!raw) return String(fallback || "");
+    if (/^(https?:|mailto:|tel:)/i.test(raw)) return raw;
+    if (/^[\w.-]+\.[a-z]{2,}([/?#].*)?$/i.test(raw)) return "https://" + raw;
+    return raw;
+  }
+
+  function applySocialAnchor(anchor, href, label) {
+    if (!anchor || !href) return;
+    var external = /^https?:\/\//i.test(href);
+    anchor.setAttribute("href", href);
+    anchor.setAttribute("aria-label", label);
+    anchor.setAttribute("title", label);
+    if (external) {
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noopener noreferrer");
+    } else {
+      anchor.removeAttribute("target");
+      anchor.removeAttribute("rel");
+    }
+  }
+
+  function setFooterSocialIcon(anchor, kind) {
+    if (!anchor) return;
+    var svg = "";
+    if (kind === "facebook") {
+      svg =
+        '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M13.5 9H16V6h-2.5C10.9 6 9 7.9 9 10.5V13H7v3h2v5h3v-5h3l.5-3H12v-2.5c0-.8.7-1.5 1.5-1.5z"></path>' +
+        "</svg>";
+    } else if (kind === "instagram") {
+      svg =
+        '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M7.5 3h9A4.5 4.5 0 0 1 21 7.5v9a4.5 4.5 0 0 1-4.5 4.5h-9A4.5 4.5 0 0 1 3 16.5v-9A4.5 4.5 0 0 1 7.5 3zm0 1.8A2.7 2.7 0 0 0 4.8 7.5v9a2.7 2.7 0 0 0 2.7 2.7h9a2.7 2.7 0 0 0 2.7-2.7v-9a2.7 2.7 0 0 0-2.7-2.7h-9zm9.45 1.35a1.05 1.05 0 1 1 0 2.1 1.05 1.05 0 0 1 0-2.1zM12 7.8A4.2 4.2 0 1 1 7.8 12 4.2 4.2 0 0 1 12 7.8zm0 1.8A2.4 2.4 0 1 0 14.4 12 2.4 2.4 0 0 0 12 9.6z"></path>' +
+        "</svg>";
+    } else if (kind === "youtube") {
+      svg =
+        '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M21.6 8.2a2.9 2.9 0 0 0-2-2.05C17.8 5.7 12 5.7 12 5.7s-5.8 0-7.6.45a2.9 2.9 0 0 0-2 2.05A30 30 0 0 0 2 12a30 30 0 0 0 .4 3.8 2.9 2.9 0 0 0 2 2.05c1.8.45 7.6.45 7.6.45s5.8 0 7.6-.45a2.9 2.9 0 0 0 2-2.05A30 30 0 0 0 22 12a30 30 0 0 0-.4-3.8zM10 15.2V8.8L15.2 12 10 15.2z"></path>' +
+        "</svg>";
+    }
+    if (svg) anchor.innerHTML = svg;
+  }
+
+  function applyFooterSocialLinks(globalContent) {
+    var facebook = normalizeLink(globalContent.facebookUrl, "https://facebook.com/");
+    var instagram = normalizeLink(globalContent.instagramUrl, "https://instagram.com/");
+    var youtube = normalizeLink(globalContent.youtubeUrl, "videos.html");
+
+    document.querySelectorAll(".site-footer .footer-socials").forEach(function (wrap) {
+      var links = wrap.querySelectorAll("a");
+      if (!links || !links.length) return;
+      applySocialAnchor(links[0], facebook, "Facebook");
+      applySocialAnchor(links[1], instagram, "Instagram");
+      applySocialAnchor(links[2], youtube, "YouTube");
+      setFooterSocialIcon(links[0], "facebook");
+      setFooterSocialIcon(links[1], "instagram");
+      setFooterSocialIcon(links[2], "youtube");
+    });
+  }
+
+  function applySharedFooterContent(content) {
+    if (!content) return;
+    var activePhone = GLOBAL_CORE_STATE.contactPhone || content.footerCallValue;
+    safeSetText(".footer-brand__desc, .home-footer-desc", content.footerDescription);
+    safeSetText(".home-footer-links-title", content.footerLinksTitle);
+    safeSetText(".home-footer-signature-title", content.footerSignatureTitle);
+
+    // Generic footer headings for non-home pages.
+    var footerCols = document.querySelectorAll(".site-footer .footer-col h4");
+    if (footerCols && footerCols.length) {
+      if (content.footerLinksTitle && footerCols[0]) footerCols[0].textContent = content.footerLinksTitle;
+      if (content.footerSignatureTitle && footerCols[1]) footerCols[1].textContent = content.footerSignatureTitle;
+    }
+
+    function setFooterLink(href, text, homeClass) {
+      if (homeClass) safeSetText(homeClass, text);
+      if (text == null || text === "") return;
+      document
+        .querySelectorAll('.site-footer .footer-col ul li a[href="' + href + '"]')
+        .forEach(function (a) {
+          a.textContent = text;
+        });
+    }
+
+    setFooterLink("index.html", content.footerLinkHome, ".home-footer-link-home");
+    setFooterLink("gallery.html", content.footerLinkGallery, ".home-footer-link-gallery");
+    setFooterLink("packages.html", content.footerLinkPackages, ".home-footer-link-packages");
+    setFooterLink("videos.html", content.footerLinkVideos, ".home-footer-link-videos");
+    setFooterLink("about.html", content.footerLinkAbout, ".home-footer-link-about");
+    setFooterLink("careers.html", content.footerLinkCareers, ".home-footer-link-careers");
+
+    safeSetText(".home-footer-tag1", content.footerTag1);
+    safeSetText(".home-footer-tag2", content.footerTag2);
+    safeSetText(".home-footer-tag3", content.footerTag3);
+    safeSetText(".home-footer-tag4", content.footerTag4);
+
+    var tags = document.querySelectorAll(".site-footer .footer-tag");
+    if (tags && tags.length) {
+      if (content.footerTag1 && tags[0]) tags[0].textContent = content.footerTag1;
+      if (content.footerTag2 && tags[1]) tags[1].textContent = content.footerTag2;
+      if (content.footerTag3 && tags[2]) tags[2].textContent = content.footerTag3;
+      if (content.footerTag4 && tags[3]) tags[3].textContent = content.footerTag4;
+    }
+
+    safeSetText(".home-footer-bottom-text", content.footerBottomText);
+    safeSetText(".site-footer__bottom > p", content.footerBottomText);
+
+    safeSetText(".home-footer-call-label", content.footerCallLabel);
+    safeSetText(".home-footer-call-value", activePhone);
+    safeSetText(".home-footer-email-label", content.footerEmailLabel);
+    safeSetText(".home-footer-email-value", content.footerEmailValue);
+
+    document.querySelectorAll(".site-footer p").forEach(function (p) {
+      var txt = String(p.textContent || "").trim();
+      if (!txt) return;
+      if (txt.toLowerCase().indexOf("call us:") >= 0 && activePhone) {
+        p.innerHTML =
+          '<strong style="color:var(--color-on-surface)">' +
+          (content.footerCallLabel || "Call Us:") +
+          "</strong> " +
+          activePhone;
+      }
+      if (txt.toLowerCase().indexOf("email:") >= 0 && content.footerEmailValue) {
+        p.innerHTML =
+          '<strong style="color:var(--color-on-surface)">' +
+          (content.footerEmailLabel || "Email:") +
+          "</strong> " +
+          content.footerEmailValue;
+      }
+    });
   }
 
   function applyPageContent(pageName, content) {
@@ -733,12 +903,21 @@
 
     return Promise.all([
       db.collection("siteContent").doc("global").get(),
-      db.collection("siteContent").doc(pageKey).get()
+      db.collection("siteContent").doc(pageKey).get(),
+      db.collection("siteContent").doc("index").get(),
+      db.collection("siteSettings").doc("widgetContact").get()
     ]).then(function (snaps) {
       var globalDoc = snaps[0];
       var pageDoc = snaps[1];
+      var indexDoc = snaps[2];
+      var widgetDoc = snaps[3];
       if (globalDoc.exists) applyGlobal(globalDoc.data());
       if (pageDoc.exists) applyPageContent(pageName, pageDoc.data());
+      var footerSource = indexDoc.exists ? mergeWithDefaults(INDEX_DEFAULTS, indexDoc.data()) : INDEX_DEFAULTS;
+      applySharedFooterContent(footerSource);
+      if (widgetDoc.exists) {
+        applyFooterSocialLinks(widgetDoc.data() || {});
+      }
     });
   }
 

@@ -802,7 +802,7 @@
     var name = String(pkg.name || "Package").replace(/</g, "&lt;");
     var desc = String(pkg.description || pkg.tagline || "").replace(/</g, "&lt;");
     var vis = pkg.visible !== false;
-    var hi = (pkg.highlights || []).length;
+    var hi = (pkg.menuItems || pkg.highlights || []).length;
     var ord = Number(pkg.sortOrder || 0);
     return (
            '<div class="group relative bg-surface-container-high rounded-2xl sm:rounded-[2rem] p-5 sm:p-6 md:p-8 min-w-0 flex flex-col h-full transition-all duration-500 hover:bg-stone-900/40" data-package-id="' +
@@ -860,6 +860,67 @@
     var packageCache = [];
     var draggingPkgId = "";
 
+    function normalizeQtyToken(rawQty) {
+      var t = String(rawQty || "").trim();
+      if (!t) return "01";
+      if (/^\d+\+$/.test(t)) {
+        var numPlus = t.slice(0, -1);
+        return String(numPlus).padStart(2, "0") + "+";
+      }
+      if (/^\d+$/.test(t)) return String(Number(t)).padStart(2, "0");
+      return t;
+    }
+
+    function parseMenuItems(rawText) {
+      var lines = String(rawText || "")
+        .split(/\n+/)
+        .map(function (x) {
+          return x.trim();
+        })
+        .filter(Boolean);
+      return lines
+        .map(function (line) {
+          var parts = line.split("|");
+          if (parts.length >= 2) {
+            var qty = normalizeQtyToken(parts.shift());
+            var label = parts.join("|").trim();
+            if (!label) return null;
+            return { qty: qty, label: label };
+          }
+          var match = line.match(/^(\d+(?:\+)?)\s+(.+)$/);
+          if (match) {
+            return {
+              qty: normalizeQtyToken(match[1]),
+              label: String(match[2] || "").trim()
+            };
+          }
+          return { qty: "01", label: line };
+        })
+        .filter(Boolean);
+    }
+
+    function menuItemsToLines(menuItems, fallbackHighlights) {
+      var structured = Array.isArray(menuItems) ? menuItems : [];
+      if (structured.length) {
+        return structured
+          .map(function (item) {
+            if (!item) return "";
+            if (typeof item === "string") {
+              var parsed = parseMenuItems(item);
+              if (parsed.length) return parsed[0].qty + "|" + parsed[0].label;
+              return "";
+            }
+            var qty = normalizeQtyToken(item.qty || item.quantity || "01");
+            var label = String(item.label || item.item || item.name || "").trim();
+            if (!label) return "";
+            return qty + "|" + label;
+          })
+          .filter(Boolean)
+          .join("\n");
+      }
+      return (fallbackHighlights || []).join("\n");
+    }
+
     function openModal(data, id) {
       if (!modal) return;
       var editing = !!id;
@@ -867,7 +928,9 @@
       if (inputName) inputName.value = editing ? data.name || "" : "";
       if (inputDesc) inputDesc.value = editing ? data.description || data.tagline || "" : "";
       if (inputHighlights)
-        inputHighlights.value = editing ? (data.highlights || []).join("\n") : "";
+        inputHighlights.value = editing
+          ? menuItemsToLines(data.menuItems, data.highlights || [])
+          : "";
       if (inputPrice) inputPrice.value = editing ? data.startingPrice || "" : "";
       if (inputShowPrice) inputShowPrice.checked = editing ? data.showPrice !== false : true;
       if (inputBestFor) inputBestFor.value = editing ? (data.bestFor || data.suitability || "") : "";
@@ -964,7 +1027,7 @@
                   Number(p.sortOrder || 0) +
                   "</td>" +
                   '<td class="px-4 lg:px-8 py-6 text-stone-400">' +
-                  (p.highlights || []).length +
+                  ((p.menuItems || p.highlights || []).length) +
                   " Items</td>" +
                   '<td class="px-4 lg:px-8 py-6">' +
                   (vis
@@ -1067,12 +1130,10 @@
         e.preventDefault();
         var name = inputName ? inputName.value.trim() : "";
         var raw = inputHighlights ? inputHighlights.value : "";
-        var highlights = raw
-          .split(/[,|\n]/)
-          .map(function (s) {
-            return s.trim();
-          })
-          .filter(Boolean);
+        var menuItems = parseMenuItems(raw);
+        var highlights = menuItems.map(function (item) {
+          return item.qty + " " + item.label;
+        });
         var badge = inputBadge ? inputBadge.value.trim() : "";
         if (badge === "None") badge = "";
         var visible = inputVisible ? inputVisible.checked : true;
@@ -1081,6 +1142,7 @@
         if (!name) return;
         var payload = {
           name: name,
+          menuItems: menuItems,
           highlights: highlights,
           description: inputDesc ? inputDesc.value.trim() : "",
           startingPrice: inputPrice ? inputPrice.value.trim() : "",

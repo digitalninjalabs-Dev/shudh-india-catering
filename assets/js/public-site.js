@@ -19,9 +19,9 @@
       loader.innerHTML =
         '<div class="shudh-loader-card">' +
         '<div class="shudh-loader-logo-wrap">' +
-        '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India" />' +
+        '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India Catering" />' +
         "</div>" +
-        '<p class="shudh-loader-brand">Shudh India</p>' +
+        '<p class="shudh-loader-brand">Shudh India Catering</p>' +
         '<p class="shudh-loader-text"><span data-loader-text>Preparing your experience</span><span class="shudh-loader-dots" aria-hidden="true"><span></span><span></span><span></span></span></p>' +
         "</div>";
       document.body.appendChild(loader);
@@ -529,62 +529,130 @@
     });
   }
 
-  function highlightList(highlights) {
-    if (!highlights || !highlights.length) return "";
-    return highlights
-      .map(function (h) {
+  function renderPackageCard(pkg, isGold, idx) {
+    var name = pkg.name || "Package";
+    var showPrice = pkg.showPrice !== false;
+    var rawPrice = showPrice && pkg.startingPrice ? String(pkg.startingPrice).trim() : "";
+    var description = String(pkg.description || pkg.tagline || "").trim();
+    var badge = String(pkg.badge || "").trim();
+    function formatDynamicPriceLine(raw) {
+      var value = String(raw || "").trim();
+      if (!value) return "Custom Quote";
+      var compact = value.replace(/\s+/g, " ");
+      if (/veg|non[-\s]?veg|tax/i.test(compact)) return compact;
+      var digits = compact.match(/\d[\d,]*/);
+      if (digits) return "Veg @ ₹" + digits[0].replace(/,/g, "");
+      return compact;
+    }
+    var priceLine = formatDynamicPriceLine(rawPrice);
+    var priceMeta = /tax/i.test(priceLine) ? "per person" : "per person, veg · + taxes";
+    function normalizeQtyToken(rawQty) {
+      var t = String(rawQty || "").trim();
+      if (!t) return "01";
+      if (/^\d+\+$/.test(t)) {
+        var n = t.slice(0, -1);
+        return String(n).padStart(2, "0") + "+";
+      }
+      if (/^\d+$/.test(t)) return String(Number(t)).padStart(2, "0");
+      return t;
+    }
+
+    function parsePackageHighlight(text) {
+      var raw = String(text || "").replace(/\s+/g, " ").trim();
+      if (!raw) return { qty: "01", label: "" };
+      var pipeMatch = raw.match(/^([^|]+)\|(.+)$/);
+      if (pipeMatch) {
+        return {
+          qty: normalizeQtyToken(pipeMatch[1]),
+          label: String(pipeMatch[2] || "").trim()
+        };
+      }
+      var m = raw.match(/^(\d+(?:\+)?)\s+(.+)$/i);
+      if (m) {
+        return {
+          qty: normalizeQtyToken(m[1]),
+          label: String(m[2] || "").trim()
+        };
+      }
+      return { qty: "01", label: raw };
+    }
+
+    function normalizeItemsSource(candidate) {
+      if (Array.isArray(candidate)) return candidate;
+      if (typeof candidate === "string") {
+        return candidate
+          .split(/\n|,/)
+          .map(function (x) { return x.trim(); })
+          .filter(Boolean);
+      }
+      if (candidate && typeof candidate === "object") {
+        return Object.keys(candidate)
+          .sort()
+          .map(function (k) { return candidate[k]; })
+          .filter(Boolean);
+      }
+      return [];
+    }
+    var sourceItems = normalizeItemsSource(
+      Array.isArray(pkg.menuItems) && pkg.menuItems.length ? pkg.menuItems : pkg.highlights
+    );
+    var parsed = sourceItems.map(function (h) {
+      var parsedItem = typeof h === "string"
+        ? parsePackageHighlight(h)
+        : {
+            qty: normalizeQtyToken(h.qty || h.quantity || "01"),
+            label: String(h.label || h.item || h.name || "").trim()
+          };
+      if (!parsedItem.label) return null;
+      return parsedItem;
+    }).filter(Boolean);
+    var rows = parsed
+      .map(function (item) {
         return (
-          '<li class="flex items-center gap-3 text-on-surface/90">' +
-          '<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>' +
-          "<span>" +
-          String(h).replace(/</g, "&lt;") +
+          '<li><span class="pkg-dot"></span><span class="pkg-line-qty">' +
+          item.qty.replace(/</g, "&lt;") +
+          '</span><span class="pkg-line-label">' +
+          item.label.replace(/</g, "&lt;") +
           "</span></li>"
         );
       })
       .join("");
-  }
 
-  function renderPackageCard(pkg, isGold) {
-    var name = pkg.name || "Package";
-    var desc = pkg.description || pkg.tagline || "";
-    var best = pkg.suitability || pkg.bestFor || "";
-    var showPrice = pkg.showPrice !== false;
-    var price = showPrice && pkg.startingPrice ? "<p class=\"text-secondary text-sm mb-4\">" + String(pkg.startingPrice).replace(/</g, "&lt;") + "</p>" : "";
-    var ul = highlightList(pkg.highlights || []);
-    var base =
-      "group relative rounded-xl p-6 sm:p-8 md:p-10 min-w-0 flex flex-col justify-between transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(18,13,13,0.3)]";
-    var shell = isGold
-      ? base +
-        " bg-primary-container ring-1 ring-secondary/50 shadow-[0_30px_60px_rgba(42,10,10,0.5)] z-20 md:scale-105 md:-my-3"
-      : base + " bg-surface-container-low";
+    var tier = String(name || "").toLowerCase();
+    var tone = "silver";
+    if (tier.indexOf("gold") >= 0) tone = "gold";
+    else if (tier.indexOf("diamond") >= 0) tone = "diamond";
+    else if (tier.indexOf("platinum") >= 0) tone = "platinum";
+    var shell = "pkgv2-card pkgv2-card--" + tone;
+    var ctaClass = "pkgv2-btn pkgv2-btn--outline";
+    if (tone === "gold") ctaClass = "pkgv2-btn pkgv2-btn--primary";
+    if (tone === "diamond") ctaClass = "pkgv2-btn pkgv2-btn--secondary";
+    var tierLabel = name;
+    var badgeClass = "pkgv2-badge pkgv2-badge--red";
+    if (/limited|premium|choice/i.test(badge)) badgeClass = "pkgv2-badge pkgv2-badge--green";
 
     return (
-      '<div class="' +
-      shell +
-      '">' +
-      (pkg.badge
-        ? '<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-secondary text-on-secondary px-6 py-1 rounded-full text-xs font-bold tracking-widest uppercase shadow-lg">' +
-          String(pkg.badge).replace(/</g, "&lt;") +
+      '<div class="' + shell + '" style="animation-delay:' + String((idx || 0) * 90) + 'ms">' +
+      (badge
+        ? '<div class="' + badgeClass + '">' +
+          badge.replace(/</g, "&lt;") +
           "</div>"
         : "") +
-      '<div class="relative z-10">' +
-      '<h3 class="text-3xl font-headline font-bold ' +
-      (isGold ? "text-secondary" : "text-on-surface") +
-      ' mb-2">' +
-      name.replace(/</g, "&lt;") +
+      '<div class="pkgv2-tier"><span class="pkgv2-tier__dot"></span><span class="pkgv2-tier__label">' +
+      tierLabel.replace(/</g, "&lt;") +
+      "</span></div>" +
+      '<h3 class="pkgv2-name">' + name.replace(/</g, "&lt;") + "</h3>" +
+      '<h3 class="pkgv2-price">' +
+      priceLine.replace(/</g, "&lt;") +
       "</h3>" +
-      price +
-      (desc ? '<p class="text-on-surface-variant mb-6 font-light">' + desc.replace(/</g, "&lt;") + "</p>" : "") +
-      '<ul class="space-y-4 mb-8">' +
-      ul +
+      '<p class="pkgv2-sub">' + priceMeta.replace(/</g, "&lt;") + "</p>" +
+      (description ? '<p class="pkgv2-desc">' + description.replace(/</g, "&lt;") + "</p>" : "") +
+      '<ul class="pkgv2-lines">' +
+      parsed.map(function (item) {
+        return '<li><span class="pkgv2-qty">' + item.qty.replace(/</g, "&lt;") + '</span><span class="pkgv2-label">' + item.label.replace(/</g, "&lt;") + "</span></li>";
+      }).join("") +
       "</ul>" +
-      (best
-        ? '<div class="p-4 rounded-xl bg-surface-container-highest/30 border border-outline-variant/10 mb-4"><span class="text-xs uppercase tracking-widest text-secondary block mb-1">Best For</span><span class="text-on-surface font-medium">' +
-          best.replace(/</g, "&lt;") +
-          "</span></div>"
-        : "") +
-      "</div>" +
-      '<a href="inquiry.html" class="relative z-10 w-full py-4 rounded-xl border border-secondary/35 text-secondary font-semibold hover:bg-secondary/10 hover:border-secondary hover:text-secondary transition-all duration-300 text-center block">Get Custom Quote</a>' +
+      '<a href="inquiry.html" class="' + ctaClass + '">Get Quote</a>' +
       "</div>"
     );
   }
@@ -592,15 +660,34 @@
   function loadPackages(db) {
     var root = document.getElementById("shudh-packages-root");
     var staticSection = document.getElementById("shudh-packages-static");
-    if (!root || !db) return Promise.resolve();
+    if (!root) return Promise.resolve();
+    if (!db) {
+      root.innerHTML =
+        '<div class="pkgv2-card pkgv2-card--silver" style="grid-column:1/-1;text-align:center;">' +
+        '<h3 class="pkgv2-price">Packages unavailable</h3>' +
+        '<p class="pkgv2-sub">Firebase not connected on this page. Please check config.</p>' +
+        "</div>";
+      root.classList.add("packages-grid");
+      root.classList.remove("hidden");
+      root.style.display = "";
+      if (staticSection) staticSection.style.display = "none";
+      return Promise.resolve();
+    }
     showLoader("Loading packages...");
     return db.collection("packages")
       .get()
       .then(function (snap) {
         if (snap.empty) {
-          if (staticSection) staticSection.classList.remove("hidden");
-          root.classList.add("hidden");
-          root.style.display = "none";
+          root.innerHTML =
+            '<div class="pkgv2-card pkgv2-card--silver" style="grid-column:1/-1;text-align:center;">' +
+            '<h3 class="pkgv2-price">Packages Coming Soon</h3>' +
+            '<p class="pkgv2-sub">Add packages from Admin panel to show them here.</p>' +
+            '<a href="inquiry.html" class="pkgv2-btn pkgv2-btn--outline" style="max-width:220px;margin:1rem auto 0;">Get Quote</a>' +
+            "</div>";
+          root.classList.add("packages-grid");
+          root.classList.remove("hidden");
+          root.style.display = "";
+          if (staticSection) staticSection.classList.add("hidden");
           return;
         }
         var items = snap.docs.map(function (d) {
@@ -616,15 +703,29 @@
         var html = "";
         items.forEach(function (pkg, i) {
           var gold = !!(pkg.popular || (pkg.badge && String(pkg.badge).toLowerCase().indexOf("popular") >= 0) || i === 1);
-          html += renderPackageCard(pkg, gold);
+          html += renderPackageCard(pkg, gold, i);
         });
         root.innerHTML = html;
-        root.classList.remove("shudh-grid-auto");
         root.classList.add("packages-grid");
         root.classList.remove("hidden");
-        if (staticSection) staticSection.classList.add("hidden");
+        root.style.display = "";
+        if (staticSection) staticSection.style.display = "none";
       })
-      .catch(function () {})
+      .catch(function (err) {
+        var errText = "";
+        if (err && (err.code || err.message)) {
+          errText = String(err.code || err.message);
+        }
+        root.innerHTML =
+          '<div class="pkgv2-card pkgv2-card--silver" style="grid-column:1/-1;text-align:center;">' +
+          '<h3 class="pkgv2-price">Could not load packages</h3>' +
+          '<p class="pkgv2-sub">Please check internet/Firebase permissions and refresh.</p>' +
+          (errText ? ('<p class="pkgv2-sub" style="margin-top:.35rem;color:#b21422;">' + errText.replace(/</g, "&lt;") + "</p>") : "") +
+          "</div>";
+        root.classList.add("packages-grid");
+        root.classList.remove("hidden");
+        root.style.display = "";
+      })
       .finally(function () {
         hideLoader();
       });
@@ -1091,7 +1192,7 @@
           galleryModalIndex = Math.max(0, Math.min(index, currentViewItems.length - 1));
           var item = currentViewItems[galleryModalIndex];
           if (img) img.src = String(item.displayUrl || "");
-          if (title) title.textContent = String(item.title || "Shudh India Event");
+          if (title) title.textContent = String(item.title || "Shudh India Catering Event");
           modal.classList.remove("hidden");
           modal.classList.add("flex");
           document.body.style.overflow = "hidden";
@@ -1167,7 +1268,7 @@
                   categoryLabel(m.category) +
                   "</span>" +
                   '<span class="shudh-masonry-title">' +
-                  escapeHtml(m.title || "Shudh India Event") +
+                  escapeHtml(m.title || "Shudh India Catering Event") +
                   "</span>" +
                   "</figcaption>" +
                   "</figure>"
@@ -1327,7 +1428,7 @@
             String(m.driveId || "").replace(/"/g, "&quot;") +
             '"><span class="material-symbols-outlined" style="font-size:1.5rem;font-variation-settings:\'FILL\' 1">play_arrow</span></button></div>' +
             '<div class="video-info"><h4 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1rem;margin-bottom:.2rem">' +
-            escapeHtml(m.title || "Shudh India Video") +
+            escapeHtml(m.title || "Shudh India Catering Video") +
             '</h4><p style="color:rgba(255,255,255,.7);font-size:.8125rem">' +
             escapeHtml(m.duration || "Watch now") +
             "</p></div></div>"
@@ -1349,7 +1450,7 @@
           '<div class="video-info"><h3 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1.375rem;margin-bottom:.25rem">' +
           escapeHtml(featured.title || "Featured video") +
           '</h3><p style="color:rgba(255,255,255,.7);font-size:.875rem">' +
-          escapeHtml(featured.summary || "Shudh India cinematic showcase") +
+          escapeHtml(featured.summary || "Shudh India Catering cinematic showcase") +
           "</p></div></div></div></section>" +
           '<section class="section" style="background:var(--color-surface-container-low);padding-top:2rem"><div class="section-inner"><div style="text-align:center;margin-bottom:3rem"><div class="section-eyebrow">More Videos</div><h2 class="section-title" style="text-align:center">Explore Our <span class="accent">Portfolio</span></h2></div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.75rem">' +
           (rest.length
@@ -1582,8 +1683,8 @@
     }
 
     var defaults = {
-      callNumber: "+91 98765 43210",
-      whatsappNumber: "+91 98765 43210",
+      callNumber: "+91-9621051619",
+      whatsappNumber: "+91-9621051619",
       facebookUrl: "https://facebook.com/",
       instagramUrl: "https://instagram.com/",
       youtubeUrl: "videos.html"

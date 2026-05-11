@@ -11,9 +11,9 @@
   loader.innerHTML =
     '<div class="shudh-loader-card">' +
     '<div class="shudh-loader-logo-wrap">' +
-    '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India" />' +
+    '<img class="shudh-loader-logo" src="assets/logo/logonew.png" alt="Shudh India Catering" />' +
     "</div>" +
-    '<p class="shudh-loader-brand">Shudh India</p>' +
+    '<p class="shudh-loader-brand">Shudh India Catering</p>' +
     '<p class="shudh-loader-text"><span data-loader-text>Preparing your experience</span><span class="shudh-loader-dots" aria-hidden="true"><span></span><span></span><span></span></span></p>' +
     "</div>";
   doc.body.appendChild(loader);
