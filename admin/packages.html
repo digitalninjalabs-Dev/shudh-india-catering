@@ -3,6 +3,7 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Packages | Shudh India Catering</title>
 <link rel="icon" href="../assets/logo/favicon.png" type="image/png" sizes="any"/>
 <link rel="apple-touch-icon" href="../assets/logo/favicon.png"/>
 <link href="../assets/css/global.css" rel="stylesheet"/>
@@ -212,8 +213,8 @@
 </div>
 <div class="space-y-2">
 <label class="text-[10px] uppercase tracking-widest text-stone-500 font-bold ml-1">Items (Quantity + Name)</label>
-<textarea id="pkg-modal-highlights" class="w-full bg-surface-container-highest border-none rounded-2xl py-3 px-5 text-sm focus:ring-1 focus:ring-secondary/40 transition-all placeholder:text-stone-600 resize-none" placeholder="01|Welcome Drinks&#10;02|Appetizers&#10;01|Soup&#10;02|Main Course Gravy" rows="5"></textarea>
-<p class="text-[10px] text-stone-500 px-1">Format: <strong class="text-stone-300">quantity|item name</strong> (one per line). Example: <strong class="text-stone-300">03|Desserts</strong></p>
+<textarea id="pkg-modal-highlights" class="w-full bg-surface-container-highest border-none rounded-2xl py-3 px-5 text-sm focus:ring-1 focus:ring-secondary/40 transition-all placeholder:text-stone-600 resize-none" placeholder="01|Welcome Drinks&#10;02|Appetizers&#10;|Chef&#39;s special selection&#10;01|Soup" rows="5"></textarea>
+<p class="text-[10px] text-stone-500 px-1">Per line: <strong class="text-stone-300">qty|item</strong> (e.g. <strong class="text-stone-300">03|Desserts</strong>) or <strong class="text-stone-300">|Section title</strong> / plain text for lines <strong class="text-stone-300">without</strong> a quantity.</p>
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
 <div class="space-y-2">
@@ -269,6 +270,6 @@ if (window.location.hash === '#add-package-modal') {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-config.js"></script>
 <script src="../assets/js/admin-auth-guard.js"></script>
-<script src="../assets/js/admin-shell.js"></script>
-<script src="../assets/js/admin-app.js"></script>
+<script src="../assets/js/admin-shell.js?v=20260512f"></script>
+<script src="../assets/js/admin-app.js?v=20260511f"></script>
 </body></html>

@@ -165,7 +165,7 @@
     aside.className =
       "bg-surface-container-low font-body tracking-tight h-screen w-[min(18rem,88vw)] max-w-[288px] md:w-64 md:max-w-none shrink-0 fixed left-0 top-0 flex flex-col py-4 md:py-5 pl-3 pr-4 md:pl-4 md:pr-4 z-[55] border-r border-stone-800/70 -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out shadow-2xl md:shadow-none overflow-y-hidden";
     aside.innerHTML =
-      '<div class="mb-5 md:mb-6 px-2 md:px-4"><h1 class="text-lg md:text-xl font-bold tracking-widest text-primary uppercase leading-tight">shudh india admin</h1><p class="text-[10px] text-stone-500 mt-1 uppercase tracking-[0.2em]">operations panel</p></div>' +
+      '<div class="mb-5 md:mb-6 px-2 md:px-4"><h1 class="text-base md:text-lg font-bold tracking-tight text-primary leading-snug">Shudh India Catering</h1><p class="text-[10px] text-stone-500 mt-1 uppercase tracking-[0.2em]">Admin</p></div>' +
       '<nav class="flex-1 space-y-0.5">' +
       items
         .map(function (x) {

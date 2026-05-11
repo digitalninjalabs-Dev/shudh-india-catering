@@ -547,8 +547,8 @@
     var priceLine = formatDynamicPriceLine(rawPrice);
     var priceMeta = /tax/i.test(priceLine) ? "per person" : "per person, veg · + taxes";
     function normalizeQtyToken(rawQty) {
-      var t = String(rawQty || "").trim();
-      if (!t) return "01";
+      var t = String(rawQty != null ? rawQty : "").trim();
+      if (!t) return "";
       if (/^\d+\+$/.test(t)) {
         var n = t.slice(0, -1);
         return String(n).padStart(2, "0") + "+";
@@ -559,22 +559,32 @@
 
     function parsePackageHighlight(text) {
       var raw = String(text || "").replace(/\s+/g, " ").trim();
-      if (!raw) return { qty: "01", label: "" };
-      var pipeMatch = raw.match(/^([^|]+)\|(.+)$/);
+      if (!raw) return { qty: "", label: "", hasQty: false };
+      if (raw.charAt(0) === "|") {
+        var only = raw.slice(1).trim();
+        return { qty: "", label: only, hasQty: false };
+      }
+      var pipeMatch = raw.match(/^([^|]*)\|(.+)$/);
       if (pipeMatch) {
+        var left = String(pipeMatch[1] || "").trim();
+        var right = String(pipeMatch[2] || "").trim();
+        if (!right) return { qty: "", label: "", hasQty: false };
+        if (!left) return { qty: "", label: right, hasQty: false };
         return {
-          qty: normalizeQtyToken(pipeMatch[1]),
-          label: String(pipeMatch[2] || "").trim()
+          qty: normalizeQtyToken(left),
+          label: right,
+          hasQty: true
         };
       }
       var m = raw.match(/^(\d+(?:\+)?)\s+(.+)$/i);
       if (m) {
         return {
           qty: normalizeQtyToken(m[1]),
-          label: String(m[2] || "").trim()
+          label: String(m[2] || "").trim(),
+          hasQty: true
         };
       }
-      return { qty: "01", label: raw };
+      return { qty: "", label: raw, hasQty: false };
     }
 
     function normalizeItemsSource(candidate) {
@@ -597,26 +607,23 @@
       Array.isArray(pkg.menuItems) && pkg.menuItems.length ? pkg.menuItems : pkg.highlights
     );
     var parsed = sourceItems.map(function (h) {
-      var parsedItem = typeof h === "string"
-        ? parsePackageHighlight(h)
-        : {
-            qty: normalizeQtyToken(h.qty || h.quantity || "01"),
-            label: String(h.label || h.item || h.name || "").trim()
-          };
+      var parsedItem;
+      if (typeof h === "string") {
+        parsedItem = parsePackageHighlight(h);
+      } else {
+        var lbl = String(h.label || h.item || h.name || "").trim();
+        var qRaw = h.qty != null ? h.qty : h.quantity;
+        var qStr = normalizeQtyToken(qRaw);
+        var hasQ = String(qRaw != null ? qRaw : "").trim() !== "";
+        if (h.showQty === false || h.hasQuantity === false) hasQ = false;
+        parsedItem = { qty: hasQ ? qStr : "", label: lbl, hasQty: hasQ };
+      }
       if (!parsedItem.label) return null;
+      if (parsedItem.hasQty == null) {
+        parsedItem.hasQty = !!String(parsedItem.qty || "").trim();
+      }
       return parsedItem;
     }).filter(Boolean);
-    var rows = parsed
-      .map(function (item) {
-        return (
-          '<li><span class="pkg-dot"></span><span class="pkg-line-qty">' +
-          item.qty.replace(/</g, "&lt;") +
-          '</span><span class="pkg-line-label">' +
-          item.label.replace(/</g, "&lt;") +
-          "</span></li>"
-        );
-      })
-      .join("");
 
     var tier = String(name || "").toLowerCase();
     var tone = "silver";
@@ -630,6 +637,17 @@
     var tierLabel = name;
     var badgeClass = "pkgv2-badge pkgv2-badge--red";
     if (/limited|premium|choice/i.test(badge)) badgeClass = "pkgv2-badge pkgv2-badge--green";
+
+    function menuLineIcon(labelText) {
+      var t = String(labelText || "").toLowerCase();
+      if (/drink|mocktail|beverage|welcome/i.test(t)) return "wine_bar";
+      if (/appetizer|starter|snack/i.test(t)) return "tapas";
+      if (/raita|dal|gravy|curry|main|sabzi|paneer|rice|biryani|bread|roti|naan/i.test(t)) return "restaurant";
+      if (/dessert|sweet|ice.?cream|cake|pastry|halwa|gulab/i.test(t)) return "cake";
+      if (/salad/i.test(t)) return "eco";
+      if (/counter|live/i.test(t)) return "storefront";
+      return "restaurant_menu";
+    }
 
     return (
       '<div class="' + shell + '" style="animation-delay:' + String((idx || 0) * 90) + 'ms">' +
@@ -649,7 +667,22 @@
       (description ? '<p class="pkgv2-desc">' + description.replace(/</g, "&lt;") + "</p>" : "") +
       '<ul class="pkgv2-lines">' +
       parsed.map(function (item) {
-        return '<li><span class="pkgv2-qty">' + item.qty.replace(/</g, "&lt;") + '</span><span class="pkgv2-label">' + item.label.replace(/</g, "&lt;") + "</span></li>";
+        var labelEsc = item.label.replace(/</g, "&lt;");
+        var showQty = item.hasQty && String(item.qty || "").trim();
+        var iconName = menuLineIcon(item.label).replace(/</g, "&lt;");
+        if (showQty) {
+          return (
+            '<li class="pkgv2-line pkgv2-line--qty">' +
+            '<span class="pkgv2-qty">' +
+            String(item.qty).replace(/</g, "&lt;") +
+            '</span><span class="pkgv2-label">' +
+            labelEsc +
+            '</span><span class="material-symbols-outlined pkgv2-item-icon" aria-hidden="true">' +
+            iconName +
+            "</span></li>"
+          );
+        }
+        return '<li class="pkgv2-line pkgv2-line--plain"><span class="pkgv2-label">' + labelEsc + '</span><span class="material-symbols-outlined pkgv2-item-icon pkgv2-item-icon--plain" aria-hidden="true">' + iconName + "</span></li>";
       }).join("") +
       "</ul>" +
       '<a href="inquiry.html" class="' + ctaClass + '">Get Quote</a>' +

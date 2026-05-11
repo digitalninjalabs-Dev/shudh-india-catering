@@ -7,7 +7,7 @@
 <link href="../assets/css/global.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<title>Content Manager | Shudh India</title>
+<title>Content Manager | Shudh India Catering</title>
 </head>
 <body class="shudh-admin-body bg-[#131313] text-[#e5e2e1]">
 <main class="ml-64 mt-14 md:mt-16 px-3 sm:px-5 md:px-8 pb-[max(1rem,env(safe-area-inset-bottom))] min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100vh-4rem)] overflow-y-auto max-w-full min-w-0">
@@ -48,7 +48,7 @@
       <section id="tab-global-core" class="cms-panel bg-stone-900/40 p-5 sm:p-6 rounded-2xl space-y-4">
         <h3 class="text-lg sm:text-xl font-semibold">Global Core</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><label class="text-xs text-stone-400">Brand Name</label><input id="brandName" placeholder="Shudh India" class="w-full bg-stone-800 rounded-xl border-none"/></div>
+          <div><label class="text-xs text-stone-400">Brand Name</label><input id="brandName" placeholder="Shudh India Catering" class="w-full bg-stone-800 rounded-xl border-none"/></div>
           <div><label class="text-xs text-stone-400">Phone</label><input id="contactPhone" placeholder="+91 99999 88888" class="w-full bg-stone-800 rounded-xl border-none"/></div>
           <div><label class="text-xs text-stone-400">City</label><input id="contactCity" placeholder="New Delhi, India" class="w-full bg-stone-800 rounded-xl border-none"/></div>
         </div>
@@ -230,6 +230,12 @@
         <h3 class="text-lg sm:text-xl font-semibold">Homepage Quote Section</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div><label class="text-xs text-stone-400">Eyebrow</label><input id="homeQuoteEyebrow" class="w-full bg-stone-800 rounded-xl border-none"/></div>
+          <div class="md:col-span-2">
+            <label class="text-xs text-stone-400">Contact panel background image URL</label>
+            <input id="homeQuotePanelImage" type="text" placeholder="https://… or Google Drive image link" class="w-full bg-stone-800 rounded-xl border-none"/>
+            <p class="text-[10px] text-stone-500 mt-1 px-0.5">Shown behind the dark overlay on the quote contact column.</p>
+            <img id="homeQuotePanelImagePreview" alt="Panel background preview" class="mt-2 w-full max-w-md rounded-xl border border-stone-700/80 object-cover min-h-[100px] bg-stone-900/60" />
+          </div>
           <div><label class="text-xs text-stone-400">Form Title</label><input id="homeQuoteFormTitle" class="w-full bg-stone-800 rounded-xl border-none"/></div>
           <div class="md:col-span-2"><label class="text-xs text-stone-400">Main Title (HTML allowed)</label><input id="homeQuoteTitle" class="w-full bg-stone-800 rounded-xl border-none"/></div>
           <div><label class="text-xs text-stone-400">Panel Title</label><input id="homeQuotePanelTitle" class="w-full bg-stone-800 rounded-xl border-none"/></div>
@@ -354,6 +360,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="../assets/js/firebase-config.js"></script>
 <script src="../assets/js/admin-auth-guard.js"></script>
-<script src="../assets/js/admin-shell.js"></script>
-<script src="../assets/js/content-admin.js"></script>
+<script src="../assets/js/admin-shell.js?v=20260512f"></script>
+<script src="../assets/js/content-admin.js?v=20260512e"></script>
 </body></html>

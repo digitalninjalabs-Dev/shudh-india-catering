@@ -92,12 +92,6 @@
     signatureStep3Title: "Final Styling & Service",
     signatureStep3Description: "From plating aesthetics to on-ground execution, every touchpoint is refined and consistent.",
     signatureStep3Cta: "See Gallery",
-    quoteEyebrow: "Let's Connect",
-    quoteTitle: "Let's Plan Your <span class=\"accent\">Celebration</span>",
-    quotePanelTitle: "Let's Plan Your Celebration",
-    quotePanelDescription: "Our culinary architects are ready to design your perfect menu. Contact us for a personalized consultation.",
-    quoteFormTitle: "Tell us about your event",
-    quoteSubmitText: "Get My Quote",
     closingTitleKicker: "WHY SHUDH INDIA",
     closingTitleMain: "Your Trusted Partner for",
     closingTitleAccent: "Premium Events",
@@ -144,6 +138,14 @@
     galleryPreviewTitle: "The Artisanal Gallery",
     galleryPreviewCta: "View All →",
     galleryPreviewImages: "",
+    quoteEyebrow: "Let's Connect",
+    quoteTitle: "Let's Plan Your <span class=\"accent\">Celebration</span>",
+    quotePanelTitle: "Let's Plan Your Celebration",
+    quotePanelDescription: "Our culinary architects are ready to design your perfect menu. Contact us for a personalized consultation.",
+    quotePanelImage:
+      "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80",
+    quoteFormTitle: "Tell us about your event",
+    quoteSubmitText: "Get My Quote",
     quoteCallLabel: "Call Us",
     quoteCallValue: "+91-9621051619",
     quoteEmailLabel: "Email Us",
@@ -357,6 +359,7 @@
   }
 
   function safeParseJsonArray(raw) {
+    if (Array.isArray(raw)) return raw;
     try {
       var parsed = JSON.parse(String(raw || "[]"));
       return Array.isArray(parsed) ? parsed : [];
@@ -414,6 +417,21 @@
         "</div>"
       );
     }).join("");
+  }
+
+  function setHomeQuoteContactPanelBackground(imageUrl) {
+    var panels = document.querySelectorAll(".home-quote-contact-panel");
+    if (!panels.length) return;
+    var fallback =
+      "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80";
+    var raw = String(imageUrl == null ? "" : imageUrl).trim();
+    var src = normalizeImageUrl(raw || fallback);
+    if (!src) src = fallback;
+    var escaped = String(src).replace(/\\/g, "/").replace(/"/g, "%22");
+    var val = 'url("' + escaped + '")';
+    panels.forEach(function (node) {
+      node.style.setProperty("--home-quote-bg-img", val);
+    });
   }
 
   function applyIndexSelectorContent(content) {
@@ -553,6 +571,7 @@
     safeSetPlaceholder(".home-quote-input-guests", content.quotePlaceholderGuests);
     safeSetPlaceholder(".home-quote-input-location", content.quotePlaceholderLocation);
     safeSetPlaceholder(".home-quote-input-requests", content.quotePlaceholderRequests);
+    setHomeQuoteContactPanelBackground(content.quotePanelImage);
   }
 
   function applyAboutContent(content) {
@@ -595,9 +614,11 @@
       teamRoot.innerHTML = teamCards.map(function (item) {
         var email = escapeHtml(item.email);
         var phone = escapeHtml(item.phone);
+        var rawImg = String(item.image || item.photo || item.imageUrl || "").trim();
+        var imgSrc = rawImg ? normalizeImageUrl(rawImg) : "";
         return (
           '<article class="card employee-card" style="padding:1.35rem">' +
-          '<div class="employee-card__image-wrap"><img src="' + escapeHtml(item.image) + '" alt="' + escapeHtml((item.name || "Team Member") + " photo") + '"/></div>' +
+          '<div class="employee-card__image-wrap"><img src="' + escapeHtml(imgSrc) + '" alt="' + escapeHtml((item.name || "Team Member") + " photo") + '" loading="lazy" decoding="async"/></div>' +
           '<p class="employee-role-badge">' + escapeHtml(item.roleBadge) + "</p>" +
           '<h3 style="margin:0 0 .2rem;font-family:var(--font-headline);font-size:1.22rem;font-weight:700">' + escapeHtml(item.name) + "</h3>" +
           '<p style="margin:0 0 .7rem;color:var(--color-on-surface-variant);font-size:.92rem">' + escapeHtml(item.title) + "</p>" +

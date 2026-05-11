@@ -861,8 +861,8 @@
     var draggingPkgId = "";
 
     function normalizeQtyToken(rawQty) {
-      var t = String(rawQty || "").trim();
-      if (!t) return "01";
+      var t = String(rawQty != null ? rawQty : "").trim();
+      if (!t) return "";
       if (/^\d+\+$/.test(t)) {
         var numPlus = t.slice(0, -1);
         return String(numPlus).padStart(2, "0") + "+";
@@ -880,12 +880,17 @@
         .filter(Boolean);
       return lines
         .map(function (line) {
+          if (line.charAt(0) === "|") {
+            var rest = line.slice(1).trim();
+            return rest ? { qty: "", label: rest } : null;
+          }
           var parts = line.split("|");
           if (parts.length >= 2) {
-            var qty = normalizeQtyToken(parts.shift());
-            var label = parts.join("|").trim();
+            var qtyPart = String(parts[0] || "").trim();
+            var label = parts.slice(1).join("|").trim();
             if (!label) return null;
-            return { qty: qty, label: label };
+            if (!qtyPart) return { qty: "", label: label };
+            return { qty: normalizeQtyToken(qtyPart), label: label };
           }
           var match = line.match(/^(\d+(?:\+)?)\s+(.+)$/);
           if (match) {
@@ -894,7 +899,7 @@
               label: String(match[2] || "").trim()
             };
           }
-          return { qty: "01", label: line };
+          return { qty: "", label: line };
         })
         .filter(Boolean);
     }
@@ -907,13 +912,22 @@
             if (!item) return "";
             if (typeof item === "string") {
               var parsed = parseMenuItems(item);
-              if (parsed.length) return parsed[0].qty + "|" + parsed[0].label;
+              if (parsed.length) {
+                var first = parsed[0];
+                return first.qty ? first.qty + "|" + first.label : "|" + first.label;
+              }
               return "";
             }
-            var qty = normalizeQtyToken(item.qty || item.quantity || "01");
+            var qty = normalizeQtyToken(
+              item.qty != null && String(item.qty).trim() !== ""
+                ? item.qty
+                : item.quantity != null && String(item.quantity).trim() !== ""
+                  ? item.quantity
+                  : ""
+            );
             var label = String(item.label || item.item || item.name || "").trim();
             if (!label) return "";
-            return qty + "|" + label;
+            return qty ? qty + "|" + label : "|" + label;
           })
           .filter(Boolean)
           .join("\n");
@@ -1132,7 +1146,8 @@
         var raw = inputHighlights ? inputHighlights.value : "";
         var menuItems = parseMenuItems(raw);
         var highlights = menuItems.map(function (item) {
-          return item.qty + " " + item.label;
+          var q = String(item.qty || "").trim();
+          return q ? q + " " + item.label : item.label;
         });
         var badge = inputBadge ? inputBadge.value.trim() : "";
         if (badge === "None") badge = "";

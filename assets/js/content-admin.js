@@ -17,7 +17,8 @@
       heroEyebrow: "homeHeroEyebrow",
       heroTitle: "homeHeroTitle",
       heroSubtitle: "homeHeroSubtitle",
-      heroImage: "homeHeroImage",      heroPrimaryCta: "homeHeroPrimaryCta",
+      heroImage: "homeHeroImage",
+      heroPrimaryCta: "homeHeroPrimaryCta",
       heroSecondaryCta: "homeHeroSecondaryCta",
       heroStat1Number: "homeHeroStat1Number",
       heroStat1Label: "homeHeroStat1Label",
@@ -73,6 +74,7 @@
       quoteTitle: "homeQuoteTitle",
       quotePanelTitle: "homeQuotePanelTitle",
       quotePanelDescription: "homeQuotePanelDesc",
+      quotePanelImage: "homeQuotePanelImage",
       quoteCallLabel: "homeQuoteCallLabel",
       quoteCallValue: "homeQuoteCallValue",
       quoteEmailLabel: "homeQuoteEmailLabel",
@@ -231,6 +233,8 @@
       quoteTitle: "Let's Plan Your <span class=\"accent\">Celebration</span>",
       quotePanelTitle: "Let's Plan Your Celebration",
       quotePanelDescription: "Our culinary architects are ready to design your perfect menu. Contact us for a personalized consultation.",
+      quotePanelImage:
+        "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80",
       quoteCallLabel: "Call Us",
       quoteCallValue: "+91-9621051619",
       quoteEmailLabel: "Email Us",
@@ -401,26 +405,6 @@
   }
 
   function initImagePreviews() {
-    function extractDriveId(url) {
-      var raw = String(url || "").replace(/&amp;/gi, "&").trim();
-      if (!raw) return "";
-      var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (m1 && m1[1]) return m1[1];
-      var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (m2 && m2[1]) return m2[1];
-      var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
-      if (m3 && m3[1]) return m3[1];
-      return "";
-    }
-
-    function normalizePreviewUrl(url) {
-      var raw = String(url || "").trim();
-      if (!raw) return "";
-      var driveId = extractDriveId(raw);
-      if (driveId) return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1200";
-      return raw;
-    }
-
     var pairs = [
       ["homeHeroImage", "homeHeroImagePreview"],
       ["homeExpCard1Image", "homeExpCard1ImagePreview"],
@@ -429,14 +413,15 @@
       ["homeSignatureFeatureImage", "homeSignatureFeatureImagePreview"],
       ["homeVisualImage", "homeVisualImagePreview"],
       ["homeClosingMediaImage", "homeClosingMediaImagePreview"],
-      ["aboutVisionImage", "aboutVisionImagePreview"]
+      ["aboutVisionImage", "aboutVisionImagePreview"],
+      ["homeQuotePanelImage", "homeQuotePanelImagePreview"]
     ];
     pairs.forEach(function (pair) {
       var input = getEl(pair[0]);
       var preview = getEl(pair[1]);
       if (!input || !preview) return;
       function sync() {
-        preview.src = normalizePreviewUrl(input.value);
+        preview.src = normalizeDriveImageUrl(input.value);
       }
       input.addEventListener("input", sync);
       sync();
@@ -444,12 +429,31 @@
   }
 
   function safeJsonParseArray(raw) {
+    if (Array.isArray(raw)) return raw;
     try {
       var parsed = JSON.parse(String(raw || "[]"));
       return Array.isArray(parsed) ? parsed : [];
     } catch (_err) {
       return [];
     }
+  }
+
+  /** Google Drive share links need thumbnail URLs for <img> preview and display. */
+  function normalizeDriveImageUrl(url) {
+    var raw = String(url || "").replace(/&amp;/gi, "&").trim();
+    if (!raw) return "";
+    var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    var id = m1 && m1[1] ? m1[1] : "";
+    if (!id) {
+      var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      id = m2 && m2[1] ? m2[1] : "";
+    }
+    if (!id) {
+      var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+      id = m3 && m3[1] ? m3[1] : "";
+    }
+    if (id) return "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200";
+    return raw;
   }
 
   function initAboutJourneyEditor() {
@@ -571,10 +575,12 @@
       row.querySelector("[data-field='phone']").value = data.phone || "";
       row.querySelector("[data-field='image']").value = data.image || "";
       var thumb = row.querySelector("[data-thumb]");
-      if (thumb) thumb.src = data.image || "";
+      if (thumb) thumb.src = normalizeDriveImageUrl(data.image || "");
       Array.prototype.slice.call(row.querySelectorAll("input,textarea")).forEach(function (el) {
         el.addEventListener("input", function () {
-          if (el.getAttribute("data-field") === "image" && thumb) thumb.src = String(el.value || "").trim();
+          if (el.getAttribute("data-field") === "image" && thumb) {
+            thumb.src = normalizeDriveImageUrl(String(el.value || "").trim());
+          }
           syncHidden();
         });
       });
@@ -676,6 +682,17 @@
     Object.keys(schema).forEach(function (field) {
       var elId = schema[field];
       var val = data && data[field] != null ? data[field] : "";
+      if (
+        (field === "teamCards" || field === "journeyItems") &&
+        val !== "" &&
+        typeof val === "object"
+      ) {
+        try {
+          val = JSON.stringify(val);
+        } catch (_e) {
+          val = "";
+        }
+      }
       setVal(elId, val);
     });
   }

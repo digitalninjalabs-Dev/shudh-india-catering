@@ -1596,11 +1596,11 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 .home-quote-section .contact-panel {
   position: relative;
   overflow: hidden;
+  /* Image URL overridden from CMS via --home-quote-bg-img (see public-content.js). */
+  --home-quote-bg-img: url("https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80");
   background:
     linear-gradient(165deg, rgba(30, 14, 12, 0.58) 0%, rgba(30, 14, 12, 0.74) 100%),
-    url("https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80");
-  background-size: cover;
-  background-position: center;
+    var(--home-quote-bg-img) center / cover no-repeat;
 }
 
 .home-quote-section .contact-panel > * {
@@ -2632,11 +2632,15 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   box-shadow: 0 8px 18px rgba(91, 64, 61, 0.08);
   animation: pkgv2FadeUp 0.5s ease both;
   overflow: visible;
+  transform-origin: center center;
+  will-change: transform, box-shadow;
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
 }
 
 .pkgv2-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(91, 64, 61, 0.12);
+  transform: translateY(-2px) scale(1.018);
+  box-shadow: 0 14px 30px rgba(91, 64, 61, 0.16);
+  z-index: 2;
 }
 
 .pkgv2-card::before {
@@ -2688,7 +2692,7 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.08rem;
 }
 
 .pkgv2-tier__dot {
@@ -2710,16 +2714,16 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 .pkgv2-name {
   margin: 0;
   font-family: var(--font-headline);
-  font-size: 1.55rem;
+  font-size: 1.35rem;
   line-height: 1.15;
   color: var(--color-on-surface);
   font-weight: 800;
 }
 
 .pkgv2-price {
-  margin: 0.22rem 0 0;
+  margin: 0.08rem 0 0;
   font-family: var(--font-headline);
-  font-size: 2.1rem;
+  font-size: 1.86rem;
   line-height: 1.05;
   color: #1d1e17;
   font-weight: 800;
@@ -2738,71 +2742,157 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 }
 
 .pkgv2-sub {
-  margin: 0.12rem 0 0.55rem;
-  font-size: 0.75rem;
+  margin: 0.08rem 0 0.4rem;
+  font-size: 0.72rem;
   color: var(--color-on-surface-variant);
 }
 
 .pkgv2-desc {
-  margin: 0 0 0.75rem;
-  font-size: 0.8rem;
+  margin: 0 0 0.46rem;
+  font-size: 0.76rem;
   color: var(--color-on-surface-variant);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 .pkgv2-lines {
-  margin: 0 0 0.95rem;
+  margin: 0 0 0.58rem;
   display: flex;
   flex-direction: column;
-  gap: 0.18rem;
+  gap: 0.06rem;
   flex: 1;
+  padding: 0.28rem 0.26rem;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(175, 16, 26, 0.08);
 }
 
 .pkgv2-lines li {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.42rem;
+  gap: 0.48rem;
   align-items: baseline;
   color: var(--color-on-surface-variant);
-  padding: 0.07rem 0.12rem;
+  padding: 0.14rem 0.2rem;
   border-radius: 0.4rem;
-  transition: background-color 0.2s ease;
+  border-bottom: 1px dashed rgba(143, 111, 108, 0.22);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.pkgv2-lines li:last-child {
+  border-bottom: none;
+}
+
+.pkgv2-lines li.pkgv2-line--qty {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.pkgv2-lines li.pkgv2-line--plain {
+  grid-template-columns: 0.7rem minmax(0, 1fr) auto;
+  align-items: center;
+  padding-left: 0.92rem;
+}
+
+.pkgv2-lines li.pkgv2-line--plain .pkgv2-label {
+  font-weight: 500;
+  color: #655552;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+
+.pkgv2-lines li.pkgv2-line--plain::before {
+  content: "•";
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: rgba(124, 72, 69, 0.62);
+  margin-top: 0.02rem;
+}
+
+.pkgv2-item-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+  opacity: 0.54;
+  color: #7c6460;
+  justify-self: end;
+}
+
+.pkgv2-item-icon--plain {
+  font-size: 0.9rem;
+  opacity: 0.42;
 }
 
 .pkgv2-lines li:hover {
   background: rgba(228, 190, 186, 0.08);
+  transform: translateX(1px);
 }
 
 .pkgv2-qty {
-  min-width: 1.45rem;
+  min-width: 1.72rem;
+  height: 1.26rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.02rem 0.34rem;
+  border-radius: 0;
+  -webkit-clip-path: polygon(12% 0, 88% 0, 100% 32%, 100% 68%, 88% 100%, 12% 100%, 0 68%, 0 32%);
+  clip-path: polygon(12% 0, 88% 0, 100% 32%, 100% 68%, 88% 100%, 12% 100%, 0 68%, 0 32%);
+  background: linear-gradient(180deg, #f4f2ef 0%, #e4dfda 100%);
+  border: 1px solid rgba(130, 114, 109, 0.62);
   font-family: var(--font-headline);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.01em;
   font-weight: 800;
-  color: var(--color-primary);
+  color: #5f524e;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.pkgv2-card--gold .pkgv2-qty {
+  color: #fff;
+  background: linear-gradient(180deg, #bf101b 0%, #a40d16 100%);
+  border-color: rgba(114, 6, 14, 0.85);
+  text-shadow: 0 1px 0 rgba(86, 5, 10, 0.45);
 }
 
 .pkgv2-card--diamond .pkgv2-qty {
-  color: var(--color-secondary);
+  color: #fff;
+  background: linear-gradient(180deg, #2b9a45 0%, #1f7f37 100%);
+  border-color: rgba(20, 98, 44, 0.85);
+  text-shadow: 0 1px 0 rgba(18, 76, 37, 0.45);
+}
+
+.pkgv2-card--diamond .pkgv2-item-icon {
+  color: #2e7d32;
 }
 
 .pkgv2-card--platinum .pkgv2-qty {
-  color: var(--color-tertiary);
+  color: #fff;
+  background: linear-gradient(180deg, #c2a442 0%, #a98723 100%);
+  border-color: rgba(126, 98, 22, 0.86);
+  text-shadow: 0 1px 0 rgba(95, 74, 18, 0.45);
+}
+
+.pkgv2-card--platinum .pkgv2-item-icon {
+  color: #866d11;
 }
 
 .pkgv2-label {
-  font-size: 0.92rem;
-  line-height: 1.33;
-  color: #50423f;
+  font-size: 0.83rem;
+  line-height: 1.28;
+  color: #453835;
+  font-weight: 600;
   word-break: break-word;
 }
 
 .pkgv2-btn {
   width: 100%;
   border-radius: 999px;
-  padding: 0.78rem 0.95rem;
+  padding: 0.62rem 0.88rem;
   text-align: center;
   font-family: var(--font-headline);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   font-weight: 800;
   transition: all 0.2s ease;
 }
