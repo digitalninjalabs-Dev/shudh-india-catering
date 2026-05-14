@@ -5,7 +5,7 @@
   <link rel="icon" href="assets/logo/favicon.png" type="image/png" sizes="any"/>
   <link rel="apple-touch-icon" href="assets/logo/favicon.png"/>
   <title>Videos | Shudh India Catering</title>
-  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260517"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>tailwind.config={theme:{extend:{colors:{"primary":"#af101a","primary-container":"#8c0d15","on-primary":"#ffffff","secondary":"#2E7D32","tertiary":"#735c00","surface":"#FCF8F1","on-surface":"#1b1c15","on-surface-variant":"#5b403d","surface-container-low":"#FDF2EE","surface-container":"#efeee3","surface-container-high":"#F0F4ED","surface-container-lowest":"#ffffff","outline-variant":"#e4beba","background":"#FCF8F1"}}}}</script>
@@ -16,7 +16,7 @@
     .video-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:.75rem; }
     .play-btn { width:64px;height:64px;border-radius:9999px;background:var(--color-primary);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 32px rgba(175,16,26,.4);transition:transform .25s; }
     .video-card:hover .play-btn { transform:scale(1.15); }
-    .video-info { position:absolute;bottom:0;left:0;right:0;padding:1.5rem;background:linear-gradient(to top,rgba(27,28,21,.85) 0%,transparent 100%); }
+    .video-info { position:absolute;bottom:0;left:0;right:0;padding:1.5rem;background:linear-gradient(to top,rgba(27,28,21,.85) 0%,transparent 100%);pointer-events:none; }
   </style>
 </head>
 <body style="font-family:var(--font-body);background:var(--color-background);color:var(--color-on-surface)">
@@ -26,7 +26,7 @@
     <a href="index.html" class="site-logo" aria-label="Shudh India Catering Home"><img src="assets/logo/logonew.png" alt="Shudh India Catering" class="site-logo__image" /></a>
     <nav class="site-nav">
       <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
-      <a href="videos.html" class="active">Videos</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+      <a href="videos.html" class="active">Videos</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a>
     </nav>
     <a href="inquiry.html" class="site-header__cta">Get Quote <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
@@ -34,7 +34,7 @@
 </header>
 <nav class="mobile-nav" id="mobileNav">
   <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
-  <a href="videos.html" class="active">Videos</a><a href="about.html">About</a><a href="contact.html">Contact</a>
+  <a href="videos.html" class="active">Videos</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a>
   <a href="inquiry.html" class="btn btn-primary" style="margin-top:.5rem;justify-content:center">Get Quote</a>
 </nav>
 
@@ -97,9 +97,9 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/public-content.js?v=20260512e"></script>
+<script src="assets/js/public-content.js?v=20260519perf"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="assets/js/public-site.js"></script>
+<script src="assets/js/public-site.js?v=20260519perf"></script>
 <script>document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('mobileNav').classList.toggle('open'));</script>
 </body></html>

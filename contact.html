@@ -6,7 +6,7 @@
   <link rel="icon" href="assets/logo/favicon.png" type="image/png" sizes="any"/>
   <link rel="apple-touch-icon" href="assets/logo/favicon.png"/>
   <title>Contact | Shudh India Catering</title>
-  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260517"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>tailwind.config={theme:{extend:{colors:{"primary":"#af101a","primary-container":"#8c0d15","on-primary":"#ffffff","secondary":"#2E7D32","tertiary":"#735c00","surface":"#FCF8F1","on-surface":"#1b1c15","on-surface-variant":"#5b403d","surface-container-low":"#FDF2EE","surface-container":"#efeee3","surface-container-high":"#F0F4ED","surface-container-lowest":"#ffffff","outline-variant":"#e4beba","background":"#FCF8F1"}}}}</script>
@@ -18,7 +18,7 @@
     <a href="index.html" class="site-logo" aria-label="Shudh India Catering Home"><img src="assets/logo/logonew.png" alt="Shudh India Catering" class="site-logo__image" /></a>
     <nav class="site-nav">
       <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
-      <a href="videos.html">Videos</a><a href="about.html">About</a><a href="contact.html" class="active">Contact</a>
+      <a href="videos.html">Videos</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html" class="active">Contact</a>
     </nav>
     <a href="inquiry.html" class="site-header__cta">Get Quote <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
@@ -26,7 +26,7 @@
 </header>
 <nav class="mobile-nav" id="mobileNav">
   <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
-  <a href="videos.html">Videos</a><a href="about.html">About</a><a href="contact.html" class="active">Contact</a>
+  <a href="videos.html">Videos</a><a href="about.html">About</a><a href="careers.html">Careers</a><a href="contact.html" class="active">Contact</a>
   <a href="inquiry.html" class="btn btn-primary" style="margin-top:.5rem;justify-content:center">Get Quote</a>
 </nav>
 
@@ -129,11 +129,11 @@
             </div>
             <div class="contact-item" style="background:rgba(255,255,255,.07);padding:.75rem .82rem;border-radius:.72rem;border:1px solid rgba(255,255,255,.12)">
               <div class="contact-icon"><span class="material-symbols-outlined">mail</span></div>
-              <div><p>Email</p><p style="color:#fff">concierge@shudhindia.com</p></div>
+              <div><p>Email</p><a href="mailto:concierge@shudhindia.com" data-shudh-contact-email style="color:#fff;text-decoration:none;display:inline-block;margin-top:.15rem">concierge@shudhindia.com</a></div>
             </div>
             <div class="contact-item" style="background:rgba(255,255,255,.07);padding:.75rem .82rem;border-radius:.72rem;border:1px solid rgba(255,255,255,.12)">
               <div class="contact-icon"><span class="material-symbols-outlined">schedule</span></div>
-              <div><p>Hours</p><p style="color:#fff">Mon-Sun | 9:00 AM - 8:00 PM</p></div>
+              <div><p>Hours</p><p data-shudh-contact-hours style="color:#fff">Mon-Sun | 9:00 AM - 8:00 PM</p></div>
             </div>
           </div>
           <div style="display:flex;gap:.55rem;flex-wrap:wrap">
@@ -236,10 +236,10 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/public-content.js?v=20260512e"></script>
+<script src="assets/js/public-content.js?v=20260522hours"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="assets/js/public-site.js"></script>
+<script src="assets/js/public-site.js?v=20260519perf"></script>
 <script>
   document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('mobileNav').classList.toggle('open'));
 </script>

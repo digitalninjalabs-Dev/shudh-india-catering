@@ -3,10 +3,13 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://drive.google.com" crossorigin/>
+  <link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin/>
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin/>
   <link rel="icon" href="assets/logo/favicon.png" type="image/png" sizes="any"/>
   <link rel="apple-touch-icon" href="assets/logo/favicon.png"/>
   <title>About Us | Shudh India Catering</title>
-  <link rel="stylesheet" href="assets/css/styles.css"/>
+  <link rel="stylesheet" href="assets/css/styles.css?v=20260517"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>tailwind.config={theme:{extend:{colors:{"primary":"#af101a","primary-container":"#8c0d15","on-primary":"#ffffff","secondary":"#2E7D32","on-secondary":"#ffffff","secondary-container":"#e8f5e9","on-secondary-container":"#1b5e20","tertiary":"#735c00","tertiary-container":"#cca730","surface":"#FCF8F1","on-surface":"#1b1c15","surface-variant":"#e4e3d7","on-surface-variant":"#5b403d","surface-container":"#efeee3","surface-container-low":"#FDF2EE","surface-container-high":"#F0F4ED","surface-container-highest":"#e4e3d7","surface-container-lowest":"#ffffff","outline-variant":"#e4beba","outline":"#8f6f6c","background":"#FCF8F1"}}}}</script>
@@ -268,6 +271,7 @@
       <a href="gallery.html">Gallery</a>
       <a href="videos.html">Videos</a>
       <a href="about.html" class="active">About</a>
+      <a href="careers.html">Careers</a>
       <a href="contact.html">Contact</a>
     </nav>
     <a href="inquiry.html" class="site-header__cta">Get Quote <span class="material-symbols-outlined" style="font-size:1rem">arrow_forward</span></a>
@@ -276,7 +280,7 @@
 </header>
 <nav class="mobile-nav" id="mobileNav">
   <a href="index.html">Home</a><a href="packages.html">Packages</a><a href="gallery.html">Gallery</a>
-  <a href="videos.html">Videos</a><a href="about.html" class="active">About</a><a href="contact.html">Contact</a>
+  <a href="videos.html">Videos</a><a href="about.html" class="active">About</a><a href="careers.html">Careers</a><a href="contact.html">Contact</a>
   <a href="inquiry.html" class="btn btn-primary" style="margin-top:.5rem;justify-content:center">Get Quote</a>
 </nav>
 
@@ -292,8 +296,8 @@
   <div class="section-inner">
     <div class="shudh-two-col">
       <div>
-        <div style="aspect-ratio:4/5;border-radius:1rem;overflow:hidden;box-shadow:var(--shadow-elevated)">
-          <img class="about-vision-image" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcnNPxd-ADUYUtlJDqko9HqJKTpJsXpxX3xIgWDDAlNp1cmUmvMtCbBkHkT2-ENRq4Wu6eyQTm-wtAchA3fhUEYoqoAPRgWkXEpcohiMo2xoL50iDSMsAxVJCg0Lgi8TNe_-iqbONEDfWCCv_ezejdia--xxgTh0X_T75vmGin1kjzAVqAV2akwrNkQxW4RtYKLlEcubhkp6_8p5uHicaGSQy-EJfDplXsKMz8sojcL7kNkmjV8OG-Rrk7Ol-u7xguw8NKttVIoKTJ" alt="Dr. Mala kumari" style="width:100%;height:100%;object-fit:cover"/>
+        <div style="aspect-ratio:4/5;border-radius:1rem;overflow:hidden;box-shadow:var(--shadow-elevated);background:var(--color-surface-container-high)">
+          <img class="about-vision-image" alt="" width="800" height="1000" decoding="async" loading="eager" fetchpriority="high" style="width:100%;height:100%;object-fit:cover;display:block"/>
         </div>
       </div>
       <div>
@@ -469,8 +473,8 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="assets/js/firebase-config.js"></script>
-<script src="assets/js/public-content.js?v=20260512e"></script>
-<script src="assets/js/public-site.js"></script>
+<script src="assets/js/public-content.js?v=20260519perf"></script>
+<script src="assets/js/public-site.js?v=20260519perf"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script>
@@ -480,14 +484,14 @@
     gsap.utils.toArray(".journey-item").forEach(function (item, idx) {
       gsap.from(item, {
         opacity: 0,
-        y: 48,
-        duration: 0.9,
-        ease: "power3.out",
-        delay: idx * 0.03,
+        y: 28,
+        duration: 0.55,
+        ease: "power2.out",
+        delay: idx * 0.02,
         scrollTrigger: {
           trigger: item,
-          start: "top 86%",
-          toggleActions: "play none none reverse"
+          start: "top 88%",
+          once: true
         }
       });
     });
@@ -498,7 +502,7 @@
         trigger: "#journey-track",
         start: "top 78%",
         end: "bottom 28%",
-        scrub: 0.8
+        scrub: true
       }
     });
   }

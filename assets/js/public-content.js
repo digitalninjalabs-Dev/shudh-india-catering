@@ -183,6 +183,7 @@
     footerCallValue: "+91-9621051619",
     footerEmailLabel: "Email:",
     footerEmailValue: "concierge@shudhindia.com",
+    contactPageHours: "Mon-Sun | 9:00 AM - 8:00 PM",
     footerBottomText: "© 2024 Shudh India Catering | Premium Catering Experiences"
   };
 
@@ -241,10 +242,10 @@
     });
   }
 
-  function safeSetImage(selector, value) {
+  function safeSetImage(selector, value, profile) {
     if (value == null || value === "") return;
     document.querySelectorAll(selector).forEach(function (node) {
-      if (node && node.tagName === "IMG") node.src = normalizeImageUrl(value);
+      if (node && node.tagName === "IMG") applyDynamicImgToNode(node, value, profile || "card");
     });
   }
 
@@ -259,15 +260,131 @@
     return "";
   }
 
-  function normalizeImageUrl(url) {
+  function dedupeUrlListContent(list) {
+    var seen = {};
+    return (list || []).filter(function (u) {
+      var key = String(u || "").trim();
+      if (!key || seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  }
+
+  function proxyImageUrlContent(url, maxW) {
+    var val = String(url || "").trim();
+    if (!val) return "";
+    try {
+      val = encodeURI(val);
+    } catch (_) {}
+    var w = Number(maxW) || 900;
+    w = Math.min(Math.max(w, 240), 2048);
+    var bare = val.replace(/^https?:\/\//i, "");
+    return "https://images.weserv.nl/?url=" + encodeURIComponent(bare) + "&w=" + w + "&q=78&output=webp";
+  }
+
+  function unsplashResizeContent(url, width) {
+    var val = String(url || "").trim();
+    if (!val || !/images\.unsplash\.com/i.test(val)) return val;
+    if (/[?&]w=\d+/.test(val)) return val;
+    var join = val.indexOf("?") >= 0 ? "&" : "?";
+    return val + join + "w=" + String(width || 900) + "&q=78&auto=format&fit=crop";
+  }
+
+  function normalizeImageUrl(url, driveW) {
     var raw = String(url || "").trim();
     if (!raw) return "";
     var driveId = extractDriveId(raw);
     if (driveId) {
-      // Most reliable public image endpoint for Drive-hosted assets.
-      return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1600";
+      var w = driveW != null ? Number(driveW) : 960;
+      if (isNaN(w)) w = 960;
+      w = Math.min(Math.max(w, 400), 1920);
+      return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w" + String(w);
     }
+    if (/dropbox\.com/i.test(raw) && /[?&]dl=0/.test(raw)) {
+      raw = raw.replace(/[?&]dl=0/, function (m) {
+        return m.charAt(0) + "raw=1";
+      });
+    }
+    try {
+      raw = encodeURI(raw);
+    } catch (_) {}
     return raw;
+  }
+
+  function buildImgFallbackChain(rawUrl, profile) {
+    var raw = String(rawUrl || "").trim();
+    if (!raw) return [];
+    var id = extractDriveId(raw);
+    var list = [];
+    if (id) {
+      if (profile === "hero") {
+        list = [
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w1280",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w1600",
+          "https://drive.google.com/uc?export=view&id=" + id,
+          "https://drive.google.com/uc?export=download&id=" + id
+        ];
+      } else if (profile === "grid") {
+        list = [
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w400",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w640",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w960",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w1280",
+          "https://drive.google.com/uc?export=view&id=" + id
+        ];
+      } else if (profile === "about") {
+        list = [
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w720",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w960",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w1280",
+          "https://drive.google.com/uc?export=view&id=" + id
+        ];
+      } else {
+        list = [
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w640",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w960",
+          "https://drive.google.com/thumbnail?id=" + id + "&sz=w1280",
+          "https://drive.google.com/uc?export=view&id=" + id
+        ];
+      }
+    } else {
+      var main = normalizeImageUrl(raw);
+      var tw =
+        profile === "hero" ? 1400 : profile === "grid" ? 480 : profile === "about" ? 720 : 800;
+      list = [
+        unsplashResizeContent(main, tw),
+        unsplashResizeContent(main, profile === "about" ? 1000 : 900),
+        unsplashResizeContent(main, 1200),
+        main,
+        proxyImageUrlContent(main, tw)
+      ];
+    }
+    list = dedupeUrlListContent(list.filter(Boolean));
+    if (list.length) {
+      var proxyW =
+        profile === "hero" ? 1400 : profile === "grid" ? 480 : profile === "about" ? 900 : 720;
+      list.push(proxyImageUrlContent(list[0], proxyW));
+      list = dedupeUrlListContent(list);
+    }
+    return list;
+  }
+
+  function applyDynamicImgToNode(img, rawUrl, profile) {
+    if (!img || !rawUrl) return;
+    var chain = buildImgFallbackChain(String(rawUrl).trim(), profile || "card");
+    if (!chain.length) return;
+    img.src = chain[0];
+    img.setAttribute("data-fallback-srcs", chain.join("||"));
+    img.setAttribute("data-fallback-index", "0");
+    if (profile === "card" || profile === "about") img.setAttribute("data-soft-fail", "1");
+    if (profile === "about") {
+      img.setAttribute("loading", "eager");
+      img.setAttribute("fetchpriority", "high");
+      img.setAttribute("decoding", "async");
+    }
+    img.onerror = function () {
+      if (window.SHUDH_handleGalleryImageError) window.SHUDH_handleGalleryImageError(img);
+    };
   }
 
   function normalizeHeroVideoUrl(url) {
@@ -322,7 +439,7 @@
   function safeSetBackgroundImage(selector, value) {
     if (value == null || value === "") return;
     document.querySelectorAll(selector).forEach(function (node) {
-      var src = normalizeImageUrl(value);
+      var src = normalizeImageUrl(value, 1280);
       if (node && src) node.style.backgroundImage = 'url("' + String(src).replace(/"/g, "") + '")';
     });
   }
@@ -337,7 +454,10 @@
   function safeSetByAttr(attr, key, value) {
     if (value == null || value === "") return;
     document.querySelectorAll("[" + attr + '="' + key + '"]').forEach(function (node) {
-      if (attr === "data-shudh-image" && node.tagName === "IMG") node.src = value;
+      if (attr === "data-shudh-image" && node.tagName === "IMG") {
+        applyDynamicImgToNode(node, value, "card");
+        return;
+      }
       else if (attr === "data-shudh-link") {
         if (node.tagName === "A") node.href = value;
         else node.setAttribute("data-href", value);
@@ -381,25 +501,6 @@
     var root = document.querySelector(".home-gallery-grid");
     if (!root) return;
 
-    function getDriveFileId(url) {
-      var val = String(url || "")
-        .replace(/&amp;/gi, "&")
-        .trim();
-      var m1 = val.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-      if (m1 && m1[1]) return m1[1];
-      var m2 = val.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      if (m2 && m2[1]) return m2[1];
-      return "";
-    }
-
-    function optimizedGallerySrc(url) {
-      var raw = String(url || "").trim();
-      var driveId = getDriveFileId(raw);
-      // Use Drive thumbnail endpoint for faster first paint than full-res file endpoint.
-      if (driveId) return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1400";
-      return raw;
-    }
-
     var list = String(rawUrls || "")
       .split(/\r?\n/)
       .map(function (x) { return String(x || "").trim(); })
@@ -409,11 +510,25 @@
       var cls = "";
       if (idx % 5 === 0) cls = "masonry-large";
       else if (idx % 5 === 2) cls = "masonry-wide";
-      var loading = idx < 2 ? "eager" : "lazy";
-      var priority = idx === 0 ? "high" : (idx < 3 ? "auto" : "low");
+      var loading = idx === 0 ? "eager" : "lazy";
+      var fetchAttr =
+        idx === 0 ? ' fetchpriority="high"' : ' fetchpriority="low"';
+      var chain = buildImgFallbackChain(url, "grid");
+      var primary = chain.length ? chain[0] : normalizeImageUrl(url, 400);
+      var fallbacks = chain.length ? chain.join("||").replace(/"/g, "&quot;") : "";
       return (
-        '<div class="' + cls + '" style="overflow:hidden;border-radius:.75rem">' +
-        '<img src="' + optimizedGallerySrc(url).replace(/"/g, "") + '" alt="Gallery preview image" style="width:100%;height:100%;object-fit:cover" loading="' + loading + '" fetchpriority="' + priority + '" decoding="async" onerror="this.closest(\'div\').style.display=\'none\'"/>' +
+        '<div class="' + cls + '" style="overflow:hidden;border-radius:.75rem;min-height:120px;background:var(--color-surface-container)">' +
+        '<img src="' +
+        String(primary).replace(/"/g, "") +
+        '" alt="Gallery preview" sizes="(max-width:640px) 100vw, (max-width:1100px) 50vw, min(560px, 33vw)" style="width:100%;height:100%;object-fit:cover" loading="' +
+        loading +
+        '"' +
+        fetchAttr +
+        ' decoding="async"' +
+        (fallbacks
+          ? ' data-fallback-srcs="' + fallbacks + '" data-fallback-index="0"'
+          : "") +
+        ' onerror="if(window.SHUDH_handleGalleryImageError)window.SHUDH_handleGalleryImageError(this)"/>' +
         "</div>"
       );
     }).join("");
@@ -425,7 +540,7 @@
     var fallback =
       "https://images.unsplash.com/photo-1478145046317-39f10e56b5e9?auto=format&fit=crop&w=1400&q=80";
     var raw = String(imageUrl == null ? "" : imageUrl).trim();
-    var src = normalizeImageUrl(raw || fallback);
+    var src = normalizeImageUrl(raw || fallback, 1280);
     if (!src) src = fallback;
     var escaped = String(src).replace(/\\/g, "/").replace(/"/g, "%22");
     var val = 'url("' + escaped + '")';
@@ -559,6 +674,12 @@
       safeSetHtml(htmlMap[key], content[key]);
     });
     renderGalleryPreviewGrid(content.galleryPreviewImages);
+    if (typeof window.SHUDH_scheduleScrollRevealImages === "function") {
+      window.SHUDH_scheduleScrollRevealImages();
+    } else if (typeof window.SHUDH_wireScrollRevealImages === "function") {
+      window.setTimeout(window.SHUDH_wireScrollRevealImages, 0);
+      window.setTimeout(window.SHUDH_wireScrollRevealImages, 220);
+    }
     safeSetHeroVideo("assets/media/herovideo.mp4", content.heroImage);
     safeSetImage(".home-exp-card1-image", content.expCard1Image);
     safeSetImage(".home-exp-card2-image", content.expCard2Image);
@@ -583,7 +704,12 @@
     safeSetText(".about-vision-role", content.visionRole);
     safeSetText(".about-vision-quote", content.visionQuote);
     safeSetText(".about-vision-description", content.visionDescription);
-    safeSetImage(".about-vision-image", content.visionImage);
+    safeSetImage(".about-vision-image", content.visionImage, "about");
+    if (content.visionName) {
+      document.querySelectorAll(".about-vision-image").forEach(function (node) {
+        if (node && node.tagName === "IMG") node.alt = String(content.visionName);
+      });
+    }
     safeSetText(".about-journey-label", content.journeyLabel);
     safeSetText(".about-journey-title", content.journeyTitle);
     safeSetText(".about-journey-subtitle", content.journeySubtitle);
@@ -615,10 +741,18 @@
         var email = escapeHtml(item.email);
         var phone = escapeHtml(item.phone);
         var rawImg = String(item.image || item.photo || item.imageUrl || "").trim();
-        var imgSrc = rawImg ? normalizeImageUrl(rawImg) : "";
+        var chain = rawImg ? buildImgFallbackChain(rawImg, "card") : [];
+        var primary = chain.length ? chain[0] : "";
+        var fb = chain.length ? chain.join("||").replace(/"/g, "&quot;") : "";
         return (
           '<article class="card employee-card" style="padding:1.35rem">' +
-          '<div class="employee-card__image-wrap"><img src="' + escapeHtml(imgSrc) + '" alt="' + escapeHtml((item.name || "Team Member") + " photo") + '" loading="lazy" decoding="async"/></div>' +
+          '<div class="employee-card__image-wrap"><img src="' +
+          escapeHtml(primary) +
+          '" alt="' +
+          escapeHtml((item.name || "Team Member") + " photo") +
+          '" loading="lazy" decoding="async"' +
+          (fb ? ' data-fallback-srcs="' + fb + '" data-fallback-index="0" data-soft-fail="1"' : "") +
+          ' onerror="if(window.SHUDH_handleGalleryImageError)window.SHUDH_handleGalleryImageError(this)"/></div>' +
           '<p class="employee-role-badge">' + escapeHtml(item.roleBadge) + "</p>" +
           '<h3 style="margin:0 0 .2rem;font-family:var(--font-headline);font-size:1.22rem;font-weight:700">' + escapeHtml(item.name) + "</h3>" +
           '<p style="margin:0 0 .7rem;color:var(--color-on-surface-variant);font-size:.92rem">' + escapeHtml(item.title) + "</p>" +
@@ -628,6 +762,31 @@
           "</article>"
         );
       }).join("");
+    }
+  }
+
+  function applyContactPageFromIndex(mergedIndex) {
+    var email = String(
+      (mergedIndex && mergedIndex.quoteEmailValue) ||
+        (mergedIndex && mergedIndex.footerEmailValue) ||
+        ""
+    ).trim();
+    if (email) {
+      document.querySelectorAll("[data-shudh-contact-email]").forEach(function (node) {
+        if (!node) return;
+        if (node.tagName === "A") {
+          node.setAttribute("href", "mailto:" + email);
+          node.textContent = email;
+        } else {
+          node.textContent = email;
+        }
+      });
+    }
+    var hours = String((mergedIndex && mergedIndex.contactPageHours) || "").trim();
+    if (hours) {
+      document.querySelectorAll("[data-shudh-contact-hours]").forEach(function (node) {
+        if (node) node.textContent = hours;
+      });
     }
   }
 
@@ -936,6 +1095,9 @@
       if (pageDoc.exists) applyPageContent(pageName, pageDoc.data());
       var footerSource = indexDoc.exists ? mergeWithDefaults(INDEX_DEFAULTS, indexDoc.data()) : INDEX_DEFAULTS;
       applySharedFooterContent(footerSource);
+      if (pageName === "contact.html") {
+        applyContactPageFromIndex(footerSource);
+      }
       if (widgetDoc.exists) {
         applyFooterSocialLinks(widgetDoc.data() || {});
       }
