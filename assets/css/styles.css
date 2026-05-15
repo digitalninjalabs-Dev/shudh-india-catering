@@ -93,6 +93,86 @@
    fixed layers / scroll-linked JS (GSAP). In-page anchors still work; use JS if a link needs easing. */
 html { scroll-behavior: auto; }
 
+/* Phones/tablets: backdrop-filter and layered filters force extra compositing while scrolling. */
+@media (hover: none) and (pointer: coarse) {
+  html.scroll-smooth {
+    scroll-behavior: auto !important;
+  }
+
+  .site-header {
+    background: rgba(252, 248, 241, 0.97);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .mobile-nav {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .shudh-loader-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(252, 248, 241, 0.96);
+  }
+
+  .shudh-contact-dock {
+    background: rgba(255, 252, 248, 0.97);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .shudh-success-modal__backdrop {
+    background: rgba(27, 28, 21, 0.75);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .shudh-modal-shell {
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .shudh-visual-story__scrim {
+    background: rgba(27, 28, 21, 0.62);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .home-hero__pill {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .home-hero__stats {
+    background: var(--color-surface-container-lowest);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .home-signature-flow__feature-overlay {
+    background: rgba(20, 13, 12, 0.78);
+    border-color: rgba(255, 255, 255, 0.22);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .contact-panel__visual-content {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  #shudh-video-modal,
+  #shudh-gallery-photo-modal {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
 body {
   font-family: var(--font-body);
   background: var(--color-background);
@@ -1250,7 +1330,7 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   position: fixed;
   right: 1rem;
   bottom: 1rem;
-  z-index: 220;
+  z-index: 10060;
   min-width: 220px;
   max-width: 340px;
   padding: 0.75rem 1rem;
@@ -1277,6 +1357,159 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 
 .shudh-form-toast.is-error {
   background: linear-gradient(135deg, #ba1a1a, #8f1515);
+}
+
+[data-form-msg].shudh-form-feedback-success,
+.shudh-modal-form-msg.shudh-form-feedback-success {
+  color: var(--color-secondary) !important;
+}
+
+/* Success confirmation modal (quote / inquiry / careers) */
+.shudh-success-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  box-sizing: border-box;
+}
+
+.shudh-success-modal.hidden {
+  display: none;
+}
+
+.shudh-success-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(27, 28, 21, 0.56);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.shudh-success-modal__wrap {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 22rem);
+  padding-top: 2.35rem;
+}
+
+.shudh-success-modal__card {
+  position: relative;
+  background: var(--color-surface-container-lowest);
+  border-radius: 1rem;
+  border: 1px solid rgba(143, 111, 108, 0.14);
+  box-shadow:
+    0 8px 16px rgba(27, 28, 21, 0.06),
+    0 28px 52px rgba(27, 28, 21, 0.14);
+  padding: 2.5rem 1.35rem 1.35rem;
+  text-align: center;
+}
+
+.shudh-success-modal__icon-ring {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -48%);
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 50%;
+  background: linear-gradient(145deg, var(--color-secondary) 0%, #1b5e20 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 10px 22px rgba(46, 125, 50, 0.28),
+    0 2px 8px rgba(27, 28, 21, 0.08);
+}
+
+.shudh-success-modal__check {
+  display: block;
+  margin-top: 2px;
+}
+
+.shudh-success-modal__title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-headline);
+  font-size: clamp(1.35rem, 4vw, 1.55rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-on-surface);
+  letter-spacing: -0.02em;
+}
+
+.shudh-success-modal__body {
+  margin: 0 0 1.35rem;
+  font-size: 0.91rem;
+  line-height: 1.55;
+  color: var(--color-on-surface-variant);
+}
+
+.shudh-success-modal__ok {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-family: var(--font-headline);
+  padding: 0.82rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: 0.75rem;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #2E7D32 55%, #1b5e20 100%);
+  color: var(--color-on-secondary);
+  box-shadow: 0 10px 26px rgba(46, 125, 50, 0.28);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.shudh-success-modal__ok:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 30px rgba(46, 125, 50, 0.34);
+}
+
+.shudh-success-modal__ok:focus-visible {
+  outline: 2px solid var(--color-secondary);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shudh-success-modal__ok {
+    transition: none;
+  }
+  .shudh-success-modal__ok:hover {
+    transform: none;
+  }
+}
+
+.shudh-video-modal-stage {
+  max-height: 70vh;
+  min-height: 120px;
+  padding: 0;
+  background: transparent;
+}
+
+.shudh-video-modal-player {
+  position: relative;
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.shudh-video-modal-player iframe,
+.shudh-video-modal-player video {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 
 /* ---------- Breadcrumb ---------- */

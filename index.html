@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-THVNCRG2');</script>
+<!-- End Google Tag Manager -->
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="preconnect" href="https://drive.google.com" crossorigin/>
@@ -98,11 +105,33 @@
     @media (min-width: 1536px) {
       .home-hero-video { transform: scale(1.08); }
     }
+    @media (hover: none) and (pointer: coarse) {
+      .home-hero::before {
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        background: linear-gradient(
+            to right,
+            rgba(18, 12, 10, 0.52) 0%,
+            rgba(18, 12, 10, 0.32) 38%,
+            rgba(18, 12, 10, 0.18) 68%,
+            rgba(18, 12, 10, 0.06) 100%
+          ),
+          rgba(0, 0, 0, 0.22);
+      }
+      .home-hero-video {
+        filter: none;
+      }
+    }
     @keyframes bounceSlow { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
     .animate-bounce-slow { animation: bounceSlow 4s ease-in-out infinite; }
   </style>
 </head>
 <body class="bg-surface text-on-surface" style="font-family:var(--font-body)">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-THVNCRG2"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
 <script src="assets/js/shudh-first-paint.js"></script>
 <!-- ===== SHARED HEADER ===== -->
 <header class="site-header">
@@ -445,12 +474,12 @@
       </ul>
     </div>
     <div class="footer-col">
-      <h4 class="home-footer-signature-title">Our Signature</h4>
+      <h4 class="home-footer-signature-title">Our Specialties</h4>
       <div class="footer-tags">
-        <span class="footer-tag home-footer-tag1">Aromatic Spices</span>
-        <span class="footer-tag home-footer-tag2">Farm Fresh</span>
-        <span class="footer-tag home-footer-tag3">Artisanal Plating</span>
-        <span class="footer-tag home-footer-tag4">Vegan Friendly</span>
+        <span class="footer-tag home-footer-tag1">Fresh Ingredients</span>
+        <span class="footer-tag home-footer-tag2">Quality Service</span>
+        <span class="footer-tag home-footer-tag3">Elegant Presentation</span>
+        <span class="footer-tag home-footer-tag4">Hygienic Preparation</span>
       </div>
       <div style="margin-top:1.25rem;display:flex;flex-direction:column;gap:.5rem">
         <p style="font-size:.875rem;color:#71717a"><strong class="home-footer-call-label" style="color:var(--color-on-surface)">Call Us:</strong> <span class="home-footer-call-value">+91 98765 43210</span></p>

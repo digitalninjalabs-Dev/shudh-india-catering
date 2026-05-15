@@ -1211,21 +1211,45 @@
       if (a && a[1]) return a[1];
       var b = v.match(/[?&]id=([a-zA-Z0-9_-]+)/);
       if (b && b[1]) return b[1];
+      var c = v.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+      if (c && c[1]) return c[1];
       return "";
+    }
+
+    function driveThumbnailUrl(id, w) {
+      var n = Number(w) || 1000;
+      n = Math.min(Math.max(n, 200), 2000);
+      return "https://drive.google.com/thumbnail?id=" + id + "&sz=w" + String(n);
+    }
+
+    /** Turn Drive share/view links (and plain ids in query) into an <img>-loadable URL. */
+    function resolveAdminImgSrc(raw, width) {
+      var s = String(raw || "").trim();
+      if (!s) return "";
+      var id = driveFileId(s);
+      if (id) return driveThumbnailUrl(id, width);
+      return s;
     }
 
     function thumbFor(m) {
       var url = String(m.url || "");
-      var poster = String(m.posterUrl || m.thumbnail || "");
+      var poster = String(m.posterUrl || m.thumbnail || "").trim();
       var driveId = driveFileId(url);
-      if ((m.type || "photo") === "video" && poster) return poster;
-      if ((m.type || "photo") === "photo" && driveId) {
-        return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w2000";
+      var typ = m.type || "photo";
+
+      if (typ === "video") {
+        if (poster) {
+          var fromPoster = resolveAdminImgSrc(poster, 1200);
+          if (fromPoster) return fromPoster;
+        }
+        if (driveId) return driveThumbnailUrl(driveId, 1200);
+        var y = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
+        if (y && y[1]) return "https://img.youtube.com/vi/" + y[1] + "/hqdefault.jpg";
+        return "";
       }
-      if ((m.type || "photo") === "photo") return url;
-      if (driveId) return "https://drive.google.com/thumbnail?id=" + driveId + "&sz=w1000";
-      var y = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-      if (y && y[1]) return "https://img.youtube.com/vi/" + y[1] + "/hqdefault.jpg";
+
+      if (typ === "photo" && driveId) return driveThumbnailUrl(driveId, 2000);
+      if (typ === "photo") return resolveAdminImgSrc(url, 2000) || url;
       return "";
     }
 
@@ -1379,10 +1403,20 @@
           var posterUrl = String(m.posterUrl || "");
           var sortOrder = Number(m.sortOrder || 0);
           var thumb = thumbFor(m);
+          var thumbFallbackId =
+            typ === "video" ? driveFileId(posterUrl) || driveFileId(url) : driveFileId(url);
           return (
             '<div draggable="true" data-media-card="' + x.id + '" data-media-type="' + typ + '" class="bg-surface-container-high rounded-xl overflow-hidden border border-stone-800 cursor-move">' +
             (thumb
-              ? '<img src="' + String(thumb).replace(/"/g, "") + '" alt="" class="w-full h-32 object-cover"/>'
+              ? '<img src="' +
+                String(thumb).replace(/"/g, "") +
+                '" alt="" class="w-full h-32 object-cover"' +
+                (thumbFallbackId
+                  ? ' onerror="if(this.dataset.shudhFb)return;this.dataset.shudhFb=1;this.src=\'https://drive.google.com/uc?export=view&id=' +
+                    thumbFallbackId +
+                    '\'"'
+                  : "") +
+                "/>"
               : '<div class="h-32 bg-black flex items-center justify-center text-stone-500 text-xs">Preview unavailable</div>') +
             '<div class="p-3 flex justify-between items-center gap-2">' +
             '<div class="min-w-0 flex-1"><p class="text-xs font-semibold truncate">' +

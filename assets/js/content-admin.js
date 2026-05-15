@@ -277,17 +277,17 @@
       closingPoint3Description: "Elegant styling that elevates every buffet, plate, and counter.",
       footerDescription: "Pioneering the art of Indian catering for over two decades. We combine ancestral recipes with avant-garde presentation.",
       footerLinksTitle: "Quick Links",
-      footerSignatureTitle: "Our Signature",
+      footerSignatureTitle: "Our Specialties",
       footerLinkHome: "Home",
       footerLinkGallery: "Gallery",
       footerLinkPackages: "Packages",
       footerLinkVideos: "Videos",
       footerLinkAbout: "About Us",
       footerLinkCareers: "Careers",
-      footerTag1: "Aromatic Spices",
-      footerTag2: "Farm Fresh",
-      footerTag3: "Artisanal Plating",
-      footerTag4: "Vegan Friendly",
+      footerTag1: "Fresh Ingredients",
+      footerTag2: "Quality Service",
+      footerTag3: "Elegant Presentation",
+      footerTag4: "Hygienic Preparation",
       footerCallLabel: "Call Us:",
       footerCallValue: "+91-9621051619",
       footerEmailLabel: "Email:",
@@ -343,6 +343,27 @@
     if (el && value != null) el.value = value;
   }
 
+  function extractDriveFileId(url) {
+    var raw = String(url || "").replace(/&amp;/gi, "&").trim();
+    if (!raw) return "";
+    var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m1 && m1[1]) return m1[1];
+    var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (m2 && m2[1]) return m2[1];
+    var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+    if (m3 && m3[1]) return m3[1];
+    return "";
+  }
+
+  /** Google Drive share / view links need a direct thumbnail or uc URL for <img>. */
+  function normalizeDriveImageUrl(url) {
+    var raw = String(url || "").replace(/&amp;/gi, "&").trim();
+    if (!raw) return "";
+    var id = extractDriveFileId(raw);
+    if (id) return "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200";
+    return raw;
+  }
+
   function initGalleryImageEditor() {
     var hidden = getEl("homeGalleryPreviewImages");
     var rowsRoot = getEl("homeGalleryPreviewImagesRows");
@@ -368,9 +389,28 @@
       var removeBtn = row.querySelector("button");
       if (input) {
         input.value = url || "";
-        if (thumb) thumb.src = url || "";
+        function syncGalleryRowThumb() {
+          if (!thumb) return;
+          var trimmed = String(input.value || "").trim();
+          thumb.onerror = null;
+          if (!trimmed) {
+            thumb.removeAttribute("src");
+            return;
+          }
+          var id = extractDriveFileId(trimmed);
+          if (id) {
+            thumb.onerror = function () {
+              thumb.onerror = null;
+              thumb.src = "https://drive.google.com/uc?export=view&id=" + id;
+            };
+            thumb.src = "https://drive.google.com/thumbnail?id=" + id + "&sz=w400";
+            return;
+          }
+          thumb.src = trimmed;
+        }
+        syncGalleryRowThumb();
         input.addEventListener("input", function () {
-          if (thumb) thumb.src = String(input.value || "").trim();
+          syncGalleryRowThumb();
           syncHiddenFromRows();
         });
       }
@@ -438,24 +478,6 @@
     } catch (_err) {
       return [];
     }
-  }
-
-  /** Google Drive share links need thumbnail URLs for <img> preview and display. */
-  function normalizeDriveImageUrl(url) {
-    var raw = String(url || "").replace(/&amp;/gi, "&").trim();
-    if (!raw) return "";
-    var m1 = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-    var id = m1 && m1[1] ? m1[1] : "";
-    if (!id) {
-      var m2 = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-      id = m2 && m2[1] ? m2[1] : "";
-    }
-    if (!id) {
-      var m3 = raw.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
-      id = m3 && m3[1] ? m3[1] : "";
-    }
-    if (id) return "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200";
-    return raw;
   }
 
   function initAboutJourneyEditor() {

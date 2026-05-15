@@ -276,13 +276,7 @@
         ignoreMobileResize: true,
         autoRefreshEvents: "visibilitychange,DOMContentLoaded,load"
       });
-      try {
-        if (typeof window.ScrollTrigger.normalizeScroll === "function") {
-          if (window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches) {
-            window.ScrollTrigger.normalizeScroll(true);
-          }
-        }
-      } catch (_ns) {}
+      /* normalizeScroll() intercepts touch momentum on iOS/Android and often feels sluggish; keep native scrolling. */
 
       if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         window.gsap.set(targets, { clearProps: "all" });
@@ -301,32 +295,54 @@
         return true;
       }
 
-      // Sections / blocks: smooth one-shot reveal (no scrub — keeps native scroll responsive).
-      window.gsap.set(targets, {
-        opacity: 0,
-        y: 32,
-        scale: 0.992,
-        force3D: true,
-        willChange: "transform,opacity"
-      });
-      window.ScrollTrigger.batch(targets, {
-        start: "top 93%",
-        end: "bottom 6%",
-        once: true,
-        onEnter: function (batch) {
-          window.gsap.to(batch, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1.12,
-            ease: "power2.out",
-            stagger: { each: 0.09, from: "start" },
-            clearProps: "willChange"
-          });
-        }
-      });
+      var coarsePointer =
+        window.matchMedia && window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+
+      // Sections / blocks: one-shot reveal. On phones/tablets keep motion light and avoid many
+      // per-element ScrollTriggers (those refresh often and cost scroll performance).
+      if (!coarsePointer) {
+        window.gsap.set(targets, {
+          opacity: 0,
+          y: 32,
+          scale: 0.992,
+          force3D: true,
+          willChange: "transform,opacity"
+        });
+        window.ScrollTrigger.batch(targets, {
+          start: "top 93%",
+          end: "bottom 6%",
+          once: true,
+          onEnter: function (batch) {
+            window.gsap.to(batch, {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1.12,
+              ease: "power2.out",
+              stagger: { each: 0.09, from: "start" },
+              clearProps: "willChange"
+            });
+          }
+        });
+      } else {
+        window.gsap.set(targets, { opacity: 0, y: 18, scale: 1, force3D: true });
+        window.ScrollTrigger.batch(targets, {
+          start: "top 96%",
+          once: true,
+          onEnter: function (batch) {
+            window.gsap.to(batch, {
+              opacity: 1,
+              y: 0,
+              duration: 0.5,
+              ease: "power1.out",
+              stagger: { each: 0.035, from: "start" }
+            });
+          }
+        });
+      }
 
       function wireScrollRevealImages() {
+        if (coarsePointer) return;
         if (!(window.gsap && window.ScrollTrigger)) return;
         var selectors = [
           ".home-hero-image",
@@ -378,6 +394,7 @@
       }
 
       function wireScrollRevealTiles() {
+        if (coarsePointer) return;
         if (!(window.gsap && window.ScrollTrigger)) return;
         var tileSelectors = [".home-gallery-grid > div", "#shudh-gallery-live figure.shudh-masonry-item"];
         tileSelectors.forEach(function (sel) {
@@ -564,9 +581,71 @@
     root.className = "shudh-form-toast is-visible " + (kind === "error" ? "is-error" : "is-success");
     root.textContent = String(text || "");
     window.clearTimeout(root._timer);
+    var ms = kind === "error" ? 3400 : 4800;
     root._timer = window.setTimeout(function () {
       root.className = "shudh-form-toast";
-    }, 3200);
+    }, ms);
+  }
+
+  function hideSuccessModal() {
+    var root = document.getElementById("shudh-success-modal");
+    if (!root) return;
+    if (root._escHandler) {
+      document.removeEventListener("keydown", root._escHandler);
+      root._escHandler = null;
+    }
+    root.classList.add("hidden");
+    root.setAttribute("aria-hidden", "true");
+    setBodyScrollLocked(false);
+  }
+
+  function ensureSuccessModal() {
+    var root = document.getElementById("shudh-success-modal");
+    if (root) return root;
+    root = document.createElement("div");
+    root.id = "shudh-success-modal";
+    root.className = "shudh-success-modal hidden";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-labelledby", "shudh-success-modal-title");
+    root.innerHTML =
+      '<div class="shudh-success-modal__backdrop" tabindex="-1"></div>' +
+      '<div class="shudh-success-modal__wrap">' +
+      '<div class="shudh-success-modal__card">' +
+      '<div class="shudh-success-modal__icon-ring" aria-hidden="true">' +
+      '<svg class="shudh-success-modal__check" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">' +
+      '<path fill="currentColor" d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>' +
+      "</svg></div>" +
+      '<h2 id="shudh-success-modal-title" class="shudh-success-modal__title"></h2>' +
+      '<p id="shudh-success-modal-body" class="shudh-success-modal__body"></p>' +
+      '<button type="button" class="shudh-success-modal__ok"></button>' +
+      "</div></div>";
+    document.body.appendChild(root);
+    root.querySelector(".shudh-success-modal__backdrop").addEventListener("click", hideSuccessModal);
+    root.querySelector(".shudh-success-modal__ok").addEventListener("click", hideSuccessModal);
+    return root;
+  }
+
+  function showSuccessModal(opts) {
+    opts = opts || {};
+    var root = ensureSuccessModal();
+    var titleEl = root.querySelector("#shudh-success-modal-title");
+    var bodyEl = root.querySelector("#shudh-success-modal-body");
+    var okBtn = root.querySelector(".shudh-success-modal__ok");
+    if (titleEl) titleEl.textContent = opts.title || "Thank you!";
+    if (bodyEl) bodyEl.textContent = opts.body || "";
+    if (okBtn) okBtn.textContent = opts.okLabel || "OK";
+    hideSuccessModal();
+    root.classList.remove("hidden");
+    root.setAttribute("aria-hidden", "false");
+    setBodyScrollLocked(true);
+    root._escHandler = function (e) {
+      if (e.key === "Escape") hideSuccessModal();
+    };
+    document.addEventListener("keydown", root._escHandler);
+    window.setTimeout(function () {
+      if (okBtn && typeof okBtn.focus === "function") okBtn.focus();
+    }, 40);
   }
 
   function bindInquiryForms(db) {
@@ -611,7 +690,10 @@
         e.preventDefault();
         var msg = form.querySelector("[data-form-msg]");
         clearFieldStates();
-        if (msg) msg.textContent = "";
+        if (msg) {
+          msg.textContent = "";
+          msg.classList.remove("shudh-form-feedback-success");
+        }
         var get = function (sel) {
           var el = form.querySelector(sel);
           return el ? el.value.trim() : "";
@@ -661,11 +743,22 @@
           .add(payload)
           .then(function () {
             form.reset();
-            if (msg) msg.textContent = "Thank you. Our team will contact you shortly.";
-            showFormToast("success", "Inquiry submitted successfully.");
+            if (msg) {
+              msg.textContent = "";
+              msg.classList.remove("shudh-form-feedback-success");
+            }
+            showSuccessModal({
+              title: "Wonderful!",
+              body:
+                "Your inquiry was sent successfully. Our team will reach out shortly — please watch your phone or email.",
+              okLabel: "OK"
+            });
           })
           .catch(function () {
-            if (msg) msg.textContent = "Could not submit. Please try again or call us.";
+            if (msg) {
+              msg.textContent = "Could not submit. Please try again or call us.";
+              msg.classList.remove("shudh-form-feedback-success");
+            }
             showFormToast("error", "Submission failed. Please try again.");
           })
           .finally(function () {
@@ -1170,10 +1263,104 @@
     return id && id[1] ? "https://www.youtube.com/embed/" + id[1] : "";
   }
 
+  function youtubeVideoIdFromPageUrl(url) {
+    var val = String(url || "");
+    var m = val.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{6,})/);
+    return m && m[1] ? m[1] : "";
+  }
+
+  function youtubeVideoIdFromThumbSrc(src) {
+    var m = String(src || "").match(/\/vi\/([a-zA-Z0-9_-]{6,})\//);
+    return m && m[1] ? m[1] : "";
+  }
+
+  /** Loads poster JPEGs until one resolves; dimensions reflect display aspect for many uploads (esp. Shorts / vertical). */
+  function probeYoutubeThumbnailAspect(videoId, cb) {
+    if (!videoId || typeof cb !== "function") {
+      if (typeof cb === "function") cb(null);
+      return;
+    }
+    var qualities = ["maxresdefault", "sddefault", "hqdefault", "mqdefault"];
+    var idx = 0;
+    function attempt() {
+      if (idx >= qualities.length) {
+        cb(null);
+        return;
+      }
+      var q = qualities[idx++];
+      var img = new Image();
+      img.onload = function () {
+        var nw = img.naturalWidth;
+        var nh = img.naturalHeight;
+        if (nw < 120 || nh < 90 || nw > 4800 || nh > 4800) {
+          attempt();
+          return;
+        }
+        if (nw === 480 && nh === 360) {
+          attempt();
+          return;
+        }
+        cb({ w: nw, h: nh });
+      };
+      img.onerror = function () {
+        attempt();
+      };
+      img.src = "https://img.youtube.com/vi/" + videoId + "/" + q + ".jpg";
+    }
+    attempt();
+  }
+
   function vimeoEmbed(url) {
     var val = String(url || "");
     var id = val.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
     return id && id[1] ? "https://player.vimeo.com/video/" + id[1] : "";
+  }
+
+  function gcdWhole(a, b) {
+    a = Math.abs(Math.round(Number(a) || 0));
+    b = Math.abs(Math.round(Number(b) || 0));
+    if (!a || !b) return 1;
+    while (b) {
+      var t = b;
+      b = a % b;
+      a = t;
+    }
+    return a || 1;
+  }
+
+  function simplifyRatio(w, h) {
+    var wi = Math.max(1, Math.round(Number(w) || 1));
+    var hi = Math.max(1, Math.round(Number(h) || 1));
+    var g = gcdWhole(wi, hi);
+    return { w: Math.round(wi / g), h: Math.round(hi / g) };
+  }
+
+  /** Optional Firestore: aspectRatio "16:9"|"9:16", aspectW/aspectH numbers, orientation portrait|landscape|square */
+  function parseMediaAspect(raw) {
+    var item = raw || {};
+    var w = Number(item.aspectW);
+    var h = Number(item.aspectH);
+    if (w > 0 && h > 0) return simplifyRatio(w, h);
+    var str = String(item.aspectRatio || item.videoAspectRatio || "").trim();
+    if (str && str.indexOf(":") !== -1) {
+      var parts = str.split(":").map(function (x) {
+        return parseFloat(String(x).trim());
+      });
+      if (parts.length === 2 && parts[0] > 0 && parts[1] > 0) {
+        return simplifyRatio(Math.round(parts[0] * 1000), Math.round(parts[1] * 1000));
+      }
+    }
+    var o = String(item.orientation || "").toLowerCase();
+    if (o === "portrait" || o === "vertical") return { w: 9, h: 16 };
+    if (o === "square") return { w: 1, h: 1 };
+    if (o === "landscape" || o === "horizontal") return { w: 16, h: 9 };
+    return null;
+  }
+
+  function defaultAspectFromVideoUrl(url) {
+    var u = String(url || "");
+    if (/youtube\.com\/shorts\/|youtu\.be\/shorts\/|m\.youtube\.com\/shorts\//i.test(u)) return { w: 9, h: 16 };
+    return null;
   }
 
   function normalizeMediaRecord(raw) {
@@ -1188,6 +1375,7 @@
     item.sortOrder = Number(item.sortOrder || 0);
     item.createdAtTs = new Date(item.createdAt || "").getTime() || 0;
     item.driveId = getDriveFileId(item.url);
+    item.videoAspect = parseMediaAspect(item);
 
     if (item.driveId && item.type === "photo") {
       // Grid: small Drive thumbnails first (fast). Modal: larger variants + fallbacks.
@@ -1375,6 +1563,82 @@
       );
     }
     return '<div class="w-full h-full flex items-center justify-center text-center p-4 text-xs text-stone-300">Unsupported video link. <a class="text-secondary underline ml-1" href="' + safeUrl + '" target="_blank" rel="noopener">Open video</a></div>';
+  }
+
+  function applyVideoModalPlayerSizing(host, w, h) {
+    if (!host || !w || !h) return;
+    var rw = Number(w);
+    var rh = Number(h);
+    if (!(rw > 0) || !(rh > 0)) return;
+    var r = rw / rh;
+    host.style.boxSizing = "border-box";
+    host.style.overflow = "hidden";
+    host.style.marginLeft = "auto";
+    host.style.marginRight = "auto";
+    host.style.aspectRatio = rw + " / " + rh;
+    if (r >= 1) {
+      host.style.width = "100%";
+      host.style.maxWidth = "100%";
+      host.style.height = "auto";
+      host.style.maxHeight = "70vh";
+    } else {
+      host.style.width = "min(100%, calc(70vh * " + rw + " / " + rh + "))";
+      host.style.height = "auto";
+      host.style.maxHeight = "70vh";
+      host.style.maxWidth = "100%";
+    }
+  }
+
+  function isYoutubeGeneratedThumbSrc(src) {
+    return /img\.youtube\.com\/vi\//i.test(String(src || ""));
+  }
+
+  function wireVideoCardPosterAspects(root) {
+    if (!root || !root.querySelectorAll) return;
+    root.querySelectorAll(".video-card img").forEach(function (img) {
+      function pushAspectToCardButton(nw, nh) {
+        if (!nw || !nh) return;
+        var card = img.closest(".video-card");
+        var btn = card && card.querySelector("[data-video-open]");
+        if (!btn || btn.getAttribute("data-video-aspect-locked") === "1") return;
+        var s = simplifyRatio(nw, nh);
+        btn.setAttribute("data-video-aspect-w", String(s.w));
+        btn.setAttribute("data-video-aspect-h", String(s.h));
+      }
+      function sync() {
+        if (!img.naturalWidth || !img.naturalHeight) return;
+        var src = img.getAttribute("src") || "";
+        if (isYoutubeGeneratedThumbSrc(src)) {
+          var yid = youtubeVideoIdFromThumbSrc(src);
+          if (!yid) return;
+          probeYoutubeThumbnailAspect(yid, function (dim) {
+            if (!dim) return;
+            pushAspectToCardButton(dim.w, dim.h);
+          });
+          return;
+        }
+        pushAspectToCardButton(img.naturalWidth, img.naturalHeight);
+      }
+      if (img.complete) sync();
+      else img.addEventListener("load", sync, { once: true });
+    });
+  }
+
+  function resolvePlaybackAspect(launcher, url) {
+    var lw = parseInt(launcher.getAttribute("data-video-aspect-w"), 10);
+    var lh = parseInt(launcher.getAttribute("data-video-aspect-h"), 10);
+    if (lw > 0 && lh > 0) return simplifyRatio(lw, lh);
+    var card = launcher.closest(".video-card");
+    var img = card && card.querySelector("img");
+    if (img && img.naturalWidth > 0 && img.naturalHeight > 0) {
+      var src = img.getAttribute("src") || "";
+      if (!isYoutubeGeneratedThumbSrc(src)) {
+        return simplifyRatio(img.naturalWidth, img.naturalHeight);
+      }
+    }
+    var fromUrl = defaultAspectFromVideoUrl(url);
+    if (fromUrl) return fromUrl;
+    return { w: 16, h: 9 };
   }
 
   function renderVideoEmbed(m, fitMode) {
@@ -1735,11 +1999,15 @@
             '<div class="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-outline-variant/30">' +
             '<h4 class="text-sm sm:text-base font-semibold" data-video-modal-title>Video</h4>' +
             '<button type="button" data-video-modal-close class="text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined">close</span></button></div>' +
-            '<div class="bg-black w-full" style="aspect-ratio:16 / 9; max-height:70vh;" data-video-modal-player></div></div>';
+            '<div class="shudh-video-modal-stage w-full flex items-center justify-center">' +
+            '<div class="shudh-video-modal-player bg-black" data-video-modal-player></div></div></div>';
           document.body.appendChild(modal);
           function closeModal() {
             var host = modal.querySelector("[data-video-modal-player]");
-            if (host) host.innerHTML = "";
+            if (host) {
+              host.innerHTML = "";
+              host.removeAttribute("style");
+            }
             modal.classList.add("hidden");
             modal.classList.remove("flex");
           }
@@ -1758,6 +2026,20 @@
             .replace(/"/g, "&quot;")
             .replace(/</g, "&lt;");
         }
+        function videoOpenAspectAttrs(m) {
+          var asp = m.videoAspect;
+          var hint = asp || defaultAspectFromVideoUrl(m.url || "");
+          if (!hint) return "";
+          var locked = asp ? " data-video-aspect-locked=\"1\"" : "";
+          return (
+            " data-video-aspect-w=\"" +
+            encAttr(String(hint.w)) +
+            "\" data-video-aspect-h=\"" +
+            encAttr(String(hint.h)) +
+            "\"" +
+            locked
+          );
+        }
         function bindVideoLaunchers() {
           function openFromLauncher(launcher) {
             var url = launcher.getAttribute("data-video-url") || "";
@@ -1767,7 +2049,35 @@
             var titleEl = modal.querySelector("[data-video-modal-title]");
             var host = modal.querySelector("[data-video-modal-player]");
             if (titleEl) titleEl.textContent = title;
-            if (host) host.innerHTML = renderVideoPlayer(url, title, drive, "click");
+            if (host) {
+              var ar = resolvePlaybackAspect(launcher, url);
+              applyVideoModalPlayerSizing(host, ar.w, ar.h);
+              host.innerHTML = renderVideoPlayer(url, title, drive, "click");
+
+              var locked = launcher.getAttribute("data-video-aspect-locked") === "1";
+              function refineFromIntrinsicDimensions(nw, nh) {
+                if (!nw || !nh || !host.isConnected) return;
+                var s = simplifyRatio(nw, nh);
+                applyVideoModalPlayerSizing(host, s.w, s.h);
+              }
+
+              var vidEl = host.querySelector("video");
+              if (vidEl) {
+                function onVideoMeta() {
+                  refineFromIntrinsicDimensions(vidEl.videoWidth, vidEl.videoHeight);
+                }
+                if (vidEl.readyState >= 1) onVideoMeta();
+                else vidEl.addEventListener("loadedmetadata", onVideoMeta, { once: true });
+              } else if (!locked) {
+                var ytIdOpen = youtubeVideoIdFromPageUrl(url);
+                if (ytIdOpen) {
+                  probeYoutubeThumbnailAspect(ytIdOpen, function (dim) {
+                    if (!dim || !host.isConnected) return;
+                    refineFromIntrinsicDimensions(dim.w, dim.h);
+                  });
+                }
+              }
+            }
             modal.classList.remove("hidden");
             modal.classList.add("flex");
           }
@@ -1814,6 +2124,8 @@
             encAttr(m.title || "Video") +
             '" data-video-drive="' +
             encAttr(m.driveId || "") +
+            '"' +
+            videoOpenAspectAttrs(m) +
             '"><span class="material-symbols-outlined" style="font-size:1.5rem;font-variation-settings:\'FILL\' 1">play_arrow</span></button></div>' +
             '<div class="video-info"><h4 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1rem;margin-bottom:.2rem">' +
             escapeHtml(m.title || "Shudh India Catering Video") +
@@ -1834,6 +2146,8 @@
           encAttr(featured.title || "Video") +
           '" data-video-drive="' +
           encAttr(featured.driveId || "") +
+          '"' +
+          videoOpenAspectAttrs(featured) +
           '"><span class="material-symbols-outlined" style="font-size:2rem;font-variation-settings:\'FILL\' 1">play_arrow</span></button><p style="color:#fff;font-weight:600;font-size:.9375rem;text-shadow:0 2px 8px rgba(0,0,0,.6)">Watch Full Event Reel</p></div>' +
           '<div class="video-info"><h3 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1.375rem;margin-bottom:.25rem">' +
           escapeHtml(featured.title || "Featured video") +
@@ -1845,6 +2159,7 @@
             ? rest.map(renderCard).join("")
             : '<div style="grid-column:1/-1" class="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-8 text-center text-on-surface-variant">Add more videos in admin to fill this section.</div>') +
           "</div></div></section>";
+        wireVideoCardPosterAspects(el);
         bindVideoLaunchers();
         el.classList.remove("hidden");
         if (typeof window.SHUDH_scheduleScrollRevealImages === "function") {
@@ -1968,6 +2283,11 @@
       if (!modal) return;
       modal.classList.remove("hidden");
       setBodyScrollLocked(true);
+      var msgEl = document.getElementById("careers-form-msg");
+      if (msgEl) {
+        msgEl.textContent = "";
+        msgEl.classList.remove("shudh-form-feedback-success");
+      }
     }
 
     function closeModal() {
@@ -2000,6 +2320,10 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
       var msg = document.getElementById("careers-form-msg");
+      if (msg) {
+        msg.textContent = "";
+        msg.classList.remove("shudh-form-feedback-success");
+      }
       var payload = {
         fullName: (form.querySelector('[name="fullName"]') || {}).value || "",
         email: (form.querySelector('[name="email"]') || {}).value || "",
@@ -2019,10 +2343,12 @@
       payload.phone = String(payload.phone).trim();
       if (!payload.fullName || !payload.email || !payload.role) {
         if (msg) msg.textContent = "Please fill name, email and role.";
+        showFormToast("error", "Please fill in your name, email, and desired role.");
         return;
       }
       if (!payload.resumeUrl) {
         if (msg) msg.textContent = "Please paste resume link.";
+        showFormToast("error", "Please add a resume link (e.g. Google Drive).");
         return;
       }
       showLoader("Submitting application...");
@@ -2030,11 +2356,25 @@
         .add(payload)
         .then(function () {
           form.reset();
-          if (msg) msg.textContent = "Application submitted successfully.";
+          if (msg) {
+            msg.textContent = "";
+            msg.classList.remove("shudh-form-feedback-success");
+          }
           closeModal();
+          showSuccessModal({
+            title: "You're all set!",
+            body:
+              "Thank you for applying to Shudh India Catering. We've received your application and will review it soon.",
+            okLabel: "OK"
+          });
         })
         .catch(function (err) {
-          if (msg) msg.textContent = (err && err.message) || "Could not submit application. Please try again.";
+          var errLine = (err && err.message) || "Could not submit application. Please try again.";
+          if (msg) {
+            msg.textContent = errLine;
+            msg.classList.remove("shudh-form-feedback-success");
+          }
+          showFormToast("error", "Could not submit. Check your connection and try again.");
         })
         .finally(hideLoader);
     });
