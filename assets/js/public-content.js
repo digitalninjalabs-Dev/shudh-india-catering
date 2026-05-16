@@ -927,25 +927,48 @@
         '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
         '<path fill="currentColor" d="M21.6 8.2a2.9 2.9 0 0 0-2-2.05C17.8 5.7 12 5.7 12 5.7s-5.8 0-7.6.45a2.9 2.9 0 0 0-2 2.05A30 30 0 0 0 2 12a30 30 0 0 0 .4 3.8 2.9 2.9 0 0 0 2 2.05c1.8.45 7.6.45 7.6.45s5.8 0 7.6-.45a2.9 2.9 0 0 0 2-2.05A30 30 0 0 0 22 12a30 30 0 0 0-.4-3.8zM10 15.2V8.8L15.2 12 10 15.2z"></path>' +
         "</svg>";
+    } else if (kind === "pinterest") {
+      svg =
+        '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">' +
+        '<path fill="currentColor" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.403.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.245 3.772-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.397.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.123.347 2.306.535 3.55.535 6.627 0 12-5.373 12-12S18.627 0 12 0z"></path>' +
+        "</svg>";
     }
     if (svg) anchor.innerHTML = svg;
   }
 
-  function applyFooterSocialLinks(globalContent) {
+  function applySiteSocialLinks(globalContent) {
     var facebook = normalizeLink(globalContent.facebookUrl, "https://facebook.com/");
     var instagram = normalizeLink(globalContent.instagramUrl, "https://instagram.com/");
+    var pinterest = normalizeLink(
+      globalContent.pinterestUrl || globalContent.linkedinUrl,
+      "https://pinterest.com/"
+    );
     var youtube = normalizeLink(globalContent.youtubeUrl, "videos.html");
+
+    document.querySelectorAll("[data-shudh-social]").forEach(function (anchor) {
+      var kind = String(anchor.getAttribute("data-shudh-social") || "").toLowerCase();
+      if (kind === "facebook") applySocialAnchor(anchor, facebook, "Facebook");
+      else if (kind === "instagram") applySocialAnchor(anchor, instagram, "Instagram");
+      else if (kind === "pinterest") applySocialAnchor(anchor, pinterest, "Pinterest");
+      else if (kind === "youtube") applySocialAnchor(anchor, youtube, "YouTube");
+    });
 
     document.querySelectorAll(".site-footer .footer-socials").forEach(function (wrap) {
       var links = wrap.querySelectorAll("a");
       if (!links || !links.length) return;
       applySocialAnchor(links[0], facebook, "Facebook");
       applySocialAnchor(links[1], instagram, "Instagram");
-      applySocialAnchor(links[2], youtube, "YouTube");
+      applySocialAnchor(links[2], pinterest, "Pinterest");
+      if (links[3]) applySocialAnchor(links[3], youtube, "YouTube");
       setFooterSocialIcon(links[0], "facebook");
       setFooterSocialIcon(links[1], "instagram");
-      setFooterSocialIcon(links[2], "youtube");
+      setFooterSocialIcon(links[2], "pinterest");
+      if (links[3]) setFooterSocialIcon(links[3], "youtube");
     });
+  }
+
+  function applyFooterSocialLinks(globalContent) {
+    applySiteSocialLinks(globalContent || {});
   }
 
   function applySharedFooterContent(content) {

@@ -1767,6 +1767,7 @@
     var widgetWhatsapp = document.getElementById("widget-whatsapp-number");
     var widgetFacebook = document.getElementById("widget-facebook-url");
     var widgetInstagram = document.getElementById("widget-instagram-url");
+    var widgetPinterest = document.getElementById("widget-pinterest-url");
     var widgetYoutube = document.getElementById("widget-youtube-url");
     if (!form || !jobsList || !applicantsList) return;
 
@@ -1861,6 +1862,11 @@
       if (widgetWhatsapp) widgetWhatsapp.value = String(raw.whatsappNumber || "+91 98765 43210");
       if (widgetFacebook) widgetFacebook.value = String(raw.facebookUrl || "https://facebook.com/");
       if (widgetInstagram) widgetInstagram.value = String(raw.instagramUrl || "https://instagram.com/");
+      if (widgetPinterest) {
+        widgetPinterest.value = String(
+          raw.pinterestUrl || raw.linkedinUrl || "https://pinterest.com/"
+        );
+      }
       if (widgetYoutube) widgetYoutube.value = String(raw.youtubeUrl || "videos.html");
     }
 
@@ -2136,6 +2142,7 @@
           whatsappNumber: String((widgetWhatsapp && widgetWhatsapp.value) || "").trim(),
           facebookUrl: String((widgetFacebook && widgetFacebook.value) || "").trim(),
           instagramUrl: String((widgetInstagram && widgetInstagram.value) || "").trim(),
+          pinterestUrl: String((widgetPinterest && widgetPinterest.value) || "").trim(),
           youtubeUrl: String((widgetYoutube && widgetYoutube.value) || "").trim(),
           updatedAt: new Date().toISOString()
         };

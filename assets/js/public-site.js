@@ -2401,6 +2401,9 @@
       if (kind === "facebook") {
         return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8h3V4h-3c-3.31 0-6 2.69-6 6v2H5v4h3v8h4v-8h4l1-4h-5v-2c0-1.1.9-2 2-2z"/></svg>';
       }
+      if (kind === "pinterest") {
+        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.403.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.245 3.772-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.207 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.397.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.746-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146 1.123.347 2.306.535 3.55.535 6.627 0 12-5.373 12-12S18.627 0 12 0z"/></svg>';
+      }
       if (kind === "call") {
         return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6.62 10.79a15.1 15.1 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.56 0 1 .44 1 1V20c0 .56-.44 1-1 1C10.3 21 3 13.7 3 4c0-.56.44-1 1-1h3.5c.56 0 1 .44 1 1 0 1.24.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2Z"/></svg>';
       }
@@ -2423,6 +2426,7 @@
       whatsappNumber: "+91-9621051619",
       facebookUrl: "https://facebook.com/",
       instagramUrl: "https://instagram.com/",
+      pinterestUrl: "https://pinterest.com/",
       youtubeUrl: "videos.html"
     };
 
@@ -2455,6 +2459,13 @@
         label: "Instagram",
         icon: "instagram",
         cls: "shudh-contact-dock__item--instagram",
+        external: true
+      },
+      {
+        href: ensureUrl(cfg.pinterestUrl || cfg.linkedinUrl, defaults.pinterestUrl),
+        label: "Pinterest",
+        icon: "pinterest",
+        cls: "shudh-contact-dock__item--pinterest",
         external: true
       },
       {

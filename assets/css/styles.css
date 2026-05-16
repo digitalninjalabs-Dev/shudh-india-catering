@@ -1050,6 +1050,18 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   border-color: rgba(126, 25, 79, 0.26);
 }
 
+.shudh-contact-dock__item--pinterest {
+  background: rgba(230, 0, 35, 0.11);
+  color: #bd081c;
+}
+
+.shudh-contact-dock__item--pinterest:hover,
+.shudh-contact-dock__item--pinterest:focus-visible {
+  background: rgba(230, 0, 35, 0.17);
+  color: #9b0717;
+  border-color: rgba(155, 7, 23, 0.26);
+}
+
 .shudh-contact-dock__item--youtube {
   background: rgba(239, 68, 68, 0.12);
   color: #a62929;
