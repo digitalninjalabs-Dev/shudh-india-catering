@@ -1195,7 +1195,6 @@
     var videoListEl = document.getElementById("media-admin-video-list");
     var typeEl = document.getElementById("media-type");
     var categoryEl = document.getElementById("media-category");
-    var posterEl = document.getElementById("media-poster-url");
     var layoutEl = document.getElementById("media-layout");
     var orderEl = document.getElementById("media-order");
     if (!form || !photoListEl || !videoListEl) return;
@@ -1231,20 +1230,56 @@
       return s;
     }
 
+    function youtubeId(url) {
+      var m = String(url || "").match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{6,})/);
+      return m && m[1] ? m[1] : "";
+    }
+
+    function adminVideoPreview(m) {
+      var url = String(m.url || "");
+      var ytId = youtubeId(url);
+      if (ytId) {
+        var origin = "";
+        try {
+          if (window.location && window.location.origin && window.location.protocol !== "file:") {
+            origin = "&origin=" + encodeURIComponent(window.location.origin);
+          }
+        } catch (e) {}
+        return (
+          '<div class="relative w-full bg-black" style="aspect-ratio:16/9">' +
+          '<iframe class="absolute inset-0 w-full h-full" src="https://www.youtube-nocookie.com/embed/' +
+          ytId +
+          "?rel=0&playsinline=1" +
+          origin +
+          '" title="YouTube preview" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
+        );
+      }
+      var thumb = thumbFor(m);
+      if (!thumb) {
+        return '<div class="h-32 bg-black flex items-center justify-center text-stone-500 text-xs">Preview unavailable</div>';
+      }
+      var thumbFallbackId = driveFileId(url);
+      return (
+        '<img src="' +
+        String(thumb).replace(/"/g, "") +
+        '" alt="" class="w-full h-32 object-cover"' +
+        (thumbFallbackId
+          ? ' onerror="if(this.dataset.shudhFb)return;this.dataset.shudhFb=1;this.src=\'https://drive.google.com/uc?export=view&id=' +
+            thumbFallbackId +
+            '\'"'
+          : "") +
+        "/>"
+      );
+    }
+
     function thumbFor(m) {
       var url = String(m.url || "");
-      var poster = String(m.posterUrl || m.thumbnail || "").trim();
       var driveId = driveFileId(url);
       var typ = m.type || "photo";
 
       if (typ === "video") {
-        if (poster) {
-          var fromPoster = resolveAdminImgSrc(poster, 1200);
-          if (fromPoster) return fromPoster;
-        }
+        if (youtubeId(url)) return "";
         if (driveId) return driveThumbnailUrl(driveId, 1200);
-        var y = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/);
-        if (y && y[1]) return "https://img.youtube.com/vi/" + y[1] + "/hqdefault.jpg";
         return "";
       }
 
@@ -1400,24 +1435,31 @@
           var typ = m.type || "photo";
           var category = normalizeCategory(m.category, typ);
           var layout = String(m.layout || (typ === "video" ? "feature" : "standard"));
-          var posterUrl = String(m.posterUrl || "");
           var sortOrder = Number(m.sortOrder || 0);
-          var thumb = thumbFor(m);
-          var thumbFallbackId =
-            typ === "video" ? driveFileId(posterUrl) || driveFileId(url) : driveFileId(url);
+          var previewHtml =
+            typ === "video"
+              ? adminVideoPreview(m)
+              : (function () {
+                  var thumb = thumbFor(m);
+                  var thumbFallbackId = driveFileId(url);
+                  if (!thumb) {
+                    return '<div class="h-32 bg-black flex items-center justify-center text-stone-500 text-xs">Preview unavailable</div>';
+                  }
+                  return (
+                    '<img src="' +
+                    String(thumb).replace(/"/g, "") +
+                    '" alt="" class="w-full h-32 object-cover"' +
+                    (thumbFallbackId
+                      ? ' onerror="if(this.dataset.shudhFb)return;this.dataset.shudhFb=1;this.src=\'https://drive.google.com/uc?export=view&id=' +
+                        thumbFallbackId +
+                        '\'"'
+                      : "") +
+                    "/>"
+                  );
+                })();
           return (
             '<div draggable="true" data-media-card="' + x.id + '" data-media-type="' + typ + '" class="bg-surface-container-high rounded-xl overflow-hidden border border-stone-800 cursor-move">' +
-            (thumb
-              ? '<img src="' +
-                String(thumb).replace(/"/g, "") +
-                '" alt="" class="w-full h-32 object-cover"' +
-                (thumbFallbackId
-                  ? ' onerror="if(this.dataset.shudhFb)return;this.dataset.shudhFb=1;this.src=\'https://drive.google.com/uc?export=view&id=' +
-                    thumbFallbackId +
-                    '\'"'
-                  : "") +
-                "/>"
-              : '<div class="h-32 bg-black flex items-center justify-center text-stone-500 text-xs">Preview unavailable</div>') +
+            previewHtml +
             '<div class="p-3 flex justify-between items-center gap-2">' +
             '<div class="min-w-0 flex-1"><p class="text-xs font-semibold truncate">' +
             title +
@@ -1433,8 +1475,6 @@
             '</select><select data-media-id="' + x.id + '" data-edit-field="layout" class="bg-stone-900 border-none rounded-lg px-2 py-1.5 text-[10px]">' +
             layoutOptions(layout, typ) +
             '</select><input data-media-id="' + x.id + '" data-edit-field="sortOrder" type="number" min="0" step="1" value="' + (sortOrder || 0) + '" class="col-span-2 bg-stone-900 border-none rounded-lg px-2 py-1.5 text-[10px]" placeholder="Order"/>' +
-            (typ === "video"
-              ? '<input data-media-id="' + x.id + '" data-edit-field="posterUrl" type="url" value="' + safe(posterUrl).replace(/"/g, "&quot;") + '" class="col-span-2 bg-stone-900 border-none rounded-lg px-2 py-1.5 text-[10px]" placeholder="Preview/Cover URL"/>' : "") +
             "</div></div>" +
             '<button type="button" data-del-media="' +
             x.id +
@@ -1480,7 +1520,6 @@
             if (field === "category") payload.category = value;
             if (field === "layout") payload.layout = value;
             if (field === "sortOrder") payload.sortOrder = value > 0 ? value : 0;
-            if (field === "posterUrl") payload.posterUrl = String(value || "").trim() || null;
             withLoader(
               db.collection("media")
                 .doc(id)
@@ -1550,7 +1589,6 @@
       var url = document.getElementById("media-url").value.trim();
       var type = document.getElementById("media-type").value;
       var title = document.getElementById("media-title").value.trim();
-      var posterUrl = posterEl ? posterEl.value.trim() : "";
       var category = normalizeCategory(categoryEl ? categoryEl.value : "", type);
       var layout = layoutEl ? layoutEl.value : "standard";
       var sortOrder = orderEl ? Number(orderEl.value || 0) : 0;
@@ -1565,7 +1603,7 @@
             url: url,
             type: type,
             title: title || null,
-            posterUrl: type === "video" ? (posterUrl || null) : null,
+            posterUrl: null,
             category: category,
             layout: layout || "standard",
             sortOrder: sortOrder > 0 ? sortOrder : mediaCache.length + 1,

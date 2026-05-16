@@ -1257,10 +1257,25 @@
     return /\.(mp4|webm|ogg)(\?|$)/i.test(String(url || ""));
   }
 
-  function youtubeEmbed(url) {
-    var val = String(url || "");
-    var id = val.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]+)/);
-    return id && id[1] ? "https://www.youtube.com/embed/" + id[1] : "";
+  function youtubeEmbed(url, extraParams) {
+    var val = String(url || "").trim();
+    var m = val.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([a-zA-Z0-9_-]{6,})/);
+    if (!m || !m[1]) return "";
+    var params = ["rel=0", "playsinline=1", "modestbranding=1"];
+    try {
+      if (window.location && window.location.origin && window.location.protocol !== "file:") {
+        params.push("origin=" + encodeURIComponent(window.location.origin));
+        params.push("widget_referrer=" + encodeURIComponent(window.location.href));
+      }
+    } catch (e) {}
+    if (extraParams && typeof extraParams === "object") {
+      Object.keys(extraParams).forEach(function (key) {
+        if (extraParams[key] !== undefined && extraParams[key] !== null) {
+          params.push(key + "=" + String(extraParams[key]));
+        }
+      });
+    }
+    return "https://www.youtube-nocookie.com/embed/" + m[1] + "?" + params.join("&");
   }
 
   function youtubeVideoIdFromPageUrl(url) {
@@ -1521,20 +1536,19 @@
   function renderVideoPlayer(url, title, driveId, mode) {
     var safeTitle = escapeHtml(title || "Video");
     var safeUrl = String(url || "").replace(/"/g, "");
-    var yt = youtubeEmbed(url);
     var vm = vimeoEmbed(url);
     var autoplay = mode === "hover" || mode === "click";
-    if (yt) {
+    var ytSrc = youtubeEmbed(url, {
+      autoplay: autoplay ? "1" : "0",
+      mute: autoplay ? "1" : "0"
+    });
+    if (ytSrc) {
       return (
-        '<iframe class="w-full h-full" loading="lazy" src="' +
-        yt +
-        (yt.indexOf("?") >= 0 ? "&" : "?") +
-        "autoplay=" +
-        (autoplay ? "1" : "0") +
-        "&mute=1&rel=0&playsinline=1" +
+        '<iframe class="w-full h-full" src="' +
+        ytSrc +
         '" title="' +
         safeTitle +
-        '" allow="autoplay; fullscreen" allowfullscreen></iframe>'
+        '" referrerpolicy="strict-origin-when-cross-origin" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
       );
     }
     if (vm) {
@@ -1558,7 +1572,11 @@
         '<video class="w-full h-full object-contain bg-black" src="' +
         safeUrl +
         '" ' +
-        (mode === "hover" ? "autoplay muted loop playsinline preload=\"metadata\"" : "controls autoplay playsinline preload=\"metadata\"") +
+        (mode === "hover"
+          ? "autoplay muted loop playsinline preload=\"metadata\""
+          : mode === "click"
+            ? "controls autoplay playsinline preload=\"metadata\""
+            : "controls playsinline preload=\"metadata\"") +
         "></video>"
       );
     }
@@ -2091,64 +2109,38 @@
             openFromLauncher(launcher);
           });
         }
-        function thumb(m) {
-          return String(m.posterUrl || m.displayUrl || "").trim();
-        }
-        function thumbImgHtml(url, alt) {
-          var u = String(url || "").trim();
-          if (!u) return "";
-          var pack = buildCoverImageCandidates(u, "card");
-          if (!pack.primary) return "";
+        function inlineVideoHtml(m) {
           return (
-            '<img src="' +
-            pack.primary.replace(/"/g, "&quot;") +
-            '" alt="' +
-            alt +
-            '" loading="lazy" decoding="async" data-fallback-srcs="' +
-            pack.attr +
-            '" data-fallback-index="0" data-soft-fail="1" data-min-h="120px" onerror="window.SHUDH_handleGalleryImageError(this)"/>'
+            '<div class="video-card__player">' +
+            renderVideoPlayer(m.url, m.title, m.driveId, "inline") +
+            "</div>"
           );
+        }
+        function videoCardStyle(m) {
+          var hint = m.videoAspect || defaultAspectFromVideoUrl(m.url || "") || { w: 16, h: 9 };
+          return "aspect-ratio:" + hint.w + "/" + hint.h + ";";
         }
         var featured = vids[0];
         var rest = vids.slice(1);
         function renderCard(m) {
-          var t = thumb(m);
           return (
-            '<div class="video-card">' +
-            (t
-              ? thumbImgHtml(t, escapeHtml(m.title || "Video thumbnail"))
-              : '<div style="width:100%;height:100%;background:#1b1c15"></div>') +
-            '<div class="video-overlay"><button type="button" class="play-btn" style="width:52px;height:52px" data-video-open data-video-url="' +
-            encAttr(m.url || "") +
-            '" data-video-title="' +
-            encAttr(m.title || "Video") +
-            '" data-video-drive="' +
-            encAttr(m.driveId || "") +
-            '"' +
-            videoOpenAspectAttrs(m) +
-            '"><span class="material-symbols-outlined" style="font-size:1.5rem;font-variation-settings:\'FILL\' 1">play_arrow</span></button></div>' +
+            '<div class="video-card" style="' +
+            videoCardStyle(m) +
+            '">' +
+            inlineVideoHtml(m) +
             '<div class="video-info"><h4 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1rem;margin-bottom:.2rem">' +
             escapeHtml(m.title || "Shudh India Catering Video") +
             '</h4><p style="color:rgba(255,255,255,.7);font-size:.8125rem">' +
-            escapeHtml(m.duration || "Watch now") +
+            escapeHtml(m.duration || "") +
             "</p></div></div>"
           );
         }
         el.innerHTML =
           '<section class="section"><div class="section-inner"><div style="margin-bottom:1.5rem"><div class="section-eyebrow">Featured</div><h2 class="section-title">The <span class="accent">Grand</span> Experience</h2></div>' +
-          '<div class="video-card" style="aspect-ratio:16/7;border-radius:1.25rem">' +
-          (thumb(featured)
-            ? thumbImgHtml(thumb(featured), escapeHtml(featured.title || "Featured video"))
-            : '<div style="width:100%;height:100%;background:#1b1c15"></div>') +
-          '<div class="video-overlay"><button type="button" class="play-btn" data-video-open data-video-url="' +
-          encAttr(featured.url || "") +
-          '" data-video-title="' +
-          encAttr(featured.title || "Video") +
-          '" data-video-drive="' +
-          encAttr(featured.driveId || "") +
-          '"' +
-          videoOpenAspectAttrs(featured) +
-          '"><span class="material-symbols-outlined" style="font-size:2rem;font-variation-settings:\'FILL\' 1">play_arrow</span></button><p style="color:#fff;font-weight:600;font-size:.9375rem;text-shadow:0 2px 8px rgba(0,0,0,.6)">Watch Full Event Reel</p></div>' +
+          '<div class="video-card video-card--featured" style="' +
+          videoCardStyle(featured) +
+          'border-radius:1.25rem">' +
+          inlineVideoHtml(featured) +
           '<div class="video-info"><h3 style="font-family:var(--font-headline);font-weight:700;color:#fff;font-size:1.375rem;margin-bottom:.25rem">' +
           escapeHtml(featured.title || "Featured video") +
           '</h3><p style="color:rgba(255,255,255,.7);font-size:.875rem">' +
@@ -2159,8 +2151,6 @@
             ? rest.map(renderCard).join("")
             : '<div style="grid-column:1/-1" class="rounded-xl border border-outline-variant/20 bg-surface-container-lowest p-8 text-center text-on-surface-variant">Add more videos in admin to fill this section.</div>') +
           "</div></div></section>";
-        wireVideoCardPosterAspects(el);
-        bindVideoLaunchers();
         el.classList.remove("hidden");
         if (typeof window.SHUDH_scheduleScrollRevealImages === "function") {
           window.SHUDH_scheduleScrollRevealImages();
