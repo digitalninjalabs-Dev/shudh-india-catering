@@ -59,9 +59,13 @@
     }
   }
 
+  function sidebarRoleLabel(user) {
+    if (isLeadsOnlyUser(user)) return "Leads";
+    return "Admin";
+  }
+
   function userRoleLabel(user) {
-    if (isLeadsOnlyUser(user)) return "Leads access";
-    return "Full admin";
+    return sidebarRoleLabel(user);
   }
 
   function pageName() {
@@ -217,7 +221,9 @@
     aside.className =
       "bg-surface-container-low font-body tracking-tight h-screen w-[min(18rem,88vw)] max-w-[288px] md:w-64 md:max-w-none shrink-0 fixed left-0 top-0 flex flex-col py-4 md:py-5 pl-3 pr-4 md:pl-4 md:pr-4 z-[55] border-r border-stone-800/70 -translate-x-full md:translate-x-0 transition-transform duration-200 ease-out shadow-2xl md:shadow-none overflow-y-hidden";
     aside.innerHTML =
-      '<div class="mb-5 md:mb-6 px-2 md:px-4"><h1 class="text-base md:text-lg font-bold tracking-tight text-primary leading-snug">Shudh India Catering</h1><p class="text-[10px] text-stone-500 mt-1 uppercase tracking-[0.2em]">Admin</p></div>' +
+      '<div class="mb-5 md:mb-6 px-2 md:px-4"><h1 class="text-base md:text-lg font-bold tracking-tight text-primary leading-snug">Shudh India Catering</h1><p class="text-[10px] text-stone-500 mt-1 uppercase tracking-[0.2em]" data-admin-sidebar-role>' +
+      sidebarRoleLabel(_currentUser) +
+      "</p></div>" +
       '<nav class="flex-1 space-y-0.5">' +
       items
         .map(function (x) {
@@ -413,10 +419,7 @@
       var nameEl = document.getElementById("admin-profile-name");
       var msgEl = document.getElementById("admin-profile-msg");
       if (emailEl) emailEl.value = _currentUser && _currentUser.email ? _currentUser.email : "";
-      if (nameEl && isLeadsOnlyUser(_currentUser)) {
-        nameEl.readOnly = true;
-        nameEl.classList.add("opacity-70");
-      } else if (nameEl) {
+      if (nameEl) {
         nameEl.readOnly = false;
         nameEl.classList.remove("opacity-70");
       }
@@ -527,6 +530,9 @@
       el.textContent = mail;
     });
     document.querySelectorAll("[data-admin-user-role]").forEach(function (el) {
+      el.textContent = role;
+    });
+    document.querySelectorAll("[data-admin-sidebar-role]").forEach(function (el) {
       el.textContent = role;
     });
     document.querySelectorAll("[data-admin-user-avatar], [data-admin-user-avatar-small]").forEach(function (el) {
