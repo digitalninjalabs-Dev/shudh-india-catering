@@ -45,6 +45,13 @@ Deployment checklist and hosting notes: **`DEPLOY.md`**.
 - `careersJobs`: job cards on `careers.html` (admin creates)
 - `careersApplications`: applications from the careers modal form
 - `blogs`: dynamic blog posts (list + detail pages)
+- `pageSeo`: per-page Google title & description (SEO Manager)
+
+## Google SEO (admin)
+
+- **Admin → Google Search:** edit title and description per page.
+- **Automatic (free):** saved text appears on the live site via Firebase (no Cloud Functions or paid plan).
+- **Static files:** `robots.txt` and `sitemap.xml` in the repo root (standard pages listed).
 
 ## Security rules (starter)
 Use strict rules and relax only what is needed:
@@ -84,6 +91,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if request.auth != null;
     }
+    match /pageSeo/{doc} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
   }
 }
 ```
+
+If SEO Manager shows **Missing or insufficient permissions**, your live Firebase project is missing the `pageSeo` block above. Copy the full rules from `firestore.rules` in this repo, or add only the `pageSeo` block, then **Publish** in [Firebase Console → Firestore → Rules](https://console.firebase.google.com/).

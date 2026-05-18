@@ -18,6 +18,7 @@
       "gallery.html": "Gallery",
       "blog.html": "Blog Manager",
       "content.html": "Content Manager",
+      "seo.html": "SEO Manager",
       "settings.html": "Settings"
     };
     return map[page] || "Admin";
@@ -31,6 +32,7 @@
       "gallery.html": "photo_library",
       "blog.html": "article",
       "content.html": "edit_document",
+      "seo.html": "travel_explore",
       "settings.html": "settings"
     };
     return map[page] || "space_dashboard";
@@ -143,6 +145,7 @@
       { href: "gallery.html", icon: "photo_library", label: "Gallery" },
       { href: "blog.html", icon: "article", label: "Blog" },
       { href: "content.html", icon: "edit_document", label: "Content Manager" },
+      { href: "seo.html", icon: "travel_explore", label: "SEO Manager" },
       { href: "settings.html", icon: "settings", label: "Settings" }
     ];
 

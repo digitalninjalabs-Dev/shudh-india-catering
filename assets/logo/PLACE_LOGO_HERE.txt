@@ -1,2 +1,0 @@
-Add your logo file as: logonew.png
-Used by: public pages (root HTML), admin, and loaders (see assets/js for /assets/logo/logonew.png).
