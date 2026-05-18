@@ -32,6 +32,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           "tertiary-container": "#cca730",
           "on-tertiary": "#ffffff",
           "on-tertiary-container": "#4f3e00",
+          "gold": "#c9a227",
+          "gold-dark": "#9a7b0a",
+          "gold-light": "#f7efd6",
+          "diamond": "#f48eb1",
+          "diamond-dark": "#e91e63",
+          "diamond-light": "#fff5f8",
+          "platinum": "#9a9590",
+          "platinum-dark": "#3d4249",
+          "platinum-light": "#f5f3f0",
           "surface": "#fbfaee",
           "surface-dim": "#dbdbcf",
           "surface-bright": "#fbfaee",
@@ -79,12 +88,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
   /* Card hover lift */
   .package-card {
-    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1),
-                box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    cursor: pointer;
+    transition:
+      transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.42s ease,
+      border-color 0.35s ease;
   }
   .package-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 30px 60px rgba(0,0,0,0.10);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 24px 48px rgba(91, 64, 61, 0.16);
+    z-index: 2;
   }
 
   /* Subtle gold shimmer on the badge */
@@ -93,14 +106,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     100% { background-position: 200% center; }
   }
   .badge-gold {
-    background: linear-gradient(90deg, #af101a 0%, #e8553b 40%, #af101a 60%, #af101a 100%);
+    background: linear-gradient(90deg, #9a7b0a 0%, #e9c349 40%, #9a7b0a 60%, #9a7b0a 100%);
     background-size: 200% auto;
     animation: shimmer 3s linear infinite;
   }
-  .badge-green {
-    background: linear-gradient(90deg, #106d20 0%, #23a035 40%, #106d20 60%, #106d20 100%);
-    background-size: 200% auto;
-    animation: shimmer 3s linear infinite;
+  .badge-diamond {
+    background: #f48eb1;
+    color: #e91e63;
+  }
+  .badge-platinum {
+    background: linear-gradient(135deg, #6e6a66, #3d4249);
   }
 
   /* Stagger fade-in on load */
@@ -215,15 +230,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
 
     <!-- ── Gold (Most Popular) ── -->
-    <div class="package-card fade-up delay-2 bg-surface-container-lowest rounded-2xl p-8 border-2 border-primary/25 shadow-[0_20px_50px_rgba(175,16,26,0.10)] flex flex-col h-full relative lg:scale-105 bg-gradient-to-b from-white to-[#fff8f8]">
+    <div class="package-card fade-up delay-2 bg-surface-container-lowest rounded-2xl p-8 border-2 border-gold/30 shadow-[0_20px_50px_rgba(201,162,39,0.14)] flex flex-col h-full relative lg:scale-105 bg-gradient-to-b from-white to-gold-light">
 
       <div class="absolute -top-4 left-1/2 -translate-x-1/2 badge-gold text-white text-[10px] font-bold tracking-widest uppercase px-5 py-1.5 rounded-full shadow-lg font-headline whitespace-nowrap">
         Most Popular
       </div>
 
       <div class="flex items-center gap-2 mb-1 mt-2">
-        <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
-        <span class="text-primary text-xs font-semibold tracking-widest uppercase font-headline">Gold</span>
+        <span class="w-2 h-2 rounded-full bg-gold inline-block"></span>
+        <span class="text-gold-dark text-xs font-semibold tracking-widest uppercase font-headline">Gold</span>
       </div>
 
       <h3 class="font-headline font-extrabold text-3xl text-on-surface mb-1">₹1,250</h3>
@@ -237,23 +252,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <span class="font-headline font-bold text-xs tracking-wide uppercase text-secondary">Starters &amp; Soup</span>
           </div>
           <ul class="space-y-1.5 text-sm text-on-surface-variant">
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Watermelon Mojito</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Cream of Tomato</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Corn Cheese Balls</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Malai Paneer</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Watermelon Mojito</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Cream of Tomato</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Corn Cheese Balls</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Malai Paneer</li>
           </ul>
         </div>
 
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-[18px] text-primary">room_service</span>
-            <span class="font-headline font-bold text-xs tracking-wide uppercase text-primary">Signature Mains</span>
+            <span class="material-symbols-outlined text-[18px] text-gold-dark">room_service</span>
+            <span class="font-headline font-bold text-xs tracking-wide uppercase text-gold-dark">Signature Mains</span>
           </div>
           <ul class="space-y-1.5 text-sm text-on-surface-variant">
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Shahi Paneer</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Methi Malai Matar</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Dal Makhani</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-primary/30 inline-block"></span>Veg Dum Biryani</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Shahi Paneer</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Methi Malai Matar</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Dal Makhani</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-gold/30 inline-block"></span>Veg Dum Biryani</li>
           </ul>
         </div>
 
@@ -271,22 +286,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       </div>
 
-      <button class="w-full py-3.5 rounded-full bg-primary text-white font-bold text-sm hover:bg-primary-container transition-all shadow-md hover:shadow-lg active:scale-95 font-headline tracking-wide">
+      <button class="w-full py-3.5 rounded-full bg-gold text-white font-bold text-sm hover:bg-gold-dark transition-all shadow-md hover:shadow-lg active:scale-95 font-headline tracking-wide">
         Get Quote
       </button>
     </div>
 
 
     <!-- ── Diamond (Premium) ── -->
-    <div class="package-card fade-up delay-3 bg-surface-container-lowest rounded-2xl p-8 border-2 border-secondary/20 shadow-[0_20px_50px_rgba(16,109,32,0.08)] flex flex-col h-full relative lg:scale-105 bg-gradient-to-b from-white to-[#f8fff9]">
+    <div class="package-card fade-up delay-3 bg-surface-container-lowest rounded-2xl p-8 border-2 border-diamond/35 shadow-[0_10px_24px_rgba(244,142,177,0.12)] flex flex-col h-full relative lg:scale-105 bg-gradient-to-b from-white to-diamond-light">
 
-      <div class="absolute -top-4 left-1/2 -translate-x-1/2 badge-green text-white text-[10px] font-bold tracking-widest uppercase px-5 py-1.5 rounded-full shadow-lg font-headline whitespace-nowrap">
+      <div class="absolute -top-4 left-1/2 -translate-x-1/2 badge-diamond text-[10px] font-bold tracking-widest uppercase px-5 py-1.5 rounded-full shadow-lg font-headline whitespace-nowrap">
         Premium Choice
       </div>
 
       <div class="flex items-center gap-2 mb-1 mt-2">
-        <span class="w-2 h-2 rounded-full bg-secondary inline-block"></span>
-        <span class="text-secondary text-xs font-semibold tracking-widest uppercase font-headline">Diamond</span>
+        <span class="w-2 h-2 rounded-full bg-diamond inline-block"></span>
+        <span class="text-diamond-dark text-xs font-semibold tracking-widest uppercase font-headline">Diamond</span>
       </div>
 
       <h3 class="font-headline font-extrabold text-3xl text-on-surface mb-1">₹1,650</h3>
@@ -296,14 +311,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-[18px] text-secondary">local_cafe</span>
-            <span class="font-headline font-bold text-xs tracking-wide uppercase text-secondary">Appetizers &amp; Salad</span>
+            <span class="material-symbols-outlined text-[18px] text-diamond-dark">local_cafe</span>
+            <span class="font-headline font-bold text-xs tracking-wide uppercase text-diamond-dark">Appetizers &amp; Salad</span>
           </div>
           <ul class="space-y-1.5 text-sm text-on-surface-variant">
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-secondary/30 inline-block"></span>Stuffed Mushroom</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-secondary/30 inline-block"></span>Dahi Ke Sholay</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-secondary/30 inline-block"></span>Greek Salad Bar</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-secondary/30 inline-block"></span>3 Live Starters</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-diamond/30 inline-block"></span>Stuffed Mushroom</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-diamond/30 inline-block"></span>Dahi Ke Sholay</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-diamond/30 inline-block"></span>Greek Salad Bar</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-diamond/30 inline-block"></span>3 Live Starters</li>
           </ul>
         </div>
 
@@ -334,18 +349,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
       </div>
 
-      <button class="w-full py-3.5 rounded-full bg-secondary text-white font-bold text-sm hover:bg-on-secondary-container transition-all shadow-md hover:shadow-lg active:scale-95 font-headline tracking-wide">
+      <button class="w-full py-3.5 rounded-full bg-diamond text-white font-bold text-sm hover:bg-diamond-dark transition-all shadow-md hover:shadow-lg active:scale-95 font-headline tracking-wide">
         Get Quote
       </button>
     </div>
 
 
     <!-- ── Platinum ── -->
-    <div class="package-card fade-up delay-4 bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/30 shadow-sm flex flex-col h-full">
+    <div class="package-card fade-up delay-4 bg-surface-container-lowest rounded-2xl p-8 border-2 border-platinum/30 shadow-sm flex flex-col h-full bg-gradient-to-b from-white to-platinum-light">
 
       <div class="flex items-center gap-2 mb-1">
-        <span class="w-2 h-2 rounded-full bg-tertiary inline-block"></span>
-        <span class="text-tertiary text-xs font-semibold tracking-widest uppercase font-headline">Platinum</span>
+        <span class="w-2 h-2 rounded-full bg-platinum inline-block"></span>
+        <span class="text-platinum-dark text-xs font-semibold tracking-widest uppercase font-headline">Platinum</span>
       </div>
 
       <h3 class="font-headline font-extrabold text-3xl text-on-surface mb-1">₹2,200</h3>
@@ -380,19 +395,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         <div>
           <div class="flex items-center gap-2 mb-3">
-            <span class="material-symbols-outlined text-[18px] text-tertiary">icecream</span>
-            <span class="font-headline font-bold text-xs tracking-wide uppercase text-tertiary">Sweet Symphony</span>
+            <span class="material-symbols-outlined text-[18px] text-platinum-dark">icecream</span>
+            <span class="font-headline font-bold text-xs tracking-wide uppercase text-platinum-dark">Sweet Symphony</span>
           </div>
           <ul class="space-y-1.5 text-sm text-on-surface-variant">
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-tertiary/30 inline-block"></span>Baklava Selection</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-tertiary/30 inline-block"></span>Jalebi with Rabri</li>
-            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-tertiary/30 inline-block"></span>Artisanal Ice Creams</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-platinum/30 inline-block"></span>Baklava Selection</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-platinum/30 inline-block"></span>Jalebi with Rabri</li>
+            <li class="flex items-center gap-2"><span class="w-1 h-1 rounded-full bg-platinum/30 inline-block"></span>Artisanal Ice Creams</li>
           </ul>
         </div>
 
       </div>
 
-      <button class="w-full py-3.5 rounded-full border-2 border-primary text-primary font-bold text-sm hover:bg-primary-fixed transition-colors active:scale-95 font-headline tracking-wide">
+      <button class="w-full py-3.5 rounded-full bg-platinum-dark text-white font-bold text-sm hover:opacity-90 transition-all shadow-md hover:shadow-lg active:scale-95 font-headline tracking-wide">
         Get Quote
       </button>
     </div>

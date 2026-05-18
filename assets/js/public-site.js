@@ -871,11 +871,14 @@
     else if (tier.indexOf("platinum") >= 0) tone = "platinum";
     var shell = "pkgv2-card pkgv2-card--" + tone;
     var ctaClass = "pkgv2-btn pkgv2-btn--outline";
-    if (tone === "gold") ctaClass = "pkgv2-btn pkgv2-btn--primary";
-    if (tone === "diamond") ctaClass = "pkgv2-btn pkgv2-btn--secondary";
+    if (tone === "gold") ctaClass = "pkgv2-btn pkgv2-btn--gold";
+    else if (tone === "diamond") ctaClass = "pkgv2-btn pkgv2-btn--diamond";
+    else if (tone === "platinum") ctaClass = "pkgv2-btn pkgv2-btn--platinum";
     var tierLabel = name;
     var badgeClass = "pkgv2-badge pkgv2-badge--red";
-    if (/limited|premium|choice/i.test(badge)) badgeClass = "pkgv2-badge pkgv2-badge--green";
+    if (tone === "gold") badgeClass = "pkgv2-badge pkgv2-badge--gold";
+    else if (tone === "diamond") badgeClass = "pkgv2-badge pkgv2-badge--diamond";
+    else if (tone === "platinum") badgeClass = "pkgv2-badge pkgv2-badge--platinum";
 
     function menuLineIcon(labelText) {
       var t = String(labelText || "").toLowerCase();

@@ -292,7 +292,8 @@
       footerCallValue: "+91-9621051619",
       footerEmailLabel: "Email:",
       footerEmailValue: "concierge@shudhindia.com",
-      footerBottomText: "© 2024 Shudh India Catering | Premium Catering Experiences"
+      footerBottomText:
+        "© 2026 Shudh India Catering. All Rights Reserved. Crafted with excellence. Designed & Developed by Digital Ninja Labs"
     },
     about: {
       heroEyebrow: "Our Story",

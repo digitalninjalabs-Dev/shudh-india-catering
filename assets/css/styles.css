@@ -36,6 +36,17 @@
   --color-on-tertiary-fixed:      #241a00;
   --color-on-tertiary-fixed-variant: #574500;
 
+  /* Package tier accents */
+  --pkg-gold:                     #c9a227;
+  --pkg-gold-dark:                #9a7b0a;
+  --pkg-gold-light:               #f7efd6;
+  --pkg-diamond:                  #f48eb1;
+  --pkg-diamond-dark:             #e91e63;
+  --pkg-diamond-light:            #fff5f8;
+  --pkg-platinum:                 #9a9590;
+  --pkg-platinum-dark:            #3d4249;
+  --pkg-platinum-light:           #f5f3f0;
+
   --color-error:                  #ba1a1a;
   --color-on-error:               #ffffff;
   --color-error-container:        #ffdad6;
@@ -916,6 +927,17 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 .site-footer__bottom p {
   color: #71717a;
   font-size: 0.8125rem;
+}
+
+.footer-credit-link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.footer-credit-link:hover {
+  color: var(--color-primary);
 }
 
 /* ---------- Floating Contact Dock ---------- */
@@ -2996,13 +3018,54 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   overflow: visible;
   transform-origin: center center;
   will-change: transform, box-shadow;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+  cursor: pointer;
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.42s ease,
+    border-color 0.35s ease;
 }
 
 .pkgv2-card:hover {
-  transform: translateY(-2px) scale(1.018);
-  box-shadow: 0 14px 30px rgba(91, 64, 61, 0.16);
-  z-index: 2;
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 22px 44px rgba(91, 64, 61, 0.18);
+  border-color: rgba(143, 111, 108, 0.45);
+  z-index: 3;
+}
+
+.pkgv2-card--gold:hover {
+  border-color: rgba(201, 162, 39, 0.55);
+  box-shadow: 0 24px 48px rgba(201, 162, 39, 0.26);
+}
+
+.pkgv2-card--diamond:hover {
+  border-color: rgba(244, 142, 177, 0.65);
+  box-shadow: 0 24px 48px rgba(244, 142, 177, 0.22);
+}
+
+.pkgv2-card--platinum:hover {
+  border-color: rgba(154, 149, 144, 0.65);
+  box-shadow: 0 24px 48px rgba(61, 66, 73, 0.2);
+}
+
+.pkgv2-card:hover .pkgv2-btn {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.pkgv2-card:hover .pkgv2-price {
+  transform: scale(1.02);
+}
+
+.pkgv2-card .pkgv2-price {
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pkgv2-card .pkgv2-btn {
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
 }
 
 .pkgv2-card::before {
@@ -3033,21 +3096,21 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 }
 
 .pkgv2-card--gold {
-  border-color: rgba(175, 16, 26, 0.25);
-  background: linear-gradient(180deg, #fff 0%, #fff7f7 100%);
-  box-shadow: 0 12px 26px rgba(175, 16, 26, 0.14);
+  border-color: rgba(201, 162, 39, 0.32);
+  background: linear-gradient(180deg, #fff 0%, var(--pkg-gold-light) 100%);
+  box-shadow: 0 12px 26px rgba(201, 162, 39, 0.18);
 }
 
 .pkgv2-card--diamond {
-  border-color: rgba(46, 125, 50, 0.22);
-  background: linear-gradient(180deg, #fff 0%, #f8fff9 100%);
-  box-shadow: 0 12px 26px rgba(46, 125, 50, 0.14);
+  border-color: rgba(244, 142, 177, 0.4);
+  background: linear-gradient(180deg, #fff 0%, var(--pkg-diamond-light) 100%);
+  box-shadow: 0 10px 24px rgba(244, 142, 177, 0.12);
 }
 
 .pkgv2-card--platinum {
-  border-color: rgba(115, 92, 0, 0.24);
-  background: linear-gradient(180deg, #fff 0%, #fffdf4 100%);
-  box-shadow: 0 12px 26px rgba(115, 92, 0, 0.12);
+  border-color: rgba(154, 149, 144, 0.45);
+  background: linear-gradient(180deg, #fff 0%, var(--pkg-platinum-light) 100%);
+  box-shadow: 0 12px 28px rgba(61, 66, 73, 0.14);
 }
 
 .pkgv2-tier {
@@ -3091,16 +3154,50 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   font-weight: 800;
 }
 
+.pkgv2-card--gold .pkgv2-tier__dot {
+  background: var(--pkg-gold);
+}
+
+.pkgv2-card--gold .pkgv2-tier__label {
+  color: var(--pkg-gold-dark);
+}
+
+.pkgv2-card--diamond .pkgv2-tier__dot {
+  background: var(--pkg-diamond);
+}
+
+.pkgv2-card--diamond .pkgv2-tier__label {
+  color: var(--pkg-diamond-dark);
+}
+
+.pkgv2-card--platinum .pkgv2-tier__dot {
+  background: var(--pkg-platinum);
+}
+
+.pkgv2-card--platinum .pkgv2-tier__label {
+  color: var(--pkg-platinum-dark);
+}
+
 .pkgv2-card--gold .pkgv2-price {
-  color: var(--color-primary);
+  color: var(--pkg-gold-dark);
 }
 
 .pkgv2-card--diamond .pkgv2-price {
-  color: var(--color-secondary);
+  color: var(--pkg-diamond-dark);
 }
 
 .pkgv2-card--platinum .pkgv2-price {
-  color: var(--color-tertiary);
+  color: var(--pkg-platinum-dark);
+}
+
+.pkgv2-card--diamond .pkgv2-lines {
+  border-color: rgba(244, 142, 177, 0.2);
+  background: rgba(255, 245, 248, 0.65);
+}
+
+.pkgv2-card--platinum .pkgv2-lines {
+  border-color: rgba(154, 149, 144, 0.22);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .pkgv2-sub {
@@ -3213,31 +3310,39 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 
 .pkgv2-card--gold .pkgv2-qty {
   color: #fff;
-  background: linear-gradient(180deg, #bf101b 0%, #a40d16 100%);
-  border-color: rgba(114, 6, 14, 0.85);
-  text-shadow: 0 1px 0 rgba(86, 5, 10, 0.45);
+  background: linear-gradient(180deg, #d4af37 0%, var(--pkg-gold-dark) 100%);
+  border-color: rgba(122, 94, 8, 0.85);
+  text-shadow: 0 1px 0 rgba(90, 68, 6, 0.45);
+}
+
+.pkgv2-card--gold .pkgv2-item-icon {
+  color: var(--pkg-gold-dark);
+  opacity: 0.72;
 }
 
 .pkgv2-card--diamond .pkgv2-qty {
-  color: #fff;
-  background: linear-gradient(180deg, #2b9a45 0%, #1f7f37 100%);
-  border-color: rgba(20, 98, 44, 0.85);
-  text-shadow: 0 1px 0 rgba(18, 76, 37, 0.45);
+  color: var(--pkg-diamond-dark);
+  background: linear-gradient(180deg, #fff 0%, #f8bbd0 100%);
+  border-color: #f48eb1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 .pkgv2-card--diamond .pkgv2-item-icon {
-  color: #2e7d32;
+  color: var(--pkg-diamond);
+  opacity: 0.72;
 }
 
 .pkgv2-card--platinum .pkgv2-qty {
   color: #fff;
-  background: linear-gradient(180deg, #c2a442 0%, #a98723 100%);
-  border-color: rgba(126, 98, 22, 0.86);
-  text-shadow: 0 1px 0 rgba(95, 74, 18, 0.45);
+  background: linear-gradient(180deg, #b0aaa4 0%, var(--pkg-platinum-dark) 100%);
+  border-color: rgba(45, 48, 54, 0.9);
+  text-shadow: 0 1px 0 rgba(30, 32, 36, 0.5);
 }
 
 .pkgv2-card--platinum .pkgv2-item-icon {
-  color: #866d11;
+  color: #5c5650;
+  opacity: 0.78;
 }
 
 .pkgv2-label {
@@ -3279,6 +3384,17 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
   box-shadow: 0 12px 22px rgba(175, 16, 26, 0.26);
 }
 
+.pkgv2-btn--gold {
+  color: #fff;
+  background: linear-gradient(135deg, var(--pkg-gold), var(--pkg-gold-dark));
+  box-shadow: 0 10px 20px rgba(201, 162, 39, 0.28);
+}
+
+.pkgv2-btn--gold:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 12px 22px rgba(201, 162, 39, 0.32);
+}
+
 .pkgv2-btn--secondary {
   color: #fff;
   background: linear-gradient(135deg, #2E7D32, #1b5e20);
@@ -3288,6 +3404,30 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 .pkgv2-btn--secondary:hover {
   filter: brightness(1.04);
   box-shadow: 0 12px 22px rgba(46, 125, 50, 0.28);
+}
+
+.pkgv2-btn--diamond {
+  color: #fff;
+  background: linear-gradient(135deg, var(--pkg-diamond), var(--pkg-diamond-dark));
+  border: none;
+  box-shadow: 0 8px 18px rgba(244, 142, 177, 0.22);
+}
+
+.pkgv2-btn--diamond:hover {
+  filter: brightness(1.05);
+  box-shadow: 0 10px 20px rgba(244, 142, 177, 0.28);
+}
+
+.pkgv2-btn--platinum {
+  color: #fff;
+  background: linear-gradient(135deg, #8f8a84, var(--pkg-platinum-dark));
+  border: none;
+  box-shadow: 0 8px 18px rgba(61, 66, 73, 0.26);
+}
+
+.pkgv2-btn--platinum:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 10px 22px rgba(61, 66, 73, 0.3);
 }
 
 .pkgv2-badge {
@@ -3309,6 +3449,12 @@ html.shudh-boot-pending body > *:not(#shudh-global-loader) {
 
 .pkgv2-badge--red { background: linear-gradient(135deg, #b80f1a, #9b0d16); }
 .pkgv2-badge--green { background: linear-gradient(135deg, #188438, #136c2d); }
+.pkgv2-badge--gold { background: linear-gradient(135deg, #d4af37, var(--pkg-gold-dark)); }
+.pkgv2-badge--diamond {
+  background: var(--pkg-diamond);
+  color: var(--pkg-diamond-dark);
+}
+.pkgv2-badge--platinum { background: linear-gradient(135deg, #6e6a66, var(--pkg-platinum-dark)); }
 
 @keyframes pkgv2FadeUp {
   from { opacity: 0; transform: translateY(14px); }

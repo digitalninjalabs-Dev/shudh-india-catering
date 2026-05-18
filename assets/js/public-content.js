@@ -184,8 +184,13 @@
     footerEmailLabel: "Email:",
     footerEmailValue: "concierge@shudhindia.com",
     contactPageHours: "Mon-Sun | 9:00 AM - 8:00 PM",
-    footerBottomText: "© 2024 Shudh India Catering | Premium Catering Experiences"
+    footerBottomText:
+      "© 2026 Shudh India Catering. All Rights Reserved. Crafted with excellence. Designed & Developed by Digital Ninja Labs"
   };
+
+  var FOOTER_BOTTOM_HTML =
+    "© 2026 Shudh India Catering. All Rights Reserved. Crafted with excellence. Designed &amp; Developed by " +
+    '<a href="https://digitalninjalabs.com/" target="_blank" rel="noopener noreferrer" class="footer-credit-link">Digital Ninja Labs</a>';
 
   var ABOUT_DEFAULTS = {
     heroEyebrow: "Our Story",
@@ -1015,8 +1020,11 @@
       if (content.footerTag4 && tags[3]) tags[3].textContent = content.footerTag4;
     }
 
-    safeSetText(".home-footer-bottom-text", content.footerBottomText);
-    safeSetText(".site-footer__bottom > p", content.footerBottomText);
+    document
+      .querySelectorAll(".home-footer-bottom-text, .site-footer__bottom > p")
+      .forEach(function (el) {
+        el.innerHTML = FOOTER_BOTTOM_HTML;
+      });
 
     safeSetText(".home-footer-call-label", content.footerCallLabel);
     safeSetText(".home-footer-call-value", activePhone);
