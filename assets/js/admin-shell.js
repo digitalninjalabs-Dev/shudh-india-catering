@@ -1,10 +1,68 @@
 (function () {
   var _pageAtLoad = (window.location.pathname.split("/").pop() || "dashboard.html").toLowerCase();
-  if (_pageAtLoad !== "login.html" && document.body) {
-    document.body.style.visibility = "hidden";
-    document.body.style.opacity = "0";
-  }
   var _currentUser = null;
+  var _shellReady = false;
+  var _authReady = false;
+  var _appRevealed = false;
+
+  function isAdminAppPage() {
+    return _pageAtLoad !== "login.html";
+  }
+
+  function initAdminBootPending() {
+    if (!isAdminAppPage() || !document.documentElement) return;
+    document.documentElement.classList.add("admin-boot-pending");
+  }
+
+  initAdminBootPending();
+
+  /** Leads-only admin: limited sidebar (Dashboard, Leads, Settings). */
+  var LEADS_ONLY_EMAIL = "leadsshudhindia@gmail.com";
+  var LEADS_ONLY_HREFS = ["dashboard.html", "leads.html", "settings.html"];
+
+  function normalizeEmail(email) {
+    return String(email || "").trim().toLowerCase();
+  }
+
+  function isLeadsOnlyUser(user) {
+    return normalizeEmail(user && user.email) === LEADS_ONLY_EMAIL;
+  }
+
+  function allNavItems() {
+    return [
+      { href: "dashboard.html", icon: "dashboard", label: "Dashboard" },
+      { href: "packages.html", icon: "inventory_2", label: "Packages" },
+      { href: "leads.html", icon: "contact_mail", label: "Leads / Inquiries" },
+      { href: "gallery.html", icon: "photo_library", label: "Gallery" },
+      { href: "blog.html", icon: "article", label: "Blog" },
+      { href: "content.html", icon: "edit_document", label: "Content Manager" },
+      { href: "seo.html", icon: "travel_explore", label: "SEO Manager" },
+      { href: "settings.html", icon: "settings", label: "Settings" }
+    ];
+  }
+
+  function getNavItems(user) {
+    if (isLeadsOnlyUser(user)) {
+      return allNavItems().filter(function (item) {
+        return LEADS_ONLY_HREFS.indexOf(item.href) >= 0;
+      });
+    }
+    return allNavItems();
+  }
+
+  function enforcePageAccess(user) {
+    var page = pageName();
+    if (page === "login.html") return;
+    if (!user) return;
+    if (isLeadsOnlyUser(user) && LEADS_ONLY_HREFS.indexOf(page) < 0) {
+      window.location.replace("dashboard.html");
+    }
+  }
+
+  function userRoleLabel(user) {
+    if (isLeadsOnlyUser(user)) return "Leads access";
+    return "Full admin";
+  }
 
   function pageName() {
     return (window.location.pathname.split("/").pop() || "dashboard.html").toLowerCase();
@@ -106,13 +164,13 @@
     if (overlay) {
       overlay.addEventListener("click", closeMobileNav);
     }
-    if (aside) {
-      aside.querySelectorAll("nav a").forEach(function (a) {
-        a.addEventListener("click", function () {
-          if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches) {
-            closeMobileNav();
-          }
-        });
+    if (aside && !aside.dataset.navDelegationBound) {
+      aside.dataset.navDelegationBound = "1";
+      aside.addEventListener("click", function (e) {
+        if (!e.target.closest("nav a")) return;
+        if (window.matchMedia && window.matchMedia("(max-width: 767px)").matches) {
+          closeMobileNav();
+        }
       });
     }
     window.addEventListener(
@@ -138,16 +196,7 @@
 
     if (document.body) document.body.classList.add("shudh-admin-body");
 
-    var items = [
-      { href: "dashboard.html", icon: "dashboard", label: "Dashboard" },
-      { href: "packages.html", icon: "inventory_2", label: "Packages" },
-      { href: "leads.html", icon: "contact_mail", label: "Leads / Inquiries" },
-      { href: "gallery.html", icon: "photo_library", label: "Gallery" },
-      { href: "blog.html", icon: "article", label: "Blog" },
-      { href: "content.html", icon: "edit_document", label: "Content Manager" },
-      { href: "seo.html", icon: "travel_explore", label: "SEO Manager" },
-      { href: "settings.html", icon: "settings", label: "Settings" }
-    ];
+    var items = getNavItems(_currentUser);
 
     var overlay = document.getElementById("admin-shell-overlay");
     if (!overlay) {
@@ -234,14 +283,80 @@
     bindMobileNav();
   }
 
+  function ensureBootLoader() {
+    if (document.getElementById("admin-boot-loader")) return;
+    var el = document.createElement("div");
+    el.id = "admin-boot-loader";
+    el.setAttribute("role", "status");
+    el.setAttribute("aria-live", "polite");
+    el.setAttribute("aria-busy", "true");
+    el.innerHTML =
+      '<div class="admin-boot-loader__card">' +
+      '<div class="admin-boot-loader__spin" aria-hidden="true"></div>' +
+      '<p class="admin-boot-loader__title">Loading admin</p>' +
+      '<p class="admin-boot-loader__sub">Preparing your menu…</p>' +
+      "</div>";
+    if (document.body) document.body.appendChild(el);
+    el.classList.add("is-active");
+  }
+
+  function showBootLoader() {
+    if (!isAdminAppPage()) return;
+    ensureBootLoader();
+  }
+
+  function hideBootLoader(done) {
+    var el = document.getElementById("admin-boot-loader");
+    if (!el) {
+      if (done) done();
+      return;
+    }
+    el.classList.add("is-hiding");
+    el.classList.remove("is-active");
+    el.setAttribute("aria-busy", "false");
+    window.setTimeout(function () {
+      el.classList.remove("is-hiding");
+      el.style.display = "none";
+      if (done) done();
+    }, 380);
+  }
+
+  function revealAdminApp() {
+    if (_appRevealed || !isAdminAppPage()) return;
+    _appRevealed = true;
+    hideBootLoader(function () {
+      document.documentElement.classList.remove("admin-boot-pending");
+      if (document.body) {
+        document.body.classList.add("admin-shell-ready");
+        document.body.style.removeProperty("visibility");
+        document.body.style.removeProperty("opacity");
+      }
+    });
+  }
+
+  function tryRevealAdminApp() {
+    if (_appRevealed || !isAdminAppPage()) return;
+    if (!_shellReady || !_authReady) return;
+    revealAdminApp();
+  }
+
+  function markShellReady() {
+    _shellReady = true;
+    tryRevealAdminApp();
+  }
+
+  function markAuthReady() {
+    _authReady = true;
+    tryRevealAdminApp();
+  }
+
   function ensureGlobalLoader() {
     if (window.SHUDH_LOADER) return;
     var loader = document.createElement("div");
     loader.id = "shudh-global-loader";
-    loader.className =
-      "hidden fixed inset-0 z-[130] bg-black/50 backdrop-blur-sm items-center justify-center";
+    loader.className = "hidden fixed inset-0 z-[130] items-center justify-center";
     loader.innerHTML =
-      '<div class="bg-surface-container-high border border-stone-700 rounded-2xl px-6 py-5 flex items-center gap-3 shadow-2xl">' +
+      '<div class="rounded-2xl px-6 py-5 flex items-center gap-3">' +
       '<div class="w-5 h-5 border-2 border-secondary/30 border-t-secondary rounded-full animate-spin"></div>' +
       '<p class="text-sm text-on-surface" data-loader-text>Processing...</p>' +
       "</div>";
@@ -298,6 +413,13 @@
       var nameEl = document.getElementById("admin-profile-name");
       var msgEl = document.getElementById("admin-profile-msg");
       if (emailEl) emailEl.value = _currentUser && _currentUser.email ? _currentUser.email : "";
+      if (nameEl && isLeadsOnlyUser(_currentUser)) {
+        nameEl.readOnly = true;
+        nameEl.classList.add("opacity-70");
+      } else if (nameEl) {
+        nameEl.readOnly = false;
+        nameEl.classList.remove("opacity-70");
+      }
       if (nameEl) {
         nameEl.value =
           (_currentUser && (_currentUser.displayName || _currentUser.email || "")) || "";
@@ -377,35 +499,84 @@
     }
   }
 
-  function bindUser() {
-    if (typeof firebase === "undefined" || !window.SHUDH_CONFIG || !window.SHUDH_CONFIG.firebase) return;
-    if (!firebase.apps.length) firebase.initializeApp(window.SHUDH_CONFIG.firebase);
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (!user) return;
-      _currentUser = user;
-      var name = (user.displayName || user.email || "Admin").trim();
-      var mail = (user.email || "Authenticated").trim();
-      document.querySelectorAll("[data-admin-user-name]").forEach(function (el) {
-        el.textContent = name;
-      });
-      document.querySelectorAll("[data-admin-user-email]").forEach(function (el) {
-        el.textContent = mail;
-      });
-      document.querySelectorAll("[data-admin-user-avatar], [data-admin-user-avatar-small]").forEach(function (el) {
-        el.textContent = initials(name);
-      });
+  function refreshNavForUser(user) {
+    var aside = document.getElementById("admin-shell-aside");
+    var nav = aside && aside.querySelector("nav");
+    if (!nav) return;
+    var page = pageName();
+    var items = getNavItems(user);
+    nav.innerHTML = items
+      .map(function (x) {
+        return navItem(x, x.href === page);
+      })
+      .join("");
+  }
+
+  function applyUserToShell(user) {
+    if (!user) return;
+    _currentUser = user;
+    enforcePageAccess(user);
+    refreshNavForUser(user);
+    var name = (user.displayName || user.email || "Admin").trim();
+    var mail = (user.email || "Authenticated").trim();
+    var role = userRoleLabel(user);
+    document.querySelectorAll("[data-admin-user-name]").forEach(function (el) {
+      el.textContent = name;
+    });
+    document.querySelectorAll("[data-admin-user-email]").forEach(function (el) {
+      el.textContent = mail;
+    });
+    document.querySelectorAll("[data-admin-user-role]").forEach(function (el) {
+      el.textContent = role;
+    });
+    document.querySelectorAll("[data-admin-user-avatar], [data-admin-user-avatar-small]").forEach(function (el) {
+      el.textContent = initials(name);
     });
   }
 
+  function bindUser() {
+    if (typeof firebase === "undefined" || !window.SHUDH_CONFIG || !window.SHUDH_CONFIG.firebase) {
+      markAuthReady();
+      return;
+    }
+    if (!firebase.apps.length) firebase.initializeApp(window.SHUDH_CONFIG.firebase);
+    var authHandled = false;
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (!isAdminAppPage()) return;
+      if (user) applyUserToShell(user);
+      if (!authHandled) {
+        authHandled = true;
+        markAuthReady();
+      }
+    });
+  }
+
+  if (isAdminAppPage()) {
+    window.setTimeout(function () {
+      if (!_appRevealed) {
+        markAuthReady();
+        markShellReady();
+      }
+    }, 3500);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    if (!isAdminAppPage()) return;
+
+    showBootLoader();
+
+    if (typeof firebase !== "undefined" && window.SHUDH_CONFIG && window.SHUDH_CONFIG.firebase) {
+      if (!firebase.apps.length) firebase.initializeApp(window.SHUDH_CONFIG.firebase);
+      if (firebase.auth().currentUser) _currentUser = firebase.auth().currentUser;
+    }
+
     renderShell();
     ensureGlobalLoader();
     ensureProfileModal();
+
+    if (_currentUser) applyUserToShell(_currentUser);
+
     bindUser();
-    document.body.style.visibility = "";
-    document.body.style.transition = "opacity 120ms ease-out";
-    requestAnimationFrame(function () {
-      document.body.style.opacity = "1";
-    });
+    markShellReady();
   });
 })();

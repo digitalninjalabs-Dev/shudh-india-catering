@@ -752,3 +752,105 @@ th, td {
   height: 0;
   background: transparent;
 }
+
+/* Admin boot — glass overlay (does not hide page with visibility) */
+html.admin-boot-pending body {
+  overflow: hidden;
+}
+
+#admin-boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(6, 6, 8, 0.72);
+  backdrop-filter: blur(14px) saturate(1.1);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
+#admin-boot-loader.is-active {
+  display: flex;
+}
+
+#admin-boot-loader.is-hiding {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#admin-boot-loader .admin-boot-loader__card {
+  width: min(100%, 20rem);
+  padding: 1.75rem 1.5rem;
+  text-align: center;
+  border-radius: 1.25rem;
+  background: rgba(28, 27, 27, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+#admin-boot-loader .admin-boot-loader__spin {
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: 0 auto 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(233, 195, 73, 0.22);
+  border-top-color: #e9c349;
+  animation: admin-boot-spin 0.75s linear infinite;
+}
+
+#admin-boot-loader .admin-boot-loader__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #eceae4;
+  letter-spacing: 0.02em;
+}
+
+#admin-boot-loader .admin-boot-loader__sub {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #a8a29e;
+}
+
+body.admin-shell-ready {
+  transition: opacity 0.35s ease;
+}
+
+#shudh-global-loader {
+  background: rgba(6, 6, 8, 0.58) !important;
+  backdrop-filter: blur(14px) saturate(1.1) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(1.1) !important;
+}
+
+#shudh-global-loader > div {
+  background: rgba(28, 27, 27, 0.62) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+}
+
+@keyframes admin-boot-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #admin-boot-loader,
+  body.admin-shell-ready {
+    transition-duration: 0.01ms !important;
+  }
+  #admin-boot-loader .admin-boot-loader__spin {
+    animation-duration: 1.2s;
+  }
+}
