@@ -35,6 +35,7 @@
       pageKey: pageKey,
       metaTitle: n.metaTitle,
       metaDescription: n.metaDescription,
+      metaKeywords: n.metaKeywords,
       canonicalUrl: n.canonicalUrl
     });
   };
@@ -59,6 +60,7 @@
             pageKey: pageKey,
             metaTitle: fb.metaTitle,
             metaDescription: fb.metaDescription,
+            metaKeywords: fb.metaKeywords || "",
             canonicalUrl: fb.canonicalUrl || ""
           });
         });

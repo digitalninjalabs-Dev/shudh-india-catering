@@ -20,6 +20,7 @@
       pageKey: d.pageKey || d.slug || doc.id,
       metaTitle: d.metaTitle || "",
       metaDescription: d.metaDescription || "",
+      metaKeywords: d.metaKeywords || "",
       canonicalUrl: d.canonicalUrl || "",
       updatedAt: d.updatedAt || null
     };
@@ -91,6 +92,7 @@
       pageKey: entity.pageKey || slug,
       metaTitle: entity.metaTitle,
       metaDescription: entity.metaDescription,
+      metaKeywords: entity.metaKeywords || "",
       canonicalUrl: entity.canonicalUrl || "",
       updatedAt: new Date().toISOString()
     };

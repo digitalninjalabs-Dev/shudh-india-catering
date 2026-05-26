@@ -62,9 +62,81 @@
 
   .seo-preview__url { color: #9df898; font-size: .72rem; }
 
-  .seo-preview__title { color: #8ab4f8; font-size: 1.1rem; font-weight: 500; margin-top: .25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seo-preview__title { color: #8ab4f8; font-size: 1.1rem; font-weight: 500; margin-top: .25rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
   .seo-preview__desc { color: #bdc1c6; font-size: .8rem; line-height: 1.5; margin-top: .35rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  .seo-url-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 12px;
+    border: 1px solid #44403c;
+    background: #1c1b1b;
+    overflow: hidden;
+  }
+
+  .seo-url-row:focus-within { border-color: #e9c349; box-shadow: 0 0 0 1px rgba(233,195,73,.25); }
+
+  .seo-url-row__prefix,
+  .seo-url-row__suffix {
+    display: flex;
+    align-items: center;
+    padding: 0 .75rem;
+    font-size: .72rem;
+    color: #78716c;
+    background: #141414;
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .seo-url-row__input {
+    flex: 1;
+    min-width: 0;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    background-color: #1c1b1b !important;
+    background: #1c1b1b !important;
+    padding: .85rem .5rem;
+    font-size: .9rem;
+    color: #e7e5e4 !important;
+    -webkit-text-fill-color: #e7e5e4;
+    caret-color: #e9c349;
+  }
+
+  .seo-url-row__input::placeholder { color: #78716c; opacity: 1; }
+
+  .seo-url-row__input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    ring: none;
+    background-color: #1c1b1b !important;
+    color: #fafaf9 !important;
+  }
+
+  .seo-url-row__input:-webkit-autofill,
+  .seo-url-row__input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #1c1b1b inset !important;
+    -webkit-text-fill-color: #e7e5e4 !important;
+  }
+
+  .seo-url-row.is-locked .seo-url-row__input {
+    color: #a8a29e !important;
+    -webkit-text-fill-color: #a8a29e;
+    cursor: not-allowed;
+  }
+
+  .seo-kw-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    font-size: .68rem;
+    font-weight: 600;
+    background: rgba(233,195,73,.12);
+    border: 1px solid rgba(233,195,73,.35);
+    color: #e9c349;
+  }
 
   .seo-hint-ok { color: #40c057; }
 
@@ -102,6 +174,32 @@
 
   #seo-toast.err { background: #4a1515; color: #ffb4ab; }
 
+  @media (max-width: 639px) {
+    .seo-url-row__prefix {
+      max-width: 42%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  #seo-page-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    #seo-page-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    #seo-page-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
 </style>
 
 </head>
@@ -110,15 +208,15 @@
 
 <div id="seo-toast" role="status"></div>
 
-<main class="ml-64 mt-14 md:mt-16 px-4 sm:px-6 md:px-8 pb-10 min-h-screen overflow-y-auto max-w-full">
+<main class="ml-0 md:ml-64 mt-14 md:mt-16 px-3 sm:px-4 md:px-6 lg:px-10 py-5 sm:py-8 min-w-0 max-w-full min-h-[calc(100dvh-3.5rem)] md:min-h-[calc(100vh-4rem)] overflow-x-hidden overflow-y-auto box-border pb-[max(1.5rem,env(safe-area-inset-bottom))]">
 
-  <div class="max-w-xl mx-auto py-6 sm:py-8 space-y-5">
+  <div class="w-full max-w-7xl mx-auto min-w-0 space-y-5 sm:space-y-6">
 
-    <header class="text-center sm:text-left">
+    <header class="text-left">
 
       <h1 class="text-2xl sm:text-3xl font-bold text-stone-100">SEO Manager</h1>
 
-      <p class="text-stone-400 text-sm mt-1">Manage how your site appears on Google.</p>
+      <p class="text-stone-400 text-sm mt-1">Edit page links, titles, descriptions, and keywords for Google.</p>
 
     </header>
 
@@ -128,9 +226,9 @@
 
       <p class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-secondary/90 mb-2">Features</p>
 
-      <div class="flex flex-wrap gap-2" id="seo-feature-tabs">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full" id="seo-feature-tabs">
 
-        <button type="button" data-seo-tab="meta" class="seo-tab-btn is-active min-w-[140px] px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-secondary text-secondary bg-secondary/15">
+        <button type="button" data-seo-tab="meta" class="seo-tab-btn is-active w-full flex items-center justify-center gap-1 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-secondary text-secondary bg-secondary/15">
 
           <span class="material-symbols-outlined text-base align-middle mr-1">search</span>
 
@@ -138,7 +236,7 @@
 
         </button>
 
-        <button type="button" data-seo-tab="pages" class="seo-tab-btn min-w-[140px] px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-stone-700 text-stone-300 bg-stone-900/50">
+        <button type="button" data-seo-tab="pages" class="seo-tab-btn w-full flex items-center justify-center gap-1 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-stone-700 text-stone-300 bg-stone-900/50">
 
           <span class="material-symbols-outlined text-base align-middle mr-1">list</span>
 
@@ -146,7 +244,7 @@
 
         </button>
 
-        <button type="button" data-seo-tab="crawl" class="seo-tab-btn min-w-[140px] px-5 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-stone-700 text-stone-300 bg-stone-900/50">
+        <button type="button" data-seo-tab="crawl" class="seo-tab-btn w-full flex items-center justify-center gap-1 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-[0.12em] border border-stone-700 text-stone-300 bg-stone-900/50">
 
           <span class="material-symbols-outlined text-base align-middle mr-1">travel_explore</span>
 
@@ -162,31 +260,35 @@
 
     <div id="seo-panel-meta" class="seo-panel space-y-5">
 
-      <div id="seo-welcome" class="hidden rounded-2xl bg-secondary/10 border border-secondary/30 p-5 text-center space-y-3">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
 
-        <p class="text-stone-200 text-sm">First time here? We can fill all pages with good default text in one click.</p>
+        <div id="seo-welcome" class="hidden rounded-2xl bg-secondary/10 border border-secondary/30 p-5 flex flex-col justify-center gap-3 sm:text-center lg:text-left">
 
-        <button id="seo-setup-all" type="button" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-secondary text-on-secondary font-bold text-sm">
+          <p class="text-stone-200 text-sm">First time here? We can fill all pages with good default text in one click.</p>
 
-          Set up all pages now
+          <button id="seo-setup-all" type="button" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-secondary text-on-secondary font-bold text-sm self-center lg:self-start">
 
-        </button>
+            Set up all pages now
 
-      </div>
-
-      <div class="rounded-2xl bg-surface-container-high border border-stone-800/50 p-4">
-
-        <div class="flex justify-between text-sm mb-2">
-
-          <span class="text-stone-300">Pages ready for Google</span>
-
-          <span id="seo-progress-text" class="font-bold text-secondary">0 / 0</span>
+          </button>
 
         </div>
 
-        <div class="h-2 rounded-full bg-stone-800 overflow-hidden">
+        <div class="rounded-2xl bg-surface-container-high border border-stone-800/50 p-4 flex flex-col justify-center">
 
-          <div id="seo-progress-bar" class="h-full bg-secondary rounded-full transition-all duration-500" style="width:0%"></div>
+          <div class="flex justify-between text-sm mb-2">
+
+            <span class="text-stone-300">Pages ready for Google</span>
+
+            <span id="seo-progress-text" class="font-bold text-secondary">0 / 0</span>
+
+          </div>
+
+          <div class="h-2 rounded-full bg-stone-800 overflow-hidden">
+
+            <div id="seo-progress-bar" class="h-full bg-secondary rounded-full transition-all duration-500" style="width:0%"></div>
+
+          </div>
 
         </div>
 
@@ -206,29 +308,41 @@
 
         </div>
 
-        <div id="seo-editor" class="hidden space-y-5">
+        <div id="seo-editor" class="hidden">
 
           <input type="hidden" id="seo-edit-slug"/>
 
           <input type="hidden" id="seo-page-key"/>
 
-          <input type="hidden" id="seo-slug"/>
-
           <input type="hidden" id="seo-page-name"/>
+
+          <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8 pt-5 border-t border-stone-800/60 mt-5">
+
+            <div class="xl:col-span-7 space-y-5 min-w-0">
 
           <div>
 
-            <p class="text-sm font-semibold text-stone-200 mb-2">Preview on Google</p>
+            <div class="flex items-center justify-between gap-2 mb-2 flex-wrap">
 
-            <div class="seo-preview">
+              <label for="seo-slug-input" class="text-sm font-semibold text-stone-200">Page link (slug)</label>
 
-              <p id="seo-preview-url" class="seo-preview__url">shudhindiacatering.com</p>
-
-              <p id="seo-preview-title" class="seo-preview__title">Your title here</p>
-
-              <p id="seo-preview-desc" class="seo-preview__desc">Your description here</p>
+              <button type="button" id="seo-slug-suggest" class="text-xs font-semibold text-secondary hover:underline">Suggest from page name</button>
 
             </div>
+
+            <p class="text-xs text-stone-500 mb-2">SEO-friendly URL — lowercase letters, numbers, and hyphens only.</p>
+
+            <div id="seo-url-row" class="seo-url-row">
+
+              <span class="seo-url-row__prefix" id="seo-url-prefix">shudhindiacatering.com/</span>
+
+              <input id="seo-slug-input" type="text" class="seo-url-row__input bg-[#1c1b1b] text-stone-100 ring-0 shadow-none border-0 focus:ring-0" placeholder="packages" autocomplete="off" spellcheck="false"/>
+
+              <span class="seo-url-row__suffix">.html</span>
+
+            </div>
+
+            <p id="seo-slug-hint" class="text-xs text-stone-500 mt-2"></p>
 
           </div>
 
@@ -256,6 +370,22 @@
 
           </div>
 
+          <div>
+
+            <label for="seo-meta-keywords" class="block text-sm font-semibold text-stone-200 mb-2">
+
+              Keywords <span id="seo-keywords-hint" class="text-xs font-normal text-stone-500"></span>
+
+            </label>
+
+            <input id="seo-meta-keywords" type="text" maxlength="340" placeholder="catering, wedding, vegetarian, Mumbai" class="w-full text-base bg-surface-container-highest border border-stone-700 rounded-xl px-4 py-3.5 focus:border-secondary focus:ring-0"/>
+
+            <p class="text-xs text-stone-500 mt-2">Separate with commas. Aim for 5–10 relevant terms.</p>
+
+            <div id="seo-keywords-chips" class="flex flex-wrap gap-1.5 mt-2 empty:hidden"></div>
+
+          </div>
+
           <button id="seo-save-btn" type="button" class="w-full flex items-center justify-center gap-2 py-4 rounded-xl bg-secondary text-on-secondary text-base font-bold hover:opacity-90 active:scale-[0.99] transition">
 
             <span class="material-symbols-outlined">check_circle</span>
@@ -277,6 +407,30 @@
               Next <span class="material-symbols-outlined text-lg">chevron_right</span>
 
             </button>
+
+          </div>
+
+            </div>
+
+            <div class="xl:col-span-5 space-y-5 min-w-0 xl:sticky xl:top-24 xl:self-start">
+
+              <div>
+
+                <p class="text-sm font-semibold text-stone-200 mb-2">Preview on Google</p>
+
+                <div class="seo-preview">
+
+                  <p id="seo-preview-url" class="seo-preview__url">shudhindiacatering.com</p>
+
+                  <p id="seo-preview-title" class="seo-preview__title">Your title here</p>
+
+                  <p id="seo-preview-desc" class="seo-preview__desc">Your description here</p>
+
+                </div>
+
+              </div>
+
+            </div>
 
           </div>
 
@@ -306,7 +460,7 @@
 
           <span class="font-semibold text-secondary">Automatic on save:</span>
 
-          Google title and description update on the live website right away.
+          Title, description, keywords, and page link preview update on the live website when you save.
 
         </p>
 
@@ -320,7 +474,7 @@
 
       <p class="text-sm text-stone-400">Overview of every page and its Meta SEO status.</p>
 
-      <div id="seo-page-list" class="space-y-2"></div>
+      <div id="seo-page-list"></div>
 
     </div>
 
@@ -330,9 +484,9 @@
 
       <p class="text-sm text-stone-400">Files Google uses to crawl your site. These are on your live domain.</p>
 
-      <div class="rounded-2xl bg-surface-container-high border border-stone-800/50 p-5 space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        <div>
+        <div class="rounded-2xl bg-surface-container-high border border-stone-800/50 p-5 space-y-3">
 
           <p class="text-sm font-semibold text-stone-200">robots.txt</p>
 
@@ -346,7 +500,7 @@
 
         </div>
 
-        <div class="border-t border-stone-800/80 pt-4">
+        <div class="rounded-2xl bg-surface-container-high border border-stone-800/50 p-5 space-y-3">
 
           <p class="text-sm font-semibold text-stone-200">sitemap.xml</p>
 
@@ -390,7 +544,7 @@
 
 <script src="../assets/js/admin-shell.js?v=20260520name"></script>
 
-<script src="../assets/js/seo-admin.js?v=8"></script>
+<script src="../assets/js/seo-admin.js?v=11"></script>
 
 </body>
 

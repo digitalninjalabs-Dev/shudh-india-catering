@@ -11,6 +11,8 @@
       metaTitle: BRAND + " | Premium Catering Experiences",
       metaDescription:
         "Premium vegetarian catering for weddings, corporate events, and celebrations across India. Custom menus and elegant service.",
+      metaKeywords:
+        "vegetarian catering, wedding catering, corporate catering, Indian catering, Shudh India Catering",
       canonicalUrl: ""
     },
     about: {
@@ -19,6 +21,7 @@
       metaTitle: "About Us | " + BRAND,
       metaDescription:
         "Discover our story, culinary philosophy, and the team behind memorable catering experiences.",
+      metaKeywords: "about Shudh India, catering company, vegetarian catering team, our story",
       canonicalUrl: ""
     },
     packages: {
@@ -27,6 +30,8 @@
       metaTitle: "Catering Packages | " + BRAND,
       metaDescription:
         "Explore Silver, Gold, Diamond, and Platinum catering packages with transparent per-pax pricing.",
+      metaKeywords:
+        "catering packages, per pax pricing, wedding packages, corporate catering packages, vegetarian menu",
       canonicalUrl: ""
     },
     inquiry: {
@@ -35,6 +40,7 @@
       metaTitle: "Get a Quote | " + BRAND,
       metaDescription:
         "Request a custom catering quote for your event. Tell us your date, guest count, and preferences.",
+      metaKeywords: "catering quote, event inquiry, book catering, get quote, wedding quote",
       canonicalUrl: ""
     },
     gallery: {
@@ -43,6 +49,7 @@
       metaTitle: "Event Gallery | " + BRAND,
       metaDescription:
         "Browse photos from weddings, corporate events, and private celebrations catered by Shudh India.",
+      metaKeywords: "catering gallery, wedding photos, event photos, food presentation, catering events",
       canonicalUrl: ""
     },
     videos: {
@@ -51,6 +58,7 @@
       metaTitle: "Videos | " + BRAND,
       metaDescription:
         "Watch highlights from our catering events, live counters, and signature presentations.",
+      metaKeywords: "catering videos, event highlights, live counter, wedding catering video",
       canonicalUrl: ""
     },
     blog: {
@@ -59,6 +67,7 @@
       metaTitle: "Blog | " + BRAND,
       metaDescription:
         "Insights on Indian catering, event planning tips, and stories from the Shudh India kitchen.",
+      metaKeywords: "catering blog, event planning tips, Indian food blog, wedding planning",
       canonicalUrl: ""
     },
     "blog-post": {
@@ -66,6 +75,7 @@
       slug: "blog-post",
       metaTitle: "Blog | " + BRAND,
       metaDescription: "Read the latest article from " + BRAND + ".",
+      metaKeywords: "catering article, event tips, Indian catering blog",
       canonicalUrl: ""
     },
     careers: {
@@ -74,6 +84,7 @@
       metaTitle: "Careers | " + BRAND,
       metaDescription:
         "Join our catering team. View open roles and apply to grow with Shudh India Catering.",
+      metaKeywords: "catering jobs, careers, hospitality jobs, join our team",
       canonicalUrl: ""
     },
     contact: {
@@ -82,6 +93,7 @@
       metaTitle: "Contact Us | " + BRAND,
       metaDescription:
         "Call or email our concierge desk for bookings, menu questions, and event consultations.",
+      metaKeywords: "contact catering, book event, catering phone, catering email, concierge",
       canonicalUrl: ""
     }
   };
@@ -107,6 +119,7 @@
       slug: record.slug || fallback.slug,
       metaTitle: record.metaTitle || fallback.metaTitle,
       metaDescription: record.metaDescription || fallback.metaDescription,
+      metaKeywords: record.metaKeywords || fallback.metaKeywords || "",
       canonicalUrl: record.canonicalUrl || fallback.canonicalUrl || ""
     };
   }

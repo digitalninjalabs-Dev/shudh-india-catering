@@ -64,6 +64,95 @@
     return base + "/" + s + ".html";
   }
 
+  function slugifyInput(value) {
+    if (window.SHUDH_PAGE_SEO_VALIDATION && window.SHUDH_PAGE_SEO_VALIDATION.slugify) {
+      return window.SHUDH_PAGE_SEO_VALIDATION.slugify(value);
+    }
+    return String(value || "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function getSlugValue() {
+    if (currentPageKey === "index") return "index";
+    var raw = ($("seo-slug-input") && $("seo-slug-input").value) || "";
+    return slugifyInput(raw) || currentPageKey || "index";
+  }
+
+  function setSlugField(slug, pageKey) {
+    var row = $("seo-url-row");
+    var input = $("seo-slug-input");
+    var suggest = $("seo-slug-suggest");
+    var isHome = pageKey === "index";
+    if (input) {
+      input.value = isHome ? "index" : slug || "";
+      input.readOnly = isHome;
+    }
+    if (row) row.classList.toggle("is-locked", isHome);
+    if (suggest) suggest.classList.toggle("hidden", isHome);
+    updateSlugHint(pageKey, slug);
+  }
+
+  function updateSlugHint(pageKey, slug) {
+    var hint = $("seo-slug-hint");
+    if (!hint) return;
+    var pk = pageKey || currentPageKey;
+    if (pk === "index") {
+      hint.textContent = "Home page always uses your main domain URL.";
+      return;
+    }
+    hint.textContent = "Live URL: " + previewUrlForSlug(slug || getSlugValue());
+  }
+
+  function suggestSlugFromPage() {
+    if (!currentPageKey || currentPageKey === "index") return;
+    var template = SITE_PAGES.find(function (p) {
+      return p.pageKey === currentPageKey;
+    });
+    if (!template) return;
+    var input = $("seo-slug-input");
+    if (!input) return;
+    input.value = slugifyInput(template.pageName || template.slug || currentPageKey);
+    updateGooglePreview();
+    updateSlugHint(currentPageKey, input.value);
+  }
+
+  function updateKeywordChips() {
+    var wrap = $("seo-keywords-chips");
+    var input = $("seo-meta-keywords");
+    if (!wrap || !input) return;
+    var norm =
+      window.SHUDH_PAGE_SEO_VALIDATION && window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords
+        ? window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords(input.value)
+        : input.value;
+    var parts = norm ? norm.split(/,\s*/) : [];
+    wrap.innerHTML = parts
+      .map(function (t) {
+        return '<span class="seo-kw-chip">' + esc(t) + "</span>";
+      })
+      .join("");
+  }
+
+  function duplicateSlugMessage(slug, pageKey) {
+    var conflict = cachedRows.find(function (r) {
+      return (
+        r.slug === slug &&
+        r.pageKey !== pageKey &&
+        r.slug !== pageKey
+      );
+    });
+    if (!conflict) return "";
+    return (
+      'The link "' +
+      slug +
+      '" is already used by "' +
+      (conflict.pageName || conflict.pageKey) +
+      '". Pick another slug.'
+    );
+  }
+
   function rowForPageKey(pageKey) {
     return cachedRows.find(function (r) {
       return r.pageKey === pageKey || r.slug === pageKey;
@@ -84,8 +173,15 @@
   function updateHints() {
     var titleLen = String(($("seo-meta-title") && $("seo-meta-title").value) || "").length;
     var descLen = String(($("seo-meta-description") && $("seo-meta-description").value) || "").length;
+    var kwRaw = String(($("seo-meta-keywords") && $("seo-meta-keywords").value) || "");
+    var kwNorm =
+      window.SHUDH_PAGE_SEO_VALIDATION && window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords
+        ? window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords(kwRaw)
+        : kwRaw;
+    var kwTags = kwNorm ? kwNorm.split(/,\s*/).filter(Boolean) : [];
     var titleHint = $("seo-title-hint");
     var descHint = $("seo-desc-hint");
+    var kwHint = $("seo-keywords-hint");
     if (titleHint) {
       titleHint.textContent = titleLen + " / 60";
       titleHint.className = "text-xs font-normal " + hintClass(titleLen, 50, 60);
@@ -94,11 +190,23 @@
       descHint.textContent = descLen + " / 160";
       descHint.className = "text-xs font-normal " + hintClass(descLen, 140, 160);
     }
+    if (kwHint) {
+      kwHint.textContent = kwTags.length + " / 15 terms";
+      kwHint.className =
+        "text-xs font-normal " +
+        (kwTags.length >= 5 && kwTags.length <= 15
+          ? "seo-hint-ok"
+          : kwTags.length > 0
+            ? "seo-hint-warn"
+            : "text-stone-500");
+    }
+    updateKeywordChips();
+    updateSlugHint();
     updateGooglePreview();
   }
 
   function updateGooglePreview() {
-    var slug = ($("seo-slug") && $("seo-slug").value) || "index";
+    var slug = getSlugValue();
     var title = ($("seo-meta-title") && $("seo-meta-title").value) || "Your page title appears here";
     var desc =
       ($("seo-meta-description") && $("seo-meta-description").value) ||
@@ -164,10 +272,13 @@
     if ($("seo-page-select")) $("seo-page-select").value = "";
     if ($("seo-edit-slug")) $("seo-edit-slug").value = "";
     if ($("seo-page-key")) $("seo-page-key").value = "";
-    if ($("seo-slug")) $("seo-slug").value = "";
     if ($("seo-page-name")) $("seo-page-name").value = "";
+    if ($("seo-slug-input")) $("seo-slug-input").value = "";
     if ($("seo-meta-title")) $("seo-meta-title").value = "";
     if ($("seo-meta-description")) $("seo-meta-description").value = "";
+    if ($("seo-meta-keywords")) $("seo-meta-keywords").value = "";
+    if ($("seo-keywords-chips")) $("seo-keywords-chips").innerHTML = "";
+    setSlugField("index", null);
     setEditorVisible(false);
     renderChips();
     updateHints();
@@ -192,10 +303,13 @@
     if ($("seo-page-select")) $("seo-page-select").value = pk;
     if ($("seo-edit-slug")) $("seo-edit-slug").value = saved && saved.slug ? saved.slug : "";
     if ($("seo-page-key")) $("seo-page-key").value = pk;
-    if ($("seo-slug")) $("seo-slug").value = data.slug || fb.slug;
     if ($("seo-page-name")) $("seo-page-name").value = data.pageName || fb.pageName;
+    setSlugField(data.slug || fb.slug, pk);
     if ($("seo-meta-title")) $("seo-meta-title").value = data.metaTitle || "";
     if ($("seo-meta-description")) $("seo-meta-description").value = data.metaDescription || "";
+    if ($("seo-meta-keywords")) {
+      $("seo-meta-keywords").value = data.metaKeywords || fb.metaKeywords || "";
+    }
 
     setEditorVisible(true);
     renderChips();
@@ -242,6 +356,11 @@
         "</span>" +
         (saved && saved.metaTitle
           ? '<span class="text-[11px] text-stone-600 mt-1 block truncate">' + esc(saved.metaTitle) + "</span>"
+          : "") +
+        (saved && saved.metaKeywords
+          ? '<span class="text-[10px] text-stone-600 mt-1 block truncate">Keywords: ' +
+            esc(saved.metaKeywords) +
+            "</span>"
           : "") +
         "</span></button>"
       );
@@ -306,12 +425,19 @@
     var pageMeta = SITE_PAGES.find(function (p) {
       return p.pageKey === pk;
     });
+    var slug = getSlugValue();
+    var dupMsg = duplicateSlugMessage(slug, pk);
+    if (dupMsg) {
+      toast(dupMsg, true);
+      return;
+    }
     var dto = {
       pageName: ($("seo-page-name") && $("seo-page-name").value) || (pageMeta && pageMeta.pageName) || pk,
       pageKey: pk,
-      slug: ($("seo-slug") && $("seo-slug").value) || (pageMeta && pageMeta.slug) || pk,
+      slug: slug,
       metaTitle: ($("seo-meta-title") && $("seo-meta-title").value) || "",
       metaDescription: ($("seo-meta-description") && $("seo-meta-description").value) || "",
+      metaKeywords: ($("seo-meta-keywords") && $("seo-meta-keywords").value) || "",
       canonicalUrl: ""
     };
     var editing = ($("seo-edit-slug") && $("seo-edit-slug").value.trim()) || "";
@@ -327,7 +453,7 @@
         return loadList();
       })
       .then(function () {
-        toast("Saved! Google title and description are live on your website now.");
+        toast("Saved! Title, description, keywords, and page link are live on your website.");
       })
       .catch(function (err) {
         if (err && err.validationErrors) toast(err.validationErrors.join(" "), true);
@@ -358,6 +484,32 @@
 
     $("seo-meta-title") && $("seo-meta-title").addEventListener("input", updateHints);
     $("seo-meta-description") && $("seo-meta-description").addEventListener("input", updateHints);
+    $("seo-meta-keywords") &&
+      $("seo-meta-keywords").addEventListener("input", updateHints);
+
+    $("seo-meta-keywords") &&
+      $("seo-meta-keywords").addEventListener("blur", function () {
+        if (window.SHUDH_PAGE_SEO_VALIDATION && window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords) {
+          this.value = window.SHUDH_PAGE_SEO_VALIDATION.normalizeKeywords(this.value);
+          updateHints();
+        }
+      });
+
+    $("seo-slug-input") &&
+      $("seo-slug-input").addEventListener("input", function () {
+        updateGooglePreview();
+        updateSlugHint();
+      });
+
+    $("seo-slug-input") &&
+      $("seo-slug-input").addEventListener("blur", function () {
+        if (currentPageKey === "index") return;
+        this.value = slugifyInput(this.value) || currentPageKey || "";
+        updateHints();
+      });
+
+    $("seo-slug-suggest") &&
+      $("seo-slug-suggest").addEventListener("click", suggestSlugFromPage);
 
     $("seo-page-select") &&
       $("seo-page-select").addEventListener("change", function () {

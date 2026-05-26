@@ -45,6 +45,7 @@
     if (!seo) return;
     document.title = seo.metaTitle || document.title;
     upsertMeta("name", "description", seo.metaDescription || "");
+    upsertMeta("name", "keywords", seo.metaKeywords || "");
     upsertMeta("property", "og:title", seo.metaTitle || "");
     upsertMeta("property", "og:description", seo.metaDescription || "");
     upsertMeta("name", "twitter:title", seo.metaTitle || "");
