@@ -1,5 +1,20 @@
 /* Runs synchronously as the first <body> child — before the rest of the page parses — so
    hardcoded HTML never flashes before the loader. */
+(function () {
+  var path = window.location.pathname || "";
+  if (!/\/admin(\/|$)/i.test(path) && /\.html$/i.test(path)) {
+    var file = path.split("/").pop() || "";
+    var slug = file.replace(/\.html$/i, "").toLowerCase();
+    var base = path.slice(0, path.length - file.length);
+    var target = slug === "index" || !slug ? "/" : base + slug;
+    var next = target + window.location.search + window.location.hash;
+    if (next !== path + window.location.search + window.location.hash) {
+      window.location.replace(next);
+      return;
+    }
+  }
+})();
+
 (function (doc) {
   var root = doc.documentElement;
   root.classList.add("shudh-boot-pending");

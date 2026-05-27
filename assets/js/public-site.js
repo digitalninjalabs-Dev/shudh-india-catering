@@ -6,7 +6,9 @@
   }
 
   function currentPageName() {
-    return (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+    var raw = (window.location.pathname.split("/").pop() || "index").toLowerCase().replace(/\.html$/i, "");
+    if (!raw || raw === "index") return "index.html";
+    return raw + ".html";
   }
 
   function ensureGlobalLoader() {
@@ -927,7 +929,7 @@
         return '<li class="pkgv2-line pkgv2-line--plain"><span class="pkgv2-label">' + labelEsc + '</span><span class="material-symbols-outlined pkgv2-item-icon pkgv2-item-icon--plain" aria-hidden="true">' + iconName + "</span></li>";
       }).join("") +
       "</ul>" +
-      '<a href="inquiry.html" class="' + ctaClass + '">Get Quote</a>' +
+      '<a href="/inquiry" class="' + ctaClass + '">Get Quote</a>' +
       "</div>"
     );
   }
@@ -957,7 +959,7 @@
             '<div class="pkgv2-card pkgv2-card--silver" style="grid-column:1/-1;text-align:center;">' +
             '<h3 class="pkgv2-price">Packages Coming Soon</h3>' +
             '<p class="pkgv2-sub">Add packages from Admin panel to show them here.</p>' +
-            '<a href="inquiry.html" class="pkgv2-btn pkgv2-btn--outline" style="max-width:220px;margin:1rem auto 0;">Get Quote</a>' +
+            '<a href="/inquiry" class="pkgv2-btn pkgv2-btn--outline" style="max-width:220px;margin:1rem auto 0;">Get Quote</a>' +
             "</div>";
           root.classList.add("packages-grid");
           root.classList.remove("hidden");
@@ -1068,7 +1070,7 @@
             '<h2 style="font-family:var(--font-headline);font-size:clamp(1.45rem,3vw,2.2rem);font-weight:800;line-height:1.2;margin:0 0 .7rem">' + title + "</h2>" +
             (date ? '<p style="margin:0 0 .45rem;color:var(--color-on-surface-variant);font-size:.86rem">' + escapeHtml(date) + "</p>" : "") +
             '<p style="margin:0;color:var(--color-on-surface-variant);line-height:1.75">' + excerpt + "</p>" +
-            '<a href="blog-post.html?id=' + encodeURIComponent(post.id) + '" class="btn btn-secondary" style="margin-top:.9rem;display:inline-flex">Read More</a>' +
+            '<a href="/blog-post?id=' + encodeURIComponent(post.id) + '" class="btn btn-secondary" style="margin-top:.9rem;display:inline-flex">Read More</a>' +
             "</div>" +
             '<div style="order:' + mediaColOrder + ';border-radius:1rem;overflow:hidden">' +
             (coverPack.primary
@@ -2420,7 +2422,7 @@
       facebookUrl: "https://facebook.com/",
       instagramUrl: "https://instagram.com/",
       pinterestUrl: "https://pinterest.com/",
-      youtubeUrl: "videos.html"
+      youtubeUrl: "/videos"
     };
 
     function buildItems(cfg) {

@@ -233,7 +233,7 @@
       '</nav><button type="button" data-admin-profile-trigger class="mt-4 w-full text-left px-2 md:px-4 py-3 bg-surface-container-high rounded-2xl flex items-center gap-3 hover:bg-surface-container-highest transition-colors">' +
       '<div class="w-10 h-10 rounded-full bg-stone-800 flex items-center justify-center text-xs font-bold text-stone-300 shrink-0" data-admin-user-avatar>A</div>' +
       '<div class="overflow-hidden min-w-0"><p class="text-xs font-bold text-on-surface truncate" data-admin-user-name>Admin User</p><p class="text-[10px] text-stone-500 truncate" data-admin-user-role>Authenticated</p></div></button>' +
-      '<div class="mt-2 px-2 md:px-4"><a href="../index.html" class="flex items-center gap-2 text-stone-600 hover:text-stone-400 text-xs tracking-wider py-2"><span class="material-symbols-outlined text-sm">arrow_back</span>View Website</a></div>';
+      '<div class="mt-2 px-2 md:px-4"><a href="/" class="flex items-center gap-2 text-stone-600 hover:text-stone-400 text-xs tracking-wider py-2"><span class="material-symbols-outlined text-sm">arrow_back</span>View Website</a></div>';
 
     var header = document.querySelector("header");
     if (!header) {

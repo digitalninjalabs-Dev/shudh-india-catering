@@ -44,7 +44,7 @@
     spec3Cta: "Start Planning",
     signatureTitle: "Signature Experiences",
     videoSectionTitle: "Cinematic Stories",
-    videoSectionVideoUrl: "videos.html",
+    videoSectionVideoUrl: "/videos",
     videoSectionCoverImage:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAfKT2QP2QEsMVOpR1f5RmtMvvWwjlVLIDzBsyeBNe9UyzySibVjMnpXxVhVhmxMp_U-SiywmDI58BkqsYfs8awQRWsf1tOSBsL_iMdHbToYilY_XaafHctK8Gnqq46hR7JIfhNApoThdUTHxrI1_TSz6k3gg0iLP8GMbpZH5GiHPmXAerM5Y1KzK2LvU1fwmXd4ZYKHd0jI-Jc-CQWEDXv0GdCMQipccxPCVfS8Z6ZXMbHo_gCWxu15Ks5qaaRPIM3IKIcakDChzie",
     galleryEyebrow: "Visual Anthology",
@@ -229,7 +229,18 @@
   };
 
   function getPageName() {
-    return (window.location.pathname.split("/").pop() || "index.html").toLowerCase();
+    var raw = (window.location.pathname.split("/").pop() || "index").toLowerCase().replace(/\.html$/i, "");
+    if (!raw || raw === "index") return "index.html";
+    return raw + ".html";
+  }
+
+  function internalPageHref(path) {
+    var slug = String(path || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\.html$/i, "");
+    if (!slug || slug === "index") return "/";
+    return "/" + slug;
   }
 
   function safeSetText(selector, value) {
@@ -893,9 +904,12 @@
 
   function normalizeLink(url, fallback) {
     var raw = String(url || "").trim();
-    if (!raw) return String(fallback || "");
+    if (!raw) return internalPageHref(fallback) || String(fallback || "");
     if (/^(https?:|mailto:|tel:)/i.test(raw)) return raw;
     if (/^[\w.-]+\.[a-z]{2,}([/?#].*)?$/i.test(raw)) return "https://" + raw;
+    if (/\.html$/i.test(raw) || /^\/[a-z0-9-]+$/i.test(raw) || /^[a-z0-9-]+$/i.test(raw)) {
+      return internalPageHref(raw);
+    }
     return raw;
   }
 
@@ -948,7 +962,7 @@
       globalContent.pinterestUrl || globalContent.linkedinUrl,
       "https://pinterest.com/"
     );
-    var youtube = normalizeLink(globalContent.youtubeUrl, "videos.html");
+    var youtube = normalizeLink(globalContent.youtubeUrl, "/videos");
 
     document.querySelectorAll("[data-shudh-social]").forEach(function (anchor) {
       var kind = String(anchor.getAttribute("data-shudh-social") || "").toLowerCase();
@@ -993,19 +1007,25 @@
     function setFooterLink(href, text, homeClass) {
       if (homeClass) safeSetText(homeClass, text);
       if (text == null || text === "") return;
-      document
-        .querySelectorAll('.site-footer .footer-col ul li a[href="' + href + '"]')
-        .forEach(function (a) {
-          a.textContent = text;
-        });
+      var hrefs = [href];
+      var legacyHtml = href === "/" ? "index.html" : String(href).replace(/^\//, "") + ".html";
+      if (hrefs.indexOf(legacyHtml) < 0) hrefs.push(legacyHtml);
+      var selector = hrefs
+        .map(function (h) {
+          return '.site-footer .footer-col ul li a[href="' + h + '"]';
+        })
+        .join(",");
+      document.querySelectorAll(selector).forEach(function (a) {
+        a.textContent = text;
+      });
     }
 
-    setFooterLink("index.html", content.footerLinkHome, ".home-footer-link-home");
-    setFooterLink("gallery.html", content.footerLinkGallery, ".home-footer-link-gallery");
-    setFooterLink("packages.html", content.footerLinkPackages, ".home-footer-link-packages");
-    setFooterLink("videos.html", content.footerLinkVideos, ".home-footer-link-videos");
-    setFooterLink("about.html", content.footerLinkAbout, ".home-footer-link-about");
-    setFooterLink("careers.html", content.footerLinkCareers, ".home-footer-link-careers");
+    setFooterLink("/", content.footerLinkHome, ".home-footer-link-home");
+    setFooterLink("/gallery", content.footerLinkGallery, ".home-footer-link-gallery");
+    setFooterLink("/packages", content.footerLinkPackages, ".home-footer-link-packages");
+    setFooterLink("/videos", content.footerLinkVideos, ".home-footer-link-videos");
+    setFooterLink("/about", content.footerLinkAbout, ".home-footer-link-about");
+    setFooterLink("/careers", content.footerLinkCareers, ".home-footer-link-careers");
 
     safeSetText(".home-footer-tag1", content.footerTag1);
     safeSetText(".home-footer-tag2", content.footerTag2);
