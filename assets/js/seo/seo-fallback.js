@@ -8,92 +8,99 @@
     index: {
       pageName: "Home",
       slug: "index",
-      metaTitle: BRAND + " | Premium Catering Experiences",
+      metaTitle: BRAND + " | Best Veg Catering Services in Lucknow",
       metaDescription:
-        "Premium vegetarian catering for weddings, corporate events, and celebrations across India. Custom menus and elegant service.",
+        "Shudh India Catering delivers fresh, hygienic veg catering in Lucknow for weddings, corporate events, and private celebrations with premium service.",
       metaKeywords:
-        "vegetarian catering, wedding catering, corporate catering, Indian catering, Shudh India Catering",
+        "veg catering lucknow, wedding catering lucknow, corporate catering lucknow, shudh india catering, hygienic catering services",
       canonicalUrl: ""
     },
     about: {
       pageName: "About Us",
       slug: "about",
-      metaTitle: "About Us | " + BRAND,
+      metaTitle: "About " + BRAND + " | Trusted Caterer in Lucknow",
       metaDescription:
-        "Discover our story, culinary philosophy, and the team behind memorable catering experiences.",
-      metaKeywords: "about Shudh India, catering company, vegetarian catering team, our story",
+        "Learn about Shudh India Catering, our culinary approach, service standards, and experience in delivering premium veg catering in Lucknow.",
+      metaKeywords:
+        "about shudh india catering, lucknow catering company, veg caterer profile, hospitality team lucknow",
       canonicalUrl: ""
     },
     packages: {
       pageName: "Packages",
       slug: "packages",
-      metaTitle: "Catering Packages | " + BRAND,
+      metaTitle: "Catering Packages in Lucknow | " + BRAND,
       metaDescription:
-        "Explore Silver, Gold, Diamond, and Platinum catering packages with transparent per-pax pricing.",
+        "Compare wedding and event catering packages with clear per-plate pricing, custom menus, and premium veg service by Shudh India Catering.",
       metaKeywords:
-        "catering packages, per pax pricing, wedding packages, corporate catering packages, vegetarian menu",
+        "catering packages lucknow, wedding menu packages, per plate catering price, veg buffet packages, event catering plans",
       canonicalUrl: ""
     },
     inquiry: {
       pageName: "Get Quote",
       slug: "inquiry",
-      metaTitle: "Get a Quote | " + BRAND,
+      metaTitle: "Get Catering Quote in Lucknow | " + BRAND,
       metaDescription:
-        "Request a custom catering quote for your event. Tell us your date, guest count, and preferences.",
-      metaKeywords: "catering quote, event inquiry, book catering, get quote, wedding quote",
+        "Request a quick catering quote for weddings, receptions, corporate events, and parties in Lucknow with menu customization and expert planning.",
+      metaKeywords:
+        "catering quote lucknow, book caterer lucknow, wedding catering inquiry, event catering quote, veg catering booking",
       canonicalUrl: ""
     },
     gallery: {
       pageName: "Gallery",
       slug: "gallery",
-      metaTitle: "Event Gallery | " + BRAND,
+      metaTitle: "Catering Event Gallery | " + BRAND,
       metaDescription:
-        "Browse photos from weddings, corporate events, and private celebrations catered by Shudh India.",
-      metaKeywords: "catering gallery, wedding photos, event photos, food presentation, catering events",
+        "See real photos from weddings, corporate functions, and private events catered by Shudh India Catering across Lucknow.",
+      metaKeywords:
+        "catering gallery lucknow, wedding catering photos, buffet setup images, event food presentation, shudh india events",
       canonicalUrl: ""
     },
     videos: {
       pageName: "Videos",
       slug: "videos",
-      metaTitle: "Videos | " + BRAND,
+      metaTitle: "Catering Videos & Event Highlights | " + BRAND,
       metaDescription:
-        "Watch highlights from our catering events, live counters, and signature presentations.",
-      metaKeywords: "catering videos, event highlights, live counter, wedding catering video",
+        "Watch Shudh India Catering videos featuring wedding setups, live counters, and premium veg service highlights from real events.",
+      metaKeywords:
+        "catering videos lucknow, wedding catering highlights, live counter videos, event catering reels, veg catering showcase",
       canonicalUrl: ""
     },
     blog: {
       pageName: "Blog",
       slug: "blog",
-      metaTitle: "Blog | " + BRAND,
+      metaTitle: "Catering Tips & Event Ideas Blog | " + BRAND,
       metaDescription:
-        "Insights on Indian catering, event planning tips, and stories from the Shudh India kitchen.",
-      metaKeywords: "catering blog, event planning tips, Indian food blog, wedding planning",
+        "Read practical catering tips, menu ideas, and event planning insights from the Shudh India Catering team.",
+      metaKeywords:
+        "catering blog lucknow, event planning tips, wedding menu ideas, veg catering advice, party catering guide",
       canonicalUrl: ""
     },
     "blog-post": {
       pageName: "Blog Post",
       slug: "blog-post",
-      metaTitle: "Blog | " + BRAND,
-      metaDescription: "Read the latest article from " + BRAND + ".",
-      metaKeywords: "catering article, event tips, Indian catering blog",
+      metaTitle: "Catering Article | " + BRAND,
+      metaDescription: "Read the latest catering and event article from " + BRAND + ".",
+      metaKeywords: "catering article, event management tips, wedding catering blog, veg food trends",
       canonicalUrl: ""
     },
     careers: {
       pageName: "Careers",
       slug: "careers",
-      metaTitle: "Careers | " + BRAND,
+      metaTitle: "Careers in Catering & Hospitality | " + BRAND,
       metaDescription:
-        "Join our catering team. View open roles and apply to grow with Shudh India Catering.",
-      metaKeywords: "catering jobs, careers, hospitality jobs, join our team",
+        "Explore job openings in catering operations, kitchen, service, and hospitality management at Shudh India Catering.",
+      metaKeywords:
+        "catering jobs lucknow, hospitality careers, kitchen staff jobs, event service jobs, shudh india careers",
       canonicalUrl: ""
     },
     contact: {
       pageName: "Contact",
       slug: "contact",
-      metaTitle: "Contact Us | " + BRAND,
+      metaTitle: "Contact " + BRAND + " | Book Catering in Lucknow",
       metaDescription:
-        "Call or email our concierge desk for bookings, menu questions, and event consultations.",
-      metaKeywords: "contact catering, book event, catering phone, catering email, concierge",
+        "Contact Shudh India Catering for bookings, menu consultation, pricing details, and event planning support in Lucknow.",
+      metaKeywords:
+        "contact caterer lucknow, book catering service, catering phone number, wedding catering contact, shudh india contact",
       canonicalUrl: ""
     }
   };
