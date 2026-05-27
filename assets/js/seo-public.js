@@ -32,13 +32,19 @@
   }
 
   function defaultCanonical(seo) {
+    var cfg = window.SHUDH_ROBOTS_CONFIG;
     var origin =
-      (window.SHUDH_ROBOTS_CONFIG && window.SHUDH_ROBOTS_CONFIG.SITE_ORIGIN) ||
-      (window.location.origin || "https://shudhindiacatering.com");
+      (cfg && cfg.SITE_ORIGIN) || window.location.origin || "https://shudhindiacatering.com";
+    if (cfg && cfg.publicUrlFromSlug) {
+      return cfg.publicUrlFromSlug(seo && seo.slug, origin);
+    }
     var base = origin.replace(/\/$/, "");
-    var slug = String(seo.slug || "").trim().toLowerCase();
+    var slug = String((seo && seo.slug) || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\.html$/i, "");
     if (!slug || slug === "index" || slug === "home") return base + "/";
-    return base + "/" + slug + ".html";
+    return base + "/" + slug;
   }
 
   function applySeo(seo) {

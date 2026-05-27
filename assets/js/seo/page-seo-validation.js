@@ -3,10 +3,8 @@
  */
 (function (global) {
   var SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-  var MAX_TITLE = 60;
-  var MAX_DESC = 160;
-  var MAX_KEYWORDS = 320;
-  var MAX_KEYWORD_TAGS = 15;
+  var SUGGEST_TITLE = 60;
+  var SUGGEST_DESC = 160;
 
   function slugify(value) {
     return String(value || "")
@@ -31,7 +29,6 @@
         seen[key] = true;
         return true;
       });
-    if (parts.length > MAX_KEYWORD_TAGS) parts = parts.slice(0, MAX_KEYWORD_TAGS);
     return parts.join(", ");
   }
 
@@ -50,21 +47,6 @@
     if (!slug) errors.push("Slug is required (use lowercase letters, numbers, and hyphens).");
     else if (!SLUG_RE.test(slug)) {
       errors.push("Slug must be SEO-friendly (e.g. about-us, packages).");
-    }
-    if (!metaTitle) errors.push("Meta title is required.");
-    else if (metaTitle.length > MAX_TITLE) {
-      errors.push("Meta title must be " + MAX_TITLE + " characters or fewer (currently " + metaTitle.length + ").");
-    }
-    if (!metaDescription) errors.push("Meta description is required.");
-    else if (metaDescription.length > MAX_DESC) {
-      errors.push(
-        "Meta description must be " + MAX_DESC + " characters or fewer (currently " + metaDescription.length + ")."
-      );
-    }
-    if (metaKeywords.length > MAX_KEYWORDS) {
-      errors.push(
-        "Keywords must be " + MAX_KEYWORDS + " characters or fewer (currently " + metaKeywords.length + ")."
-      );
     }
     if (canonicalUrl) {
       try {
@@ -92,10 +74,8 @@
   }
 
   global.SHUDH_PAGE_SEO_VALIDATION = {
-    MAX_TITLE: MAX_TITLE,
-    MAX_DESC: MAX_DESC,
-    MAX_KEYWORDS: MAX_KEYWORDS,
-    MAX_KEYWORD_TAGS: MAX_KEYWORD_TAGS,
+    SUGGEST_TITLE: SUGGEST_TITLE,
+    SUGGEST_DESC: SUGGEST_DESC,
     slugify: slugify,
     normalizeKeywords: normalizeKeywords,
     validatePageSeoDto: validatePageSeoDto

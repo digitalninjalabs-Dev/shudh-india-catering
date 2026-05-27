@@ -58,10 +58,15 @@
   }
 
   function previewUrlForSlug(slug) {
+    if (window.SHUDH_ROBOTS_CONFIG && window.SHUDH_ROBOTS_CONFIG.publicUrlFromSlug) {
+      return window.SHUDH_ROBOTS_CONFIG.publicUrlFromSlug(slug, SITE_ORIGIN);
+    }
     var base = SITE_ORIGIN.replace(/\/$/, "");
-    var s = String(slug || "index").toLowerCase();
-    if (!s || s === "index") return base + "/";
-    return base + "/" + s + ".html";
+    var s = String(slug || "index")
+      .toLowerCase()
+      .replace(/\.html$/i, "");
+    if (!s || s === "index" || s === "home") return base + "/";
+    return base + "/" + s;
   }
 
   function slugifyInput(value) {
@@ -164,10 +169,8 @@
     return !!(saved && saved.metaTitle && saved.metaDescription);
   }
 
-  function hintClass(len, good, max) {
-    if (len <= good) return "seo-hint-ok";
-    if (len <= max) return "seo-hint-warn";
-    return "seo-hint-bad";
+  function suggestionHintClass(inIdealRange) {
+    return "text-xs font-normal " + (inIdealRange ? "seo-hint-ok" : "text-stone-500");
   }
 
   function updateHints() {
@@ -183,22 +186,16 @@
     var descHint = $("seo-desc-hint");
     var kwHint = $("seo-keywords-hint");
     if (titleHint) {
-      titleHint.textContent = titleLen + " / 60";
-      titleHint.className = "text-xs font-normal " + hintClass(titleLen, 50, 60);
+      titleHint.textContent = titleLen + " chars · ~60 suggested for Google";
+      titleHint.className = suggestionHintClass(titleLen > 0 && titleLen <= 60);
     }
     if (descHint) {
-      descHint.textContent = descLen + " / 160";
-      descHint.className = "text-xs font-normal " + hintClass(descLen, 140, 160);
+      descHint.textContent = descLen + " chars · ~160 suggested for Google";
+      descHint.className = suggestionHintClass(descLen > 0 && descLen <= 160);
     }
     if (kwHint) {
-      kwHint.textContent = kwTags.length + " / 15 terms";
-      kwHint.className =
-        "text-xs font-normal " +
-        (kwTags.length >= 5 && kwTags.length <= 15
-          ? "seo-hint-ok"
-          : kwTags.length > 0
-            ? "seo-hint-warn"
-            : "text-stone-500");
+      kwHint.textContent = kwTags.length + " terms · ~5–10 suggested";
+      kwHint.className = suggestionHintClass(kwTags.length >= 5 && kwTags.length <= 10);
     }
     updateKeywordChips();
     updateSlugHint();
