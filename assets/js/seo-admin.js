@@ -3,8 +3,11 @@
  */
 (function () {
   var service = null;
+  var adminDb = null;
   var cachedRows = [];
+  var cachedBlogs = [];
   var currentPageKey = null;
+  var currentBlogId = null;
   var SITE_ORIGIN =
     (window.SHUDH_ROBOTS_CONFIG && window.SHUDH_ROBOTS_CONFIG.SITE_ORIGIN) ||
     "https://shudhindiacatering.com";
@@ -58,6 +61,9 @@
   }
 
   function previewUrlForSlug(slug) {
+    if (isBlogPostMode() && currentBlogId) {
+      return previewUrlForBlogPost(currentBlogId);
+    }
     if (window.SHUDH_ROBOTS_CONFIG && window.SHUDH_ROBOTS_CONFIG.publicUrlFromSlug) {
       return window.SHUDH_ROBOTS_CONFIG.publicUrlFromSlug(slug, SITE_ORIGIN);
     }
@@ -67,6 +73,90 @@
       .replace(/\.html$/i, "");
     if (!s || s === "index" || s === "home") return base + "/";
     return base + "/" + s;
+  }
+
+  function isBlogPostMode() {
+    return currentPageKey === "blog-post";
+  }
+
+  function blogPostPageKey(blogId) {
+    if (window.SHUDH_SEO_FALLBACK && window.SHUDH_SEO_FALLBACK.blogPostPageKey) {
+      return window.SHUDH_SEO_FALLBACK.blogPostPageKey(blogId);
+    }
+    return "blog-post:" + String(blogId || "").trim();
+  }
+
+  function previewUrlForBlogPost(blogId) {
+    var base = SITE_ORIGIN.replace(/\/$/, "");
+    var id = String(blogId || "").trim();
+    if (!id) return base + "/blog-post";
+    return base + "/blog-post?id=" + encodeURIComponent(id);
+  }
+
+  function blogById(blogId) {
+    return cachedBlogs.find(function (b) {
+      return b.id === blogId;
+    });
+  }
+
+  function staticSitePages() {
+    return SITE_PAGES.filter(function (p) {
+      return p.pageKey !== "blog-post";
+    });
+  }
+
+  function toggleBlogPicker(show) {
+    var wrap = $("seo-blog-picker");
+    if (wrap) wrap.classList.toggle("hidden", !show);
+  }
+
+  function loadBlogs() {
+    if (!adminDb) return Promise.resolve([]);
+    return adminDb
+      .collection("blogs")
+      .get()
+      .then(function (snap) {
+        cachedBlogs = snap.docs
+          .map(function (d) {
+            return { id: d.id, data: d.data() || {} };
+          })
+          .filter(function (b) {
+            return b.data.visible !== false;
+          })
+          .sort(function (a, b) {
+            var ta = new Date(a.data.createdAt || 0).getTime() || 0;
+            var tb = new Date(b.data.createdAt || 0).getTime() || 0;
+            return tb - ta;
+          });
+        populateBlogSelect();
+        return cachedBlogs;
+      })
+      .catch(function () {
+        cachedBlogs = [];
+        populateBlogSelect();
+        return [];
+      });
+  }
+
+  function populateBlogSelect() {
+    var sel = $("seo-blog-select");
+    if (!sel) return;
+    var current = sel.value;
+    if (!cachedBlogs.length) {
+      sel.innerHTML = '<option value="">No published blog posts yet</option>';
+      return;
+    }
+    sel.innerHTML =
+      '<option value="">Choose a blog post...</option>' +
+      cachedBlogs
+        .map(function (b) {
+          var title = String((b.data && b.data.title) || "Untitled");
+          var saved = rowForPageKey(blogPostPageKey(b.id));
+          var label = title + (saved && saved.metaTitle ? " ✓" : "");
+          return '<option value="' + esc(b.id) + '">' + esc(label) + "</option>";
+        })
+        .join("");
+    if (current) sel.value = current;
   }
 
   function slugifyInput(value) {
@@ -108,18 +198,31 @@
       hint.textContent = "Home page always uses your main domain URL.";
       return;
     }
+    if (isBlogPostMode() && currentBlogId) {
+      hint.textContent =
+        "Live URL: " +
+        previewUrlForBlogPost(currentBlogId) +
+        " · Slug is for organization (optional short name).";
+      return;
+    }
     hint.textContent = "Live URL: " + previewUrlForSlug(slug || getSlugValue());
   }
 
   function suggestSlugFromPage() {
     if (!currentPageKey || currentPageKey === "index") return;
-    var template = SITE_PAGES.find(function (p) {
-      return p.pageKey === currentPageKey;
-    });
-    if (!template) return;
     var input = $("seo-slug-input");
     if (!input) return;
-    input.value = slugifyInput(template.pageName || template.slug || currentPageKey);
+    if (isBlogPostMode() && currentBlogId) {
+      var blog = blogById(currentBlogId);
+      var title = blog && blog.data ? String(blog.data.title || "") : "";
+      input.value = slugifyInput(title) || "blog-post";
+    } else {
+      var template = SITE_PAGES.find(function (p) {
+        return p.pageKey === currentPageKey;
+      });
+      if (!template) return;
+      input.value = slugifyInput(template.pageName || template.slug || currentPageKey);
+    }
     updateGooglePreview();
     updateSlugHint(currentPageKey, input.value);
   }
@@ -142,11 +245,7 @@
 
   function duplicateSlugMessage(slug, pageKey) {
     var conflict = cachedRows.find(function (r) {
-      return (
-        r.slug === slug &&
-        r.pageKey !== pageKey &&
-        r.slug !== pageKey
-      );
+      return r.slug === slug && r.pageKey !== pageKey;
     });
     if (!conflict) return "";
     return (
@@ -213,11 +312,21 @@
     if ($("seo-preview-desc")) $("seo-preview-desc").textContent = desc;
   }
 
+  function isBlogSeoReady(blogId) {
+    var saved = rowForPageKey(blogPostPageKey(blogId));
+    return !!(saved && saved.metaTitle && saved.metaDescription);
+  }
+
   function updateProgress() {
-    var total = SITE_PAGES.length;
-    var ready = SITE_PAGES.filter(function (p) {
-      return isPageReady(p.pageKey);
-    }).length;
+    var pages = staticSitePages();
+    var total = pages.length + cachedBlogs.length;
+    var ready =
+      pages.filter(function (p) {
+        return isPageReady(p.pageKey);
+      }).length +
+      cachedBlogs.filter(function (b) {
+        return isBlogSeoReady(b.id);
+      }).length;
     var pct = total ? Math.round((ready / total) * 100) : 0;
     if ($("seo-progress-text")) $("seo-progress-text").textContent = ready + " / " + total;
     if ($("seo-progress-bar")) $("seo-progress-bar").style.width = pct + "%";
@@ -266,7 +375,10 @@
 
   function clearEditor() {
     currentPageKey = null;
+    currentBlogId = null;
     if ($("seo-page-select")) $("seo-page-select").value = "";
+    if ($("seo-blog-select")) $("seo-blog-select").value = "";
+    if ($("seo-blog-id")) $("seo-blog-id").value = "";
     if ($("seo-edit-slug")) $("seo-edit-slug").value = "";
     if ($("seo-page-key")) $("seo-page-key").value = "";
     if ($("seo-page-name")) $("seo-page-name").value = "";
@@ -275,13 +387,57 @@
     if ($("seo-meta-description")) $("seo-meta-description").value = "";
     if ($("seo-meta-keywords")) $("seo-meta-keywords").value = "";
     if ($("seo-keywords-chips")) $("seo-keywords-chips").innerHTML = "";
+    toggleBlogPicker(false);
     setSlugField("index", null);
     setEditorVisible(false);
     renderChips();
     updateHints();
   }
 
-  function fillForm(pageKey) {
+  function fillBlogForm(blogId) {
+    if (!blogId) {
+      currentBlogId = null;
+      if ($("seo-blog-id")) $("seo-blog-id").value = "";
+      setEditorVisible(false);
+      updateHints();
+      return;
+    }
+    var blog = blogById(blogId);
+    if (!blog) return;
+    var pk = blogPostPageKey(blogId);
+    var saved = rowForPageKey(pk);
+    var fb = window.SHUDH_SEO_FALLBACK.getFallback(pk);
+    var title = String((blog.data && blog.data.title) || "Untitled");
+    var excerpt = String((blog.data && blog.data.excerpt) || "");
+    var defaults = {
+      pageName: title,
+      slug: slugifyInput(title) || "blog-post",
+      metaTitle: title + " | Shudh India Catering",
+      metaDescription: excerpt || fb.metaDescription,
+      metaKeywords: fb.metaKeywords || ""
+    };
+    var data = saved && saved.metaTitle ? saved : defaults;
+    currentBlogId = blogId;
+    currentPageKey = "blog-post";
+    if ($("seo-page-select")) $("seo-page-select").value = "blog-post";
+    if ($("seo-blog-select")) $("seo-blog-select").value = blogId;
+    if ($("seo-blog-id")) $("seo-blog-id").value = blogId;
+    if ($("seo-edit-slug")) $("seo-edit-slug").value = saved && saved.slug ? saved.slug : "";
+    if ($("seo-page-key")) $("seo-page-key").value = pk;
+    if ($("seo-page-name")) $("seo-page-name").value = data.pageName || title;
+    setSlugField(data.slug || defaults.slug, "blog-post");
+    if ($("seo-meta-title")) $("seo-meta-title").value = data.metaTitle || "";
+    if ($("seo-meta-description")) $("seo-meta-description").value = data.metaDescription || "";
+    if ($("seo-meta-keywords")) {
+      $("seo-meta-keywords").value = data.metaKeywords || defaults.metaKeywords || "";
+    }
+    toggleBlogPicker(true);
+    setEditorVisible(true);
+    renderChips();
+    updateHints();
+  }
+
+  function fillForm(pageKey, blogId) {
     var pk = pageKey;
     if (!pk) {
       clearEditor();
@@ -291,13 +447,28 @@
       return p.pageKey === pk;
     });
     if (!template) return;
-
+    currentPageKey = pk;
+    toggleBlogPicker(pk === "blog-post");
+    if ($("seo-page-select")) $("seo-page-select").value = pk;
+    if (pk === "blog-post") {
+      currentBlogId = null;
+      if ($("seo-blog-id")) $("seo-blog-id").value = "";
+      populateBlogSelect();
+      if (blogId) {
+        fillBlogForm(blogId);
+        return;
+      }
+      if ($("seo-blog-select")) $("seo-blog-select").value = "";
+      setEditorVisible(false);
+      renderChips();
+      updateHints();
+      return;
+    }
+    currentBlogId = null;
+    if ($("seo-blog-id")) $("seo-blog-id").value = "";
     var saved = rowForPageKey(pk);
     var fb = window.SHUDH_SEO_FALLBACK.getFallback(pk);
     var data = saved && saved.metaTitle ? saved : fb;
-
-    currentPageKey = pk;
-    if ($("seo-page-select")) $("seo-page-select").value = pk;
     if ($("seo-edit-slug")) $("seo-edit-slug").value = saved && saved.slug ? saved.slug : "";
     if ($("seo-page-key")) $("seo-page-key").value = pk;
     if ($("seo-page-name")) $("seo-page-name").value = data.pageName || fb.pageName;
@@ -307,7 +478,6 @@
     if ($("seo-meta-keywords")) {
       $("seo-meta-keywords").value = data.metaKeywords || fb.metaKeywords || "";
     }
-
     setEditorVisible(true);
     renderChips();
     updateHints();
@@ -315,12 +485,57 @@
 
   function navigatePage(delta) {
     if (!SITE_PAGES.length) return;
+    if (isBlogPostMode() && currentBlogId && cachedBlogs.length) {
+      var bidx = cachedBlogs.findIndex(function (b) {
+        return b.id === currentBlogId;
+      });
+      if (bidx < 0) bidx = 0;
+      else bidx = (bidx + delta + cachedBlogs.length) % cachedBlogs.length;
+      fillBlogForm(cachedBlogs[bidx].id);
+      return;
+    }
     var idx = SITE_PAGES.findIndex(function (p) {
       return p.pageKey === currentPageKey;
     });
     if (idx < 0) idx = 0;
     else idx = (idx + delta + SITE_PAGES.length) % SITE_PAGES.length;
     fillForm(SITE_PAGES[idx].pageKey);
+  }
+
+  function renderPageListRow(opts) {
+    var badge = opts.ready
+      ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-900/30 text-green-400">Ready</span>'
+      : '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-stone-800 text-stone-500">Default</span>';
+    var blogAttr = opts.blogId ? ' data-blog-id="' + esc(opts.blogId) + '"' : "";
+    return (
+      '<button type="button" class="seo-page-list-row w-full text-left rounded-xl border border-stone-700/50 bg-surface-container-highest p-3 flex items-start gap-3 hover:border-stone-600 transition" data-page-key="' +
+      esc(opts.pageKey) +
+      '"' +
+      blogAttr +
+      ">" +
+      '<span class="material-symbols-outlined text-stone-500 text-xl mt-0.5">' +
+      (opts.blogId ? "newspaper" : "article") +
+      "</span>" +
+      '<span class="min-w-0 flex-1">' +
+      '<span class="flex items-center justify-between gap-2 flex-wrap">' +
+      '<span class="font-semibold text-stone-100 text-sm">' +
+      esc(opts.pageName) +
+      "</span>" +
+      badge +
+      "</span>" +
+      '<span class="text-[11px] text-stone-500 mt-1 block">' +
+      esc(opts.url) +
+      "</span>" +
+      (opts.saved && opts.saved.metaTitle
+        ? '<span class="text-[11px] text-stone-600 mt-1 block truncate">' + esc(opts.saved.metaTitle) + "</span>"
+        : "") +
+      (opts.saved && opts.saved.metaKeywords
+        ? '<span class="text-[10px] text-stone-600 mt-1 block truncate">Keywords: ' +
+          esc(opts.saved.metaKeywords) +
+          "</span>"
+        : "") +
+      "</span></button>"
+    );
   }
 
   function renderPageList() {
@@ -330,38 +545,29 @@
       list.innerHTML = '<p class="text-sm text-stone-500">No pages found.</p>';
       return;
     }
-    list.innerHTML = SITE_PAGES.map(function (p) {
-      var saved = rowForPageKey(p.pageKey);
-      var ready = isPageReady(p.pageKey);
-      var badge = ready
-        ? '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-green-900/30 text-green-400">Ready</span>'
-        : '<span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-stone-800 text-stone-500">Default</span>';
-      return (
-        '<button type="button" class="seo-page-list-row w-full text-left rounded-xl border border-stone-700/50 bg-surface-container-highest p-3 flex items-start gap-3 hover:border-stone-600 transition" data-page-key="' +
-        esc(p.pageKey) +
-        '">' +
-        '<span class="material-symbols-outlined text-stone-500 text-xl mt-0.5">article</span>' +
-        '<span class="min-w-0 flex-1">' +
-        '<span class="flex items-center justify-between gap-2 flex-wrap">' +
-        '<span class="font-semibold text-stone-100 text-sm">' +
-        esc(p.pageName) +
-        "</span>" +
-        badge +
-        "</span>" +
-        '<span class="text-[11px] text-stone-500 mt-1 block">' +
-        esc(previewUrlForSlug(p.slug)) +
-        "</span>" +
-        (saved && saved.metaTitle
-          ? '<span class="text-[11px] text-stone-600 mt-1 block truncate">' + esc(saved.metaTitle) + "</span>"
-          : "") +
-        (saved && saved.metaKeywords
-          ? '<span class="text-[10px] text-stone-600 mt-1 block truncate">Keywords: ' +
-            esc(saved.metaKeywords) +
-            "</span>"
-          : "") +
-        "</span></button>"
-      );
-    }).join("");
+    var staticRows = SITE_PAGES.filter(function (p) {
+      return p.pageKey !== "blog-post";
+    }).map(function (p) {
+      return renderPageListRow({
+        pageKey: p.pageKey,
+        pageName: p.pageName,
+        url: previewUrlForSlug(p.slug),
+        ready: isPageReady(p.pageKey),
+        saved: rowForPageKey(p.pageKey)
+      });
+    });
+    var blogRows = cachedBlogs.map(function (b) {
+      var title = String((b.data && b.data.title) || "Untitled");
+      return renderPageListRow({
+        pageKey: "blog-post",
+        blogId: b.id,
+        pageName: "Blog · " + title,
+        url: previewUrlForBlogPost(b.id),
+        ready: isBlogSeoReady(b.id),
+        saved: rowForPageKey(blogPostPageKey(b.id))
+      });
+    });
+    list.innerHTML = staticRows.concat(blogRows).join("");
   }
 
   function switchFeatureTab(tabId) {
@@ -395,32 +601,38 @@
     });
   }
 
-  function openPageFromList(pageKey) {
+  function openPageFromList(pageKey, blogId) {
     switchFeatureTab("meta");
-    fillForm(pageKey);
+    fillForm(pageKey, blogId);
     if ($("seo-page-select")) $("seo-page-select").value = pageKey;
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function loadList() {
-    return service.getAll().then(function (rows) {
-      cachedRows = rows || [];
+    return Promise.all([service.getAll(), loadBlogs()]).then(function (results) {
+      cachedRows = results[0] || [];
       populatePageSelect();
+      populateBlogSelect();
       renderChips();
       renderPageList();
       updateProgress();
-      if (currentPageKey) fillForm(currentPageKey);
+      if (currentPageKey === "blog-post" && currentBlogId) fillBlogForm(currentBlogId);
+      else if (currentPageKey) fillForm(currentPageKey);
     });
   }
 
   function saveCurrentPage() {
+    if (isBlogPostMode() && !currentBlogId) {
+      toast("Select a blog article first.", true);
+      return;
+    }
     var pk = ($("seo-page-key") && $("seo-page-key").value) || currentPageKey;
     if (!pk) {
       toast("Pick a page first.", true);
       return;
     }
     var pageMeta = SITE_PAGES.find(function (p) {
-      return p.pageKey === pk;
+      return p.pageKey === (isBlogPostMode() ? "blog-post" : pk);
     });
     var slug = getSlugValue();
     var dupMsg = duplicateSlugMessage(slug, pk);
@@ -435,8 +647,12 @@
       metaTitle: ($("seo-meta-title") && $("seo-meta-title").value) || "",
       metaDescription: ($("seo-meta-description") && $("seo-meta-description").value) || "",
       metaKeywords: ($("seo-meta-keywords") && $("seo-meta-keywords").value) || "",
-      canonicalUrl: ""
+      canonicalUrl: isBlogPostMode() && currentBlogId ? previewUrlForBlogPost(currentBlogId) : ""
     };
+    if (isBlogPostMode() && currentBlogId) {
+      dto.blogId = currentBlogId;
+      dto.docId = "blog-" + currentBlogId;
+    }
     var editing = ($("seo-edit-slug") && $("seo-edit-slug").value.trim()) || "";
     var btn = $("seo-save-btn");
     if (btn) btn.disabled = true;
@@ -444,7 +660,7 @@
     service
       .save(dto)
       .then(function () {
-        if (editing && editing !== dto.slug) return service.delete(editing);
+        if (!isBlogPostMode() && editing && editing !== dto.slug) return service.delete(editing);
       })
       .then(function () {
         return loadList();
@@ -465,6 +681,7 @@
 
   function initSeoAdmin(db) {
     buildSitePages();
+    adminDb = db;
     service = window.SHUDH_PAGE_SEO_SERVICE.createService(db);
 
     populatePageSelect();
@@ -476,7 +693,7 @@
       $("seo-page-list").addEventListener("click", function (e) {
         var row = e.target.closest("[data-page-key]");
         if (!row) return;
-        openPageFromList(row.getAttribute("data-page-key"));
+        openPageFromList(row.getAttribute("data-page-key"), row.getAttribute("data-blog-id"));
       });
 
     $("seo-meta-title") && $("seo-meta-title").addEventListener("input", updateHints);
@@ -513,6 +730,17 @@
         var pk = this.value;
         if (!pk) clearEditor();
         else fillForm(pk);
+      });
+
+    $("seo-blog-select") &&
+      $("seo-blog-select").addEventListener("change", function () {
+        var blogId = this.value;
+        if (!blogId) {
+          currentBlogId = null;
+          setEditorVisible(false);
+          return;
+        }
+        fillBlogForm(blogId);
       });
 
     $("seo-save-btn") && $("seo-save-btn").addEventListener("click", saveCurrentPage);

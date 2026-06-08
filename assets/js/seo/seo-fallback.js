@@ -106,15 +106,32 @@
   };
 
   function normalizePageKey(pageKey) {
-    return String(pageKey || "index")
+    var raw = String(pageKey || "index")
       .replace(/\.html$/i, "")
-      .trim()
-      .toLowerCase() || "index";
+      .trim();
+    if (/^blog-post:/i.test(raw)) {
+      return "blog-post:" + raw.slice("blog-post:".length);
+    }
+    return raw.toLowerCase() || "index";
+  }
+
+  function isBlogPostPageKey(pageKey) {
+    return /^blog-post:[^/]+$/i.test(String(pageKey || ""));
+  }
+
+  function blogPostPageKey(blogId) {
+    var id = String(blogId || "").trim();
+    return id ? "blog-post:" + id : "blog-post";
   }
 
   function getFallback(pageKey) {
     var key = normalizePageKey(pageKey);
-    var base = FALLBACK_BY_PAGE_KEY[key] || FALLBACK_BY_PAGE_KEY.index;
+    var base;
+    if (isBlogPostPageKey(key)) {
+      base = FALLBACK_BY_PAGE_KEY["blog-post"] || FALLBACK_BY_PAGE_KEY.index;
+    } else {
+      base = FALLBACK_BY_PAGE_KEY[key] || FALLBACK_BY_PAGE_KEY.index;
+    }
     return Object.assign({}, base);
   }
 
@@ -135,6 +152,8 @@
     FALLBACK_BY_PAGE_KEY: FALLBACK_BY_PAGE_KEY,
     getFallback: getFallback,
     resolveSeo: resolveSeo,
-    normalizePageKey: normalizePageKey
+    normalizePageKey: normalizePageKey,
+    isBlogPostPageKey: isBlogPostPageKey,
+    blogPostPageKey: blogPostPageKey
   };
 })(typeof window !== "undefined" ? window : this);

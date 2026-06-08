@@ -30,9 +30,11 @@
     var n = validation.normalized;
     var pageKey = global.SHUDH_SEO_FALLBACK.normalizePageKey(dto.pageKey || n.slug);
     return this._repo.upsert({
+      docId: dto.docId || n.slug,
       pageName: n.pageName,
       slug: n.slug,
       pageKey: pageKey,
+      blogId: dto.blogId || "",
       metaTitle: n.metaTitle,
       metaDescription: n.metaDescription,
       metaKeywords: n.metaKeywords,

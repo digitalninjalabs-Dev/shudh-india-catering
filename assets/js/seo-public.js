@@ -67,6 +67,10 @@
     if (!firebase.apps.length) firebase.initializeApp(window.SHUDH_CONFIG.firebase);
 
     var pageKey = getPageKey();
+    if (pageKey === "blog-post" && new URLSearchParams(window.location.search).get("id")) {
+      return Promise.resolve();
+    }
+
     var service = window.SHUDH_PAGE_SEO_SERVICE.createService();
 
     return service
@@ -76,6 +80,11 @@
         applySeo(window.SHUDH_SEO_FALLBACK.getFallback(pageKey));
       });
   }
+
+  window.SHUDH_PUBLIC_SEO = {
+    apply: applySeo,
+    defaultCanonical: defaultCanonical
+  };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);

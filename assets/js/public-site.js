@@ -1141,13 +1141,20 @@
           }
         }
         if (contentEl) {
-          contentEl.innerHTML = String(post.content || "")
-            .split(/\n{2,}/)
-            .map(function (block) {
-              return "<p>" + escapeHtml(block).replace(/\n/g, "<br/>") + "</p>";
-            })
-            .join("");
+          var rawContent = String(post.content || "");
+          var hasHtml = /<\/?[a-z][\s\S]*>/i.test(rawContent);
+          if (hasHtml) {
+            contentEl.innerHTML = sanitizeBlogHtml(rawContent);
+          } else {
+            contentEl.innerHTML = rawContent
+              .split(/\n{2,}/)
+              .map(function (block) {
+                return "<p>" + escapeHtml(block).replace(/\n/g, "<br/>") + "</p>";
+              })
+              .join("");
+          }
         }
+        applyBlogPostSeo(id, post);
         if (typeof window.SHUDH_scheduleScrollRevealImages === "function") {
           window.SHUDH_scheduleScrollRevealImages();
         } else if (typeof window.SHUDH_wireScrollRevealImages === "function") {
@@ -1159,6 +1166,60 @@
 
   function escapeHtml(v) {
     return String(v || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function sanitizeBlogHtml(html) {
+    var wrap = document.createElement("div");
+    wrap.innerHTML = String(html || "");
+    wrap.querySelectorAll("[style]").forEach(function (el) {
+      el.removeAttribute("style");
+    });
+    wrap.querySelectorAll("[class]").forEach(function (el) {
+      var kept = String(el.getAttribute("class") || "")
+        .split(/\s+/)
+        .filter(function (cls) {
+          return /^ql-align-(center|right|justify)$/.test(cls);
+        });
+      if (kept.length) el.setAttribute("class", kept.join(" "));
+      else el.removeAttribute("class");
+    });
+    return wrap.innerHTML;
+  }
+
+  function applyBlogPostSeo(blogId, post) {
+    if (!blogId || !window.SHUDH_PAGE_SEO_SERVICE || !window.SHUDH_SEO_FALLBACK) return;
+    var pk = window.SHUDH_SEO_FALLBACK.blogPostPageKey
+      ? window.SHUDH_SEO_FALLBACK.blogPostPageKey(blogId)
+      : "blog-post:" + blogId;
+    var service = window.SHUDH_PAGE_SEO_SERVICE.createService();
+    var applyFn = window.SHUDH_PUBLIC_SEO && window.SHUDH_PUBLIC_SEO.apply;
+    service
+      .getForPage(pk)
+      .then(function (seo) {
+        var data = seo || window.SHUDH_SEO_FALLBACK.getFallback(pk);
+        if (!data.metaTitle && post && post.title) {
+          data.metaTitle = String(post.title) + " | Shudh India Catering";
+        }
+        if (!data.metaDescription && post && post.excerpt) {
+          data.metaDescription = String(post.excerpt);
+        }
+        if (!data.canonicalUrl) {
+          var origin = window.location.origin || "https://shudhindiacatering.com";
+          data.canonicalUrl = origin.replace(/\/$/, "") + "/blog-post?id=" + encodeURIComponent(blogId);
+        }
+        if (applyFn) applyFn(data);
+      })
+      .catch(function () {
+        if (!applyFn) return;
+        var fb = window.SHUDH_SEO_FALLBACK.getFallback(pk);
+        if (post && post.title) fb.metaTitle = String(post.title) + " | Shudh India Catering";
+        if (post && post.excerpt) fb.metaDescription = String(post.excerpt);
+        fb.canonicalUrl =
+          (window.location.origin || "https://shudhindiacatering.com").replace(/\/$/, "") +
+          "/blog-post?id=" +
+          encodeURIComponent(blogId);
+        applyFn(fb);
+      });
   }
 
   function getDriveFileId(url) {

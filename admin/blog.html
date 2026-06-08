@@ -15,7 +15,31 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   <link href="../assets/css/global.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet"/>
   <title>Blog Manager | Shudh India Catering</title>
+  <style>
+    #blog-content-editor-wrap .ql-toolbar.ql-snow {
+      border: none;
+      border-bottom: 1px solid #44403c;
+      border-radius: 0.75rem 0.75rem 0 0;
+      background: #1c1b1b;
+    }
+    #blog-content-editor-wrap .ql-container.ql-snow {
+      border: none;
+      border-radius: 0 0 0.75rem 0.75rem;
+      background: #1c1b1b;
+      color: #e5e2e1;
+      font-size: 0.875rem;
+      min-height: 280px;
+    }
+    #blog-content-editor-wrap .ql-editor { min-height: 260px; }
+    #blog-content-editor-wrap .ql-editor.ql-blank::before { color: #78716c; font-style: normal; }
+    #blog-content-editor-wrap .ql-snow .ql-stroke { stroke: #a8a29e; }
+    #blog-content-editor-wrap .ql-snow .ql-fill { fill: #a8a29e; }
+    #blog-content-editor-wrap .ql-snow .ql-picker { color: #e5e2e1; }
+    #blog-content-editor-wrap .ql-snow .ql-picker-options { background: #292524; border-color: #44403c; }
+    #blog-content-editor-wrap { border-radius: 0.75rem; overflow: hidden; background: #1c1b1b; }
+  </style>
 </head>
 <body class="shudh-admin-body bg-[#131313] text-[#e5e2e1]">
 <!-- Google Tag Manager (noscript) -->
@@ -40,7 +64,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <input id="blog-category" type="text" placeholder="Category (e.g. Masterclass)" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm"/>
           </div>
           <textarea id="blog-excerpt" rows="2" placeholder="Short excerpt..." class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm"></textarea>
-          <textarea id="blog-content" rows="8" placeholder="Full blog content..." class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm"></textarea>
+          <div>
+            <label class="block text-xs font-semibold text-stone-400 mb-2 uppercase tracking-wide">Full content</label>
+            <div id="blog-content-editor-wrap" class="rounded-xl border border-stone-700/50">
+              <div id="blog-content-editor"></div>
+            </div>
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <input id="blog-cover" type="url" placeholder="Cover image URL" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm"/>
             <input id="blog-order" type="number" min="0" step="1" placeholder="Display order" class="w-full bg-surface-container-highest border-none rounded-xl px-4 py-3 text-sm"/>
@@ -68,6 +97,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="../assets/js/firebase-config.js"></script>
 <script src="../assets/js/admin-auth-guard.js"></script>
 <script src="../assets/js/admin-shell.js?v=20260520name"></script>
-<script src="../assets/js/admin-app.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="../assets/js/admin-app.js?v=20260608blog"></script>
 </body>
 </html>

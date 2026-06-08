@@ -309,6 +309,20 @@
 
         </div>
 
+        <div id="seo-blog-picker" class="hidden rounded-xl border border-stone-700/60 bg-stone-950/40 p-4 space-y-2">
+
+          <label for="seo-blog-select" class="block text-sm font-semibold text-stone-200">Select blog article</label>
+
+          <p class="text-xs text-stone-500">Each blog post has its own title, description, and keywords for Google.</p>
+
+          <select id="seo-blog-select" class="w-full text-base bg-surface-container-highest border-2 border-stone-700 rounded-xl px-4 py-3.5 text-stone-100 focus:border-secondary focus:ring-0">
+
+            <option value="">Choose a blog post...</option>
+
+          </select>
+
+        </div>
+
         <div id="seo-editor" class="hidden">
 
           <input type="hidden" id="seo-edit-slug"/>
@@ -316,6 +330,8 @@
           <input type="hidden" id="seo-page-key"/>
 
           <input type="hidden" id="seo-page-name"/>
+
+          <input type="hidden" id="seo-blog-id"/>
 
           <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 xl:gap-8 pt-5 border-t border-stone-800/60 mt-5">
 
@@ -543,7 +559,7 @@
 
 <script src="../assets/js/admin-shell.js?v=20260520name"></script>
 
-<script src="../assets/js/seo-admin.js?v=13"></script>
+<script src="../assets/js/seo-admin.js?v=14blog"></script>
 
 </body>
 

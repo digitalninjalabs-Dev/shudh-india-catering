@@ -18,6 +18,7 @@
       pageName: d.pageName || "",
       slug: d.slug || doc.id,
       pageKey: d.pageKey || d.slug || doc.id,
+      blogId: d.blogId || "",
       metaTitle: d.metaTitle || "",
       metaDescription: d.metaDescription || "",
       metaKeywords: d.metaKeywords || "",
@@ -86,6 +87,7 @@
     if (!self._db) return Promise.reject(new Error("Database not available."));
     var slug = String(entity.slug || "").trim();
     if (!slug) return Promise.reject(new Error("Slug is required."));
+    var docId = String(entity.docId || slug).trim();
     var payload = {
       pageName: entity.pageName,
       slug: slug,
@@ -96,7 +98,8 @@
       canonicalUrl: entity.canonicalUrl || "",
       updatedAt: new Date().toISOString()
     };
-    return self._db.collection(COLLECTION).doc(slug).set(payload, { merge: true });
+    if (entity.blogId) payload.blogId = String(entity.blogId);
+    return self._db.collection(COLLECTION).doc(docId).set(payload, { merge: true });
   };
 
   PageSeoRepository.prototype.remove = function (slug) {

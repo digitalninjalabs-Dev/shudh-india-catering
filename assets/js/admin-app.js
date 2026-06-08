@@ -1634,10 +1634,11 @@
     var inputTitle = document.getElementById("blog-title");
     var inputCategory = document.getElementById("blog-category");
     var inputExcerpt = document.getElementById("blog-excerpt");
-    var inputContent = document.getElementById("blog-content");
+    var editorMount = document.getElementById("blog-content-editor");
     var inputCover = document.getElementById("blog-cover");
     var inputOrder = document.getElementById("blog-order");
     var inputVisible = document.getElementById("blog-visible");
+    var quillEditor = null;
 
     var postsCache = [];
 
@@ -1650,12 +1651,66 @@
       if (inputTitle) inputTitle.value = "";
       if (inputCategory) inputCategory.value = "";
       if (inputExcerpt) inputExcerpt.value = "";
-      if (inputContent) inputContent.value = "";
+      setEditorContent("");
       if (inputCover) inputCover.value = "";
       if (inputOrder) inputOrder.value = "";
       if (inputVisible) inputVisible.checked = true;
       if (cancelBtn) cancelBtn.classList.add("hidden");
       if (msgEl) msgEl.textContent = "";
+    }
+
+    function hasHtmlMarkup(text) {
+      return /<\/?[a-z][\s\S]*>/i.test(String(text || ""));
+    }
+
+    function plainTextToHtml(text) {
+      return String(text || "")
+        .split(/\n{2,}/)
+        .map(function (block) {
+          return "<p>" + esc(block).replace(/\n/g, "<br/>") + "</p>";
+        })
+        .join("");
+    }
+
+    function isEmptyEditorHtml(html) {
+      var s = String(html || "").trim();
+      return !s || s === "<p><br></p>" || s === "<p></p>";
+    }
+
+    function getEditorContent() {
+      if (!quillEditor) return "";
+      var html = String(quillEditor.root.innerHTML || "").trim();
+      return isEmptyEditorHtml(html) ? "" : html;
+    }
+
+    function setEditorContent(content) {
+      if (!quillEditor) return;
+      var raw = String(content || "").trim();
+      quillEditor.setText("");
+      if (!raw) return;
+      if (hasHtmlMarkup(raw)) {
+        quillEditor.clipboard.dangerouslyPasteHTML(raw);
+      } else {
+        quillEditor.setText(raw);
+      }
+    }
+
+    function initQuillEditor() {
+      if (!editorMount || typeof Quill === "undefined") return;
+      quillEditor = new Quill(editorMount, {
+        theme: "snow",
+        placeholder: "Write your blog content here...",
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            [{ align: [] }],
+            ["link", "blockquote"],
+            ["clean"]
+          ]
+        }
+      });
     }
 
     function render() {
@@ -1698,7 +1753,7 @@
           if (inputTitle) inputTitle.value = String(data.title || "");
           if (inputCategory) inputCategory.value = String(data.category || "");
           if (inputExcerpt) inputExcerpt.value = String(data.excerpt || "");
-          if (inputContent) inputContent.value = String(data.content || "");
+          setEditorContent(String(data.content || ""));
           if (inputCover) inputCover.value = String(data.coverImage || "");
           if (inputOrder) inputOrder.value = String(Number(data.sortOrder || 9999));
           if (inputVisible) inputVisible.checked = data.visible !== false;
@@ -1755,7 +1810,11 @@
         title: title,
         category: String((inputCategory && inputCategory.value) || "").trim() || "General",
         excerpt: String((inputExcerpt && inputExcerpt.value) || "").trim(),
-        content: String((inputContent && inputContent.value) || "").trim(),
+        content: (function () {
+          var raw = getEditorContent();
+          if (!raw) return "";
+          return hasHtmlMarkup(raw) ? raw : plainTextToHtml(raw);
+        })(),
         coverImage: String((inputCover && inputCover.value) || "").trim(),
         sortOrder: Number((inputOrder && inputOrder.value) || 9999),
         visible: !!(inputVisible && inputVisible.checked),
@@ -1785,6 +1844,7 @@
       });
     }
 
+    initQuillEditor();
     refresh().catch(function () {});
   }
 
